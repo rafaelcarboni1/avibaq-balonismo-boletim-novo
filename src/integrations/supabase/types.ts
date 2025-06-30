@@ -9,7 +9,204 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      assinantes: {
+        Row: {
+          ativo: boolean | null
+          confirmado: boolean | null
+          created_at: string | null
+          eh_piloto: boolean | null
+          email: string
+          id: string
+          nome: string
+          token_confirmacao: string | null
+          token_descadastro: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          confirmado?: boolean | null
+          created_at?: string | null
+          eh_piloto?: boolean | null
+          email: string
+          id?: string
+          nome: string
+          token_confirmacao?: string | null
+          token_descadastro?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          confirmado?: boolean | null
+          created_at?: string | null
+          eh_piloto?: boolean | null
+          email?: string
+          id?: string
+          nome?: string
+          token_confirmacao?: string | null
+          token_descadastro?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      boletins: {
+        Row: {
+          audio_url: string | null
+          bandeira: Database["public"]["Enums"]["bandeira_tipo"]
+          created_at: string | null
+          data: string
+          fotos: string[] | null
+          id: string
+          motivo: string
+          periodo: Database["public"]["Enums"]["periodo_tipo"]
+          publicado: boolean | null
+          publicado_em: string | null
+          publicado_por: string | null
+          status_voo: Database["public"]["Enums"]["status_voo"]
+          titulo_curto: string
+          updated_at: string | null
+        }
+        Insert: {
+          audio_url?: string | null
+          bandeira: Database["public"]["Enums"]["bandeira_tipo"]
+          created_at?: string | null
+          data: string
+          fotos?: string[] | null
+          id?: string
+          motivo: string
+          periodo: Database["public"]["Enums"]["periodo_tipo"]
+          publicado?: boolean | null
+          publicado_em?: string | null
+          publicado_por?: string | null
+          status_voo: Database["public"]["Enums"]["status_voo"]
+          titulo_curto: string
+          updated_at?: string | null
+        }
+        Update: {
+          audio_url?: string | null
+          bandeira?: Database["public"]["Enums"]["bandeira_tipo"]
+          created_at?: string | null
+          data?: string
+          fotos?: string[] | null
+          id?: string
+          motivo?: string
+          periodo?: Database["public"]["Enums"]["periodo_tipo"]
+          publicado?: boolean | null
+          publicado_em?: string | null
+          publicado_por?: string | null
+          status_voo?: Database["public"]["Enums"]["status_voo"]
+          titulo_curto?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "boletins_publicado_por_fkey"
+            columns: ["publicado_por"]
+            isOneToOne: false
+            referencedRelation: "usuarios_admin"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      logs_atividade: {
+        Row: {
+          acao: string
+          created_at: string | null
+          detalhes: Json | null
+          id: string
+          usuario_id: string | null
+        }
+        Insert: {
+          acao: string
+          created_at?: string | null
+          detalhes?: Json | null
+          id?: string
+          usuario_id?: string | null
+        }
+        Update: {
+          acao?: string
+          created_at?: string | null
+          detalhes?: Json | null
+          id?: string
+          usuario_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "logs_atividade_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "usuarios_admin"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      paginas_cms: {
+        Row: {
+          conteudo: string
+          id: string
+          slug: string
+          titulo: string
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          conteudo: string
+          id?: string
+          slug: string
+          titulo: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          conteudo?: string
+          id?: string
+          slug?: string
+          titulo?: string
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "paginas_cms_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "usuarios_admin"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      usuarios_admin: {
+        Row: {
+          ativo: boolean | null
+          created_at: string | null
+          email: string
+          id: string
+          nome: string
+          perfil: Database["public"]["Enums"]["perfil_usuario"]
+          senha_hash: string
+          updated_at: string | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          created_at?: string | null
+          email: string
+          id?: string
+          nome: string
+          perfil?: Database["public"]["Enums"]["perfil_usuario"]
+          senha_hash: string
+          updated_at?: string | null
+        }
+        Update: {
+          ativo?: boolean | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          nome?: string
+          perfil?: Database["public"]["Enums"]["perfil_usuario"]
+          senha_hash?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +215,10 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      bandeira_tipo: "verde" | "amarela" | "vermelha"
+      perfil_usuario: "administrador" | "editor"
+      periodo_tipo: "manha" | "tarde"
+      status_voo: "liberado" | "em_avaliacao" | "cancelado"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +333,11 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      bandeira_tipo: ["verde", "amarela", "vermelha"],
+      perfil_usuario: ["administrador", "editor"],
+      periodo_tipo: ["manha", "tarde"],
+      status_voo: ["liberado", "em_avaliacao", "cancelado"],
+    },
   },
 } as const
