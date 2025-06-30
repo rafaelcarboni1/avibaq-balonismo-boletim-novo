@@ -8,12 +8,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Download, Volume2, Filter } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Database } from "@/integrations/supabase/types";
+
+type BandeiraTipo = Database["public"]["Enums"]["bandeira_tipo"];
+type PeriodoTipo = Database["public"]["Enums"]["periodo_tipo"];
 
 interface BoletimHistorico {
   id: string;
   data: string;
-  periodo: "manha" | "tarde";
-  bandeira: "verde" | "amarela" | "vermelha";
+  periodo: PeriodoTipo;
+  bandeira: BandeiraTipo;
   status_voo: "liberado" | "em_avaliacao" | "cancelado";
   titulo_curto: string;
   motivo: string;
@@ -52,10 +56,10 @@ const Historico = () => {
         query = query.lte("data", filtros.dataFim);
       }
       if (filtros.bandeira) {
-        query = query.eq("bandeira", filtros.bandeira);
+        query = query.eq("bandeira", filtros.bandeira as BandeiraTipo);
       }
       if (filtros.periodo) {
-        query = query.eq("periodo", filtros.periodo);
+        query = query.eq("periodo", filtros.periodo as PeriodoTipo);
       }
 
       const { data, error } = await query;
