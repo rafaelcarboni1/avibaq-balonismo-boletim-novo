@@ -143,7 +143,7 @@ export const BoletimCard = ({ boletim }: BoletimCardProps) => {
   }
 
   return (
-    <div ref={cardRef} className="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-lg ring-1 ring-black/5 px-6 py-8 md:px-10 md:py-12 font-sans tracking-normal">
+    <div ref={cardRef} className="w-full max-w-md md:max-w-4xl mx-auto bg-white rounded-2xl shadow-lg ring-1 ring-black/5 px-3 py-6 md:px-10 md:py-12 font-sans tracking-normal">
       <CardHeader className="text-center bg-white/80 rounded-t-lg pb-0">
         <div className="flex flex-col items-center justify-center mb-6">
           <div className="flex items-center justify-center gap-10 mb-6 items-center">
