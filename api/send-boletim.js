@@ -8,6 +8,15 @@ const supabase = createClient(
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+function getBrasiliaDate(offsetDays = 0) {
+  const now = new Date();
+  // Ajusta para o fuso de Brasília (GMT-3)
+  const utc = now.getTime() + (now.getTimezoneOffset() * 60000);
+  const brasilia = new Date(utc - (3 * 60 * 60 * 1000));
+  brasilia.setDate(brasilia.getDate() + offsetDays);
+  return brasilia.toISOString().slice(0, 10); // YYYY-MM-DD
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método não permitido' });
@@ -23,9 +32,49 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Erro ao buscar assinantes' });
   }
 
-  // Conteúdo do boletim (exemplo fixo, personalize depois)
+  // Buscar o boletim do dia seguinte
+  const dataAmanha = getBrasiliaDate(1); // Dia seguinte
+  const { data: boletins, error: errorBoletim } = await supabase
+    .from('boletins')
+    .select('*')
+    .eq('data', dataAmanha)
+    .order('periodo', { ascending: true });
+
+  if (errorBoletim) {
+    return res.status(500).json({ error: 'Erro ao buscar boletim do dia seguinte' });
+  }
+
+  if (!boletins || boletins.length === 0) {
+    return res.status(404).json({ error: 'Nenhum boletim cadastrado para o dia seguinte.' });
+  }
+
+  // Montar o conteúdo do e-mail com todos os boletins do dia seguinte
+  let conteudo = '';
+  for (const boletim of boletins) {
+    conteudo += `
+      <h3>Boletim do dia ${boletim.data.split('-').reverse().join('/')} - Período: ${boletim.periodo === 'manha' ? 'Manhã' : 'Tarde'}</h3>
+      <p><strong>Bandeira:</strong> ${boletim.bandeira.toUpperCase()}</p>
+      <p><strong>Status:</strong> ${boletim.titulo_curto}</p>
+      <p><strong>Motivo:</strong> ${boletim.motivo}</p>
+    `;
+    if (boletim.fotos_urls && boletim.fotos_urls.length > 0) {
+      conteudo += '<p><strong>Fotos Anexadas:</strong><br>';
+      for (const url of boletim.fotos_urls) {
+        conteudo += `<img src="${url}" alt="Foto do boletim" style="max-width:200px; margin:4px;" />`;
+      }
+      conteudo += '</p>';
+    }
+    if (boletim.audios_urls && boletim.audios_urls.length > 0) {
+      conteudo += '<p><strong>Áudios Anexados:</strong><br>';
+      for (const url of boletim.audios_urls) {
+        conteudo += `<a href="${url}">Ouvir áudio</a><br>`;
+      }
+      conteudo += '</p>';
+    }
+    conteudo += '<hr />';
+  }
+
   const titulo = 'Boletim Meteorológico - AVIBAQ';
-  const conteudo = '<p>Condições meteorológicas para hoje: ...</p>';
 
   // Enviar e-mail para cada assinante
   for (const assinante of assinantes) {
@@ -33,7 +82,6 @@ export default async function handler(req, res) {
       <h2>${titulo}</h2>
       <p>Olá, ${assinante.nome}!</p>
       ${conteudo}
-      <hr>
       <p style="font-size:12px;color:#888;">
         Caso não queira mais receber nossos e-mails, 
         <a href="https://avibaq-balonismo-boletim-novo.vercel.app/descadastrar?token=${assinante.token_descadastro}">
