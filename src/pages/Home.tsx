@@ -29,11 +29,11 @@ const Home = () => {
         const tz = 'America/Sao_Paulo';
         const hoje = new Date();
         const localDate = hoje.toLocaleDateString('sv-SE', { timeZone: tz }); // 'YYYY-MM-DD'
-        // 1. Buscar o boletim mais próximo do futuro (data >= hoje)
+        // 1. Buscar o boletim do próximo dia (data > hoje)
         let { data: futuros, error: errorFuturos } = await supabase
           .from("boletins")
           .select("*")
-          .gte("data", localDate)
+          .gt("data", localDate)
           .order("data", { ascending: true })
           .order("periodo", { ascending: true })
           .limit(1);
@@ -43,16 +43,30 @@ const Home = () => {
         if (futuros && futuros.length > 0) {
           setBoletimHoje(futuros[0]);
         } else {
-          // 2. Se não houver boletim futuro, buscar o mais recente do passado
-          const { data: ultimos, error: err2 } = await supabase
+          // 2. Se não houver boletim futuro, buscar o de hoje
+          const { data: hojeData, error: errorHoje } = await supabase
             .from("boletins")
             .select("*")
-            .lt("data", localDate)
-            .order("data", { ascending: false })
-            .order("periodo", { ascending: false })
+            .eq("data", localDate)
+            .order("periodo", { ascending: true })
             .limit(1);
-          if (!err2 && ultimos && ultimos.length > 0) {
-            setBoletimHoje(ultimos[0]);
+          if (errorHoje) {
+            console.error("Erro ao buscar boletim de hoje:", errorHoje);
+          }
+          if (hojeData && hojeData.length > 0) {
+            setBoletimHoje(hojeData[0]);
+          } else {
+            // 3. Se não houver, buscar o mais recente do passado
+            const { data: ultimos, error: err2 } = await supabase
+              .from("boletins")
+              .select("*")
+              .lt("data", localDate)
+              .order("data", { ascending: false })
+              .order("periodo", { ascending: false })
+              .limit(1);
+            if (!err2 && ultimos && ultimos.length > 0) {
+              setBoletimHoje(ultimos[0]);
+            }
           }
         }
       } catch (error) {
