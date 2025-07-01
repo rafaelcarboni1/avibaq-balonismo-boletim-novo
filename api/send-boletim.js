@@ -84,7 +84,7 @@ export default async function handler(req, res) {
       ${conteudo}
       <p style="font-size:12px;color:#888;">
         Caso não queira mais receber nossos e-mails, 
-        <a href="https://avibaq-balonismo-boletim-novo.vercel.app/descadastrar?token=${assinante.token_descadastro}">
+        <a href="https://avibaq.org/descadastrar?token=${assinante.token_descadastro}">
           clique aqui para se descadastrar
         </a>.
       </p>
