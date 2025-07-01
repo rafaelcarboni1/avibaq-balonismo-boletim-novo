@@ -11,6 +11,7 @@ import Acessibilidade from "./pages/Acessibilidade";
 import NotFound from "./pages/NotFound";
 import AdminBoletinsList from "./pages/AdminBoletinsList";
 import AdminBoletimForm from "./pages/AdminBoletimForm";
+import Descadastrar from "./pages/Descadastrar";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/quem-somos" element={<QuemSomos />} />
           <Route path="/politica-privacidade" element={<PoliticaPrivacidade />} />
           <Route path="/acessibilidade" element={<Acessibilidade />} />
+          <Route path="/descadastrar" element={<Descadastrar />} />
           {/* Rotas Admin Boletins */}
           <Route path="/admin/boletins" element={<AdminBoletinsList />} />
           <Route path="/admin/boletins/new" element={<AdminBoletimForm />} />
