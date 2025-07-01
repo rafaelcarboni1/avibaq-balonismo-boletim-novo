@@ -44,8 +44,8 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <AuthRedirector />
       <BrowserRouter>
+        <AuthRedirector />
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/historico" element={<Historico />} />
