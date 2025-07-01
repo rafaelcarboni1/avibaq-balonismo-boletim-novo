@@ -73,8 +73,7 @@ const Home = () => {
               Associação de Pilotos e Empresas de Balonismo
             </h1>
             <p className="text-xl text-gray-600 mb-8">
-              Promovendo a segurança e excelência no balonismo brasileiro através de 
-              informações meteorológicas precisas e confiáveis para nossa comunidade.
+              Promovendo a segurança e excelência no balonismo em Praia Grande/SC através de informações meteorológicas precisas e confiáveis para nossa comunidade. 🚀
             </p>
           </div>
         </section>
