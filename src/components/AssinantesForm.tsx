@@ -46,15 +46,12 @@ export const AssinantesForm = () => {
     setIsLoading(true);
     
     try {
-      const tokenConfirmacao = crypto.randomUUID();
-      
       const { error } = await supabase
         .from("assinantes")
         .insert({
           nome: formData.nome,
           email: formData.email,
           eh_piloto: formData.ehPiloto,
-          token_confirmacao: tokenConfirmacao
         });
 
       if (error) {
@@ -68,17 +65,6 @@ export const AssinantesForm = () => {
           throw error;
         }
       } else {
-        // Chamar a Edge Function para enviar o e-mail de confirmação
-        await fetch('https://elcbodhxzvoqpzamgown.functions.supabase.co/send-confirmation-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: formData.email,
-            nome: formData.nome,
-            token: tokenConfirmacao
-          })
-        });
-
         setSuccess(true);
         setFormData({ nome: "", email: "", ehPiloto: false, aceitouTermos: false });
         toast({
