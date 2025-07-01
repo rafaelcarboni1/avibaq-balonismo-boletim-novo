@@ -81,7 +81,7 @@ export default async function handler(req, res) {
     const html = `
       <div style="max-width:600px;margin:0 auto;font-family:sans-serif;background:#f9fafb;padding:24px 0;">
         <div style="text-align:center;margin-bottom:24px;">
-          <img src="https://avibaq.org/logo.png" alt="AVIBAQ" style="max-width:120px;margin-bottom:8px;" />
+          <img src="https://elcbodhxzvoqpzamgown.supabase.co/storage/v1/object/public/public-assets/Logo%20AVIBAQ.png" alt="AVIBAQ" style="max-width:120px;margin-bottom:8px;" />
           <h2 style="color:#1e293b;font-size:24px;margin:0;">Boletim Meteorológico - AVIBAQ</h2>
         </div>
         <div style="background:#fff;border-radius:8px;padding:24px 24px 16px 24px;box-shadow:0 2px 8px #0001;">
