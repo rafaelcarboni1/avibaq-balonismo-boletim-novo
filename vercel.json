@@ -1,5 +1,11 @@
 {
   "rewrites": [
     { "source": "/(.*)", "destination": "/" }
+  ],
+  "crons": [
+    {
+      "path": "/api/send-boletim",
+      "schedule": "0 22 * * *"
+    }
   ]
 } 
