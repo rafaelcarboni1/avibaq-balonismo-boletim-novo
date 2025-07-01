@@ -120,24 +120,24 @@ export const BoletimCard = ({ boletim }: BoletimCardProps) => {
     if (btns) btns.style.display = 'none';
     // Aguarda o reflow
     await new Promise(r => setTimeout(r, 50));
-    // Forçar tamanho 1080x1350 px
-    const width = 1080;
-    const height = 1350;
-    // Salva estilos originais
-    const originalWidth = cardRef.current.style.width;
-    const originalHeight = cardRef.current.style.height;
-    cardRef.current.style.width = width + 'px';
-    cardRef.current.style.height = height + 'px';
-    // Aguarda reflow
-    await new Promise(r => setTimeout(r, 50));
-    const canvas = await html2canvas(cardRef.current, { backgroundColor: '#f8fafc', width, height, scale: 1, useCORS: true });
-    // Restaura estilos
-    cardRef.current.style.width = originalWidth;
-    cardRef.current.style.height = originalHeight;
+    // Captura o card com alta resolução
+    const canvas = await html2canvas(cardRef.current, { backgroundColor: '#f8fafc', scale: 2, useCORS: true });
+    // Recorta para 1080x1350 se necessário
+    let finalCanvas = canvas;
+    if (canvas.width > 1080 && canvas.height > 1350) {
+      const crop = document.createElement('canvas');
+      crop.width = 1080;
+      crop.height = 1350;
+      const ctx = crop.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(canvas, 0, 0, 1080, 1350, 0, 0, 1080, 1350);
+        finalCanvas = crop;
+      }
+    }
     if (btns) btns.style.display = originalDisplay || '';
     const link = document.createElement('a');
     link.download = `Boletim_AVIBAQ_${boletim.data.split('-').reverse().join('_')}_${boletim.periodo}.png`;
-    link.href = canvas.toDataURL('image/png');
+    link.href = finalCanvas.toDataURL('image/png');
     link.click();
   }
 
@@ -156,7 +156,7 @@ export const BoletimCard = ({ boletim }: BoletimCardProps) => {
   }
 
   return (
-    <div ref={cardRef} className="w-full max-w-md md:max-w-4xl mx-auto bg-white rounded-2xl shadow-lg ring-1 ring-black/5 px-3 py-6 md:px-10 md:py-12 font-sans tracking-normal">
+    <div ref={cardRef} className="w-full max-w-full md:max-w-4xl mx-auto bg-white rounded-2xl shadow-lg ring-1 ring-black/5 px-2 py-6 md:px-10 md:py-12 font-sans tracking-normal">
       <CardHeader className="text-center bg-white/80 rounded-t-lg pb-0">
         <div className="flex flex-col md:flex-row md:items-center justify-center mb-6 md:gap-8">
           {/* Logo em cima no mobile, ao lado no desktop */}
