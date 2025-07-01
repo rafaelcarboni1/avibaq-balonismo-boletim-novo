@@ -18,11 +18,14 @@ export default function AdminLogin() {
     e.preventDefault();
     setLoading(true);
     setError("");
+    console.log("[LOGIN] Tentando login com:", { email, password });
     const { data, error: loginError } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
+    console.log("[LOGIN] Resposta do Supabase:", { data, loginError });
     if (loginError) {
+      console.error("[LOGIN] Erro no login:", loginError.message, loginError);
       setError("E-mail ou senha inválidos.");
       setLoading(false);
       return;
@@ -33,6 +36,7 @@ export default function AdminLogin() {
       .select("email")
       .eq("email", email)
       .single();
+    console.log("[LOGIN] Verificação usuarios_admin:", { adminData, adminError });
     if (adminError || !adminData) {
       setError("Acesso negado: seu e-mail não está autorizado como administrador.");
       await supabase.auth.signOut();
