@@ -18,6 +18,7 @@ export default function Descadastrar() {
       .from("assinantes")
       .update({ ativo: false })
       .eq("token_descadastro", token)
+      .select()
       .then(({ error, data }) => {
         if (error || !data || data.length === 0) setStatus("fail");
         else setStatus("ok");
