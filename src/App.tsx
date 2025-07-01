@@ -12,6 +12,8 @@ import NotFound from "./pages/NotFound";
 import AdminBoletinsList from "./pages/AdminBoletinsList";
 import AdminBoletimForm from "./pages/AdminBoletimForm";
 import Descadastrar from "./pages/Descadastrar";
+import AdminLogin from "./pages/AdminLogin";
+import RequireAdmin from "@/components/RequireAdmin";
 
 const queryClient = new QueryClient();
 
@@ -29,10 +31,11 @@ const App = () => (
           <Route path="/acessibilidade" element={<Acessibilidade />} />
           <Route path="/descadastrar" element={<Descadastrar />} />
           {/* Rotas Admin Boletins */}
-          <Route path="/admin/boletins" element={<AdminBoletinsList />} />
-          <Route path="/admin/boletins/new" element={<AdminBoletimForm />} />
-          <Route path="/admin/boletins/:id/edit" element={<AdminBoletimForm />} />
+          <Route path="/admin/boletins" element={<RequireAdmin><AdminBoletinsList /></RequireAdmin>} />
+          <Route path="/admin/boletins/new" element={<RequireAdmin><AdminBoletimForm /></RequireAdmin>} />
+          <Route path="/admin/boletins/:id/edit" element={<RequireAdmin><AdminBoletimForm /></RequireAdmin>} />
           <Route path="/admin" element={<Navigate to="/admin/boletins" replace />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
