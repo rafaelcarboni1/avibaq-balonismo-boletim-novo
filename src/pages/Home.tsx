@@ -73,7 +73,7 @@ const Home = () => {
               Associação de Pilotos e Empresas de Balonismo
             </h1>
             <p className="text-xl text-gray-600 mb-8">
-              Promovendo a segurança e excelência no balonismo em Praia Grande/SC através de informações meteorológicas precisas e confiáveis para nossa comunidade. 🚀
+              Promovendo a segurança e excelência no balonismo em Praia Grande/SC através de informações meteorológicas precisas e confiáveis para nossa comunidade.
             </p>
           </div>
         </section>
@@ -158,9 +158,7 @@ const Home = () => {
       <footer className="bg-gray-900 text-white py-8 mt-16">
         <div className="container mx-auto px-4 text-center">
           <div className="flex items-center justify-center space-x-3 mb-4">
-            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold">A</span>
-            </div>
+            <img src="https://elcbodhxzvoqpzamgown.supabase.co/storage/v1/object/public/public-assets/Logo%20AVIBAQ.png" alt="Logo AVIBAQ" style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', background: '#fff' }} />
             <span className="text-lg font-semibold">AVIBAQ</span>
           </div>
           <p className="text-gray-400 mb-4">
