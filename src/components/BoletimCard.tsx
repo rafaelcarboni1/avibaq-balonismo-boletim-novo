@@ -130,37 +130,37 @@ export const BoletimCard = ({ boletim }: BoletimCardProps) => {
     document.body.appendChild(ghost);
     // Renderiza o conteúdo do card no ghost
     ghost.innerHTML = `
-      <div style="width:1000px;height:1250px;background:white;border-radius:32px;box-shadow:0 8px 32px #0002;padding:40px 48px 32px 48px;display:flex;flex-direction:column;align-items:center;font-family:Inter,sans-serif;">
-        <div style='display:flex;align-items:center;gap:32px;margin-bottom:32px;'>
-          <img src='https://elcbodhxzvoqpzamgown.supabase.co/storage/v1/object/public/public-assets/Logo%20AVIBAQ.png' alt='Logo AVIBAQ' style='width:80px;height:80px;border-radius:50%;background:#fff;'/>
+      <div style="width:1040px;height:1310px;background:white;border-radius:24px;box-shadow:0 4px 24px #0001;padding:24px 28px 20px 28px;display:flex;flex-direction:column;align-items:center;font-family:Inter,sans-serif;">
+        <div style='display:flex;align-items:center;gap:24px;margin-bottom:20px;'>
+          <img src='https://elcbodhxzvoqpzamgown.supabase.co/storage/v1/object/public/public-assets/Logo%20AVIBAQ.png' alt='Logo AVIBAQ' style='width:68px;height:68px;border-radius:50%;background:#fff;'/>
           <div style='display:flex;flex-direction:column;align-items:flex-start;'>
-            <span style='font-size:32px;font-weight:700;color:#111;line-height:1.1;'>Boletim Meteorológico - AVIBAQ</span>
-            <div style='display:flex;align-items:center;gap:16px;margin-top:8px;'>
-              <span style='font-size:22px;font-weight:700;color:#111;display:flex;align-items:center;gap:8px;'><svg width='28' height='28' fill='none' stroke='#222'><rect width='28' height='28' rx='6' fill='#f5f7fa'/><path d='M7 10h14M7 14h8M7 18h6' stroke='#222' stroke-width='2' stroke-linecap='round'/></svg>${boletim.data.split('-').reverse().join('/')}</span>
-              <span style='font-size:18px;padding:4px 16px;border-radius:999px;border:1.5px solid #eee;background:#f5f7fa;'>Período da ${boletim.periodo === "manha" ? "Manhã" : "Tarde"}</span>
+            <span style='font-size:28px;font-weight:700;color:#111;line-height:1.1;'>Boletim Meteorológico - AVIBAQ</span>
+            <div style='display:flex;align-items:center;gap:12px;margin-top:6px;'>
+              <span style='font-size:18px;font-weight:700;color:#111;display:flex;align-items:center;gap:6px;'><svg width='22' height='22' fill='none' stroke='#222'><rect width='22' height='22' rx='5' fill='#f5f7fa'/><path d='M5 8h12M5 11h7M5 14h5' stroke='#222' stroke-width='2' stroke-linecap='round'/></svg>${boletim.data.split('-').reverse().join('/')}</span>
+              <span style='font-size:15px;padding:3px 12px;border-radius:999px;border:1.2px solid #eee;background:#f5f7fa;'>Período da ${boletim.periodo === "manha" ? "Manhã" : "Tarde"}</span>
             </div>
           </div>
         </div>
-        <div style='width:100%;margin-bottom:24px;padding:0;'>
-          <div style='background:#3AA655;color:white;font-size:18px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;padding:16px 0;border-radius:16px;display:flex;align-items:center;justify-content:center;gap:12px;'>
-            <span style='font-size:22px;'>✔️</span> BANDEIRA ${boletim.bandeira.toUpperCase()} - ${boletim.titulo_curto.toUpperCase()}
+        <div style='width:100%;margin-bottom:16px;padding:0;'>
+          <div style='background:#3AA655;color:white;font-size:15px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;padding:10px 0;border-radius:12px;display:flex;align-items:center;justify-content:center;gap:8px;'>
+            <span style='font-size:18px;'>✔️</span> BANDEIRA ${boletim.bandeira.toUpperCase()} - ${boletim.titulo_curto.toUpperCase()}
           </div>
         </div>
-        <div style='width:100%;margin-bottom:24px;'>
-          <span style='font-size:20px;font-weight:600;color:#222;'>Motivo:</span>
-          <div style='background:#f5f7fa;border-radius:12px;padding:20px 24px;margin-top:10px;'>
-            <pre style='font-size:16px;color:#222;line-height:1.6;margin:0;white-space:pre-wrap;'>${boletim.motivo}</pre>
+        <div style='width:100%;margin-bottom:16px;'>
+          <span style='font-size:16px;font-weight:600;color:#222;'>Motivo:</span>
+          <div style='background:#f5f7fa;border-radius:8px;padding:12px 14px;margin-top:7px;'>
+            <pre style='font-size:13px;color:#222;line-height:1.5;margin:0;white-space:pre-wrap;'>${boletim.motivo}</pre>
           </div>
         </div>
-        <div style='width:100%;margin-bottom:24px;'>
-          <span style='font-size:16px;font-weight:500;color:#222;'>Fotos Anexadas</span>
-          <div style='display:flex;gap:12px;margin-top:8px;'>
-            ${(boletim.fotos_urls||[]).map(u => `<img src='${u}' style='width:220px;height:140px;object-fit:cover;border-radius:10px;box-shadow:0 2px 8px #0001;'/>`).join('')}
+        <div style='width:100%;margin-bottom:16px;'>
+          <span style='font-size:13px;font-weight:500;color:#222;'>Fotos Anexadas</span>
+          <div style='display:flex;gap:8px;margin-top:6px;'>
+            ${(boletim.fotos_urls||[]).map(u => `<img src='${u}' style='width:150px;height:100px;object-fit:cover;border-radius:7px;box-shadow:0 1px 4px #0001;'/>`).join('')}
           </div>
         </div>
-        <div style='width:100%;margin-top:auto;background:#f5f7fa;border-radius:10px;padding:12px 0;text-align:center;font-size:15px;color:#444;'>
+        <div style='width:100%;margin-top:auto;background:#f5f7fa;border-radius:7px;padding:8px 0;text-align:center;font-size:12px;color:#444;'>
           Decisão da Comissão de Meteorologia e Segurança da AVIBAQ<br/>
-          <span style='font-size:13px;color:#888;'>Atualizado em ${boletim.publicado_em ? new Date(boletim.publicado_em).toLocaleString('pt-BR') : ''}</span>
+          <span style='font-size:11px;color:#888;'>Atualizado em ${boletim.publicado_em ? new Date(boletim.publicado_em).toLocaleString('pt-BR') : ''}</span>
         </div>
       </div>
     `;
