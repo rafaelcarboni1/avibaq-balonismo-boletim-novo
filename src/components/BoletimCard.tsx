@@ -60,6 +60,7 @@ export const BoletimCard = ({ boletim }: BoletimCardProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const navigate = useNavigate();
   const cardRef = useRef<HTMLDivElement>(null);
+  const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
 
   if (!boletim) {
     return (
@@ -209,13 +210,58 @@ export const BoletimCard = ({ boletim }: BoletimCardProps) => {
             {boletim.fotos_urls && boletim.fotos_urls.length > 0 && (
               <div>
                 <h4 className="text-sm font-medium text-gray-700 mb-2">Fotos Anexadas</h4>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {/* Desktop: grid, Mobile: slider */}
+                <div className="hidden md:grid grid-cols-3 gap-3">
                   {boletim.fotos_urls.map((u: string, idx: number) => (
-                    <div key={u} className="aspect-square bg-gray-200 rounded-lg overflow-hidden">
-                      <img src={u} alt="Foto do boletim" loading="lazy" className="w-full h-full object-cover" />
-                    </div>
+                    <img
+                      key={u}
+                      src={u}
+                      alt="Foto do boletim"
+                      loading="lazy"
+                      className="rounded-lg shadow object-cover w-full h-40 cursor-pointer"
+                      onClick={() => setLightboxIdx(idx)}
+                    />
                   ))}
                 </div>
+                <div className="md:hidden flex overflow-x-auto snap-x snap-mandatory scroll-smooth gap-3 pb-2">
+                  {boletim.fotos_urls.map((u: string, idx: number) => (
+                    <img
+                      key={u}
+                      src={u}
+                      alt="Foto do boletim"
+                      loading="lazy"
+                      className="rounded-lg shadow object-cover w-[180px] h-[120px] flex-shrink-0 snap-center cursor-pointer"
+                      onClick={() => setLightboxIdx(idx)}
+                    />
+                  ))}
+                </div>
+                {/* Lightbox/Preview */}
+                {lightboxIdx !== null && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+                    <button
+                      className="absolute top-6 right-6 text-white text-3xl font-bold bg-black/60 rounded-full w-10 h-10 flex items-center justify-center hover:bg-black/80 transition"
+                      onClick={() => setLightboxIdx(null)}
+                      aria-label="Fechar preview"
+                    >×</button>
+                    <button
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-white text-3xl font-bold bg-black/40 rounded-full w-10 h-10 flex items-center justify-center hover:bg-black/70 transition disabled:opacity-30"
+                      onClick={() => setLightboxIdx(i => (i !== null && i > 0 ? i - 1 : i))}
+                      disabled={lightboxIdx === 0}
+                      aria-label="Foto anterior"
+                    >‹</button>
+                    <img
+                      src={boletim.fotos_urls[lightboxIdx]}
+                      alt={`Foto ${lightboxIdx + 1}`}
+                      className="max-h-[80vh] max-w-[90vw] rounded-xl shadow-2xl border-4 border-white object-contain"
+                    />
+                    <button
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-white text-3xl font-bold bg-black/40 rounded-full w-10 h-10 flex items-center justify-center hover:bg-black/70 transition disabled:opacity-30"
+                      onClick={() => setLightboxIdx(i => (i !== null && i < boletim.fotos_urls.length - 1 ? i + 1 : i))}
+                      disabled={lightboxIdx === boletim.fotos_urls.length - 1}
+                      aria-label="Próxima foto"
+                    >›</button>
+                  </div>
+                )}
               </div>
             )}
           </div>
