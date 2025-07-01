@@ -79,15 +79,22 @@ export default async function handler(req, res) {
   // Enviar e-mail para cada assinante
   for (const assinante of assinantes) {
     const html = `
-      <h2>${titulo}</h2>
-      <p>Olá, ${assinante.nome}!</p>
-      ${conteudo}
-      <p style="font-size:12px;color:#888;">
-        Caso não queira mais receber nossos e-mails, 
-        <a href="https://avibaq.org/descadastrar?token=${assinante.token_descadastro}">
-          clique aqui para se descadastrar
-        </a>.
-      </p>
+      <div style="max-width:600px;margin:0 auto;font-family:sans-serif;background:#f9fafb;padding:24px 0;">
+        <div style="text-align:center;margin-bottom:24px;">
+          <img src="https://avibaq.org/logo.png" alt="AVIBAQ" style="max-width:120px;margin-bottom:8px;" />
+          <h2 style="color:#1e293b;font-size:24px;margin:0;">Boletim Meteorológico - AVIBAQ</h2>
+        </div>
+        <div style="background:#fff;border-radius:8px;padding:24px 24px 16px 24px;box-shadow:0 2px 8px #0001;">
+          <p style="font-size:16px;color:#222;margin-bottom:16px;">Olá, <strong>${assinante.nome}</strong>!</p>
+          ${conteudo}
+        </div>
+        <div style="font-size:13px;color:#666;text-align:center;margin-top:32px;">
+          <hr style="margin:24px 0; border:none; border-top:1px solid #e5e7eb;" />
+          <p style="margin:0 0 8px 0;">AVIBAQ - Associação de Pilotos e Empresas de Balonismo</p>
+          <p style="margin:0 0 8px 0;">Dúvidas? Fale conosco: <a href="mailto:contato@avibaq.org" style="color:#2563eb;">contato@avibaq.org</a></p>
+          <p style="margin:0;">Caso não queira mais receber nossos e-mails, <a href="https://avibaq.org/descadastrar?token=${assinante.token_descadastro}" style="color:#ef4444;">clique aqui para se descadastrar</a>.</p>
+        </div>
+      </div>
     `;
 
     try {
