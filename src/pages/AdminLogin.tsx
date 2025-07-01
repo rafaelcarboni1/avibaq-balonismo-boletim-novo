@@ -27,9 +27,9 @@ export default function AdminLogin() {
       setLoading(false);
       return;
     }
-    // Verifica se o e-mail está na tabela admins
+    // Verifica se o e-mail está na tabela usuarios_admin
     const { data: adminData, error: adminError } = await supabase
-      .from("admins")
+      .from("usuarios_admin")
       .select("email")
       .eq("email", email)
       .single();

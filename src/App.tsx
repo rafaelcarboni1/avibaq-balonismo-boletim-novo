@@ -17,6 +17,7 @@ import RequireAdmin from "@/components/RequireAdmin";
 import AdminSetPassword from "./pages/AdminSetPassword";
 import { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import AdminRegister from "./pages/AdminRegister";
 
 const queryClient = new QueryClient();
 
@@ -57,6 +58,7 @@ const App = () => (
           <Route path="/admin/boletins" element={<RequireAdmin><AdminBoletinsList /></RequireAdmin>} />
           <Route path="/admin/boletins/new" element={<RequireAdmin><AdminBoletimForm /></RequireAdmin>} />
           <Route path="/admin/boletins/:id/edit" element={<RequireAdmin><AdminBoletimForm /></RequireAdmin>} />
+          <Route path="/admin/cadastrar-admin" element={<RequireAdmin><AdminRegister /></RequireAdmin>} />
           <Route path="/admin" element={<Navigate to="/admin/boletins" replace />} />
           <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin/definir-senha" element={<AdminSetPassword />} />

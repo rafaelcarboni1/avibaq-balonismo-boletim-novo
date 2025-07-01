@@ -16,7 +16,7 @@ export default function RequireAdmin({ children }: { children: React.ReactNode }
         return;
       }
       const { data: adminData } = await supabase
-        .from("admins")
+        .from("usuarios_admin")
         .select("email")
         .eq("email", email)
         .single();
