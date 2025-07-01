@@ -103,3 +103,7 @@ All colors MUST be HSL.
     @apply bg-bgSoft text-gray-800 font-sans;
   }
 }
+
+html {
+  scroll-behavior: smooth;
+}

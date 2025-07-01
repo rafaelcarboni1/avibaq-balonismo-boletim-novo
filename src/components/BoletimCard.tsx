@@ -113,63 +113,15 @@ export const BoletimCard = ({ boletim }: BoletimCardProps) => {
   }
 
   async function handleDownloadImage() {
-    if (!boletim) return;
-    // Cria um card fantasma offscreen
-    const ghost = document.createElement('div');
-    ghost.style.position = 'fixed';
-    ghost.style.left = '-9999px';
-    ghost.style.top = '0';
-    ghost.style.width = '1080px';
-    ghost.style.height = '1350px';
-    ghost.style.background = '#F5F7FA';
-    ghost.style.zIndex = '9999';
-    ghost.style.padding = '0';
-    ghost.style.display = 'flex';
-    ghost.style.alignItems = 'center';
-    ghost.style.justifyContent = 'center';
-    document.body.appendChild(ghost);
-    // Renderiza o conteúdo do card no ghost
-    ghost.innerHTML = `
-      <div style="width:1080px;height:1350px;background:white;border-radius:24px;box-shadow:0 4px 24px #0001;padding:36px 44px 32px 44px;display:flex;flex-direction:column;align-items:center;font-family:Inter,sans-serif;">
-        <div style='display:flex;align-items:center;gap:32px;margin-bottom:28px;'>
-          <img src='https://elcbodhxzvoqpzamgown.supabase.co/storage/v1/object/public/public-assets/Logo%20AVIBAQ.png' alt='Logo AVIBAQ' style='width:92px;height:92px;border-radius:50%;background:#fff;'/>
-          <div style='display:flex;flex-direction:column;align-items:flex-start;'>
-            <span style='font-size:36px;font-weight:700;color:#111;line-height:1.1;'>Boletim Meteorológico - AVIBAQ</span>
-            <div style='display:flex;align-items:center;gap:16px;margin-top:10px;'>
-              <span style='font-size:22px;font-weight:700;color:#111;display:flex;align-items:center;gap:8px;'><svg width='28' height='28' fill='none' stroke='#222'><rect width='28' height='28' rx='6' fill='#f5f7fa'/><path d='M7 10h14M7 14h8M7 18h6' stroke='#222' stroke-width='2' stroke-linecap='round'/></svg>${boletim.data.split('-').reverse().join('/')}</span>
-              <span style='font-size:18px;padding:5px 18px;border-radius:999px;border:1.5px solid #eee;background:#f5f7fa;'>Período da ${boletim.periodo === "manha" ? "Manhã" : "Tarde"}</span>
-            </div>
-          </div>
-        </div>
-        <div style='width:100%;margin-bottom:20px;padding:0;'>
-          <div style='background:#3AA655;color:white;font-size:20px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;padding:14px 0;border-radius:14px;display:flex;align-items:center;justify-content:center;gap:10px;'>
-            <span style='font-size:24px;'>✔️</span> BANDEIRA ${boletim.bandeira.toUpperCase()} - ${boletim.titulo_curto.toUpperCase()}
-          </div>
-        </div>
-        <div style='width:100%;margin-bottom:20px;'>
-          <span style='font-size:20px;font-weight:600;color:#222;'>Motivo:</span>
-          <div style='background:#f5f7fa;border-radius:10px;padding:18px 20px;margin-top:10px;'>
-            <pre style='font-size:16px;color:#222;line-height:1.6;margin:0;white-space:pre-wrap;'>${boletim.motivo}</pre>
-          </div>
-        </div>
-        <div style='width:100%;margin-bottom:20px;'>
-          <span style='font-size:15px;font-weight:500;color:#222;'>Fotos Anexadas</span>
-          <div style='display:flex;gap:12px;margin-top:8px;'>
-            ${(boletim.fotos_urls||[]).map(u => `<img src='${u}' style='width:220px;height:140px;object-fit:cover;border-radius:10px;box-shadow:0 2px 8px #0001;'/>`).join('')}
-          </div>
-        </div>
-        <div style='width:100%;margin-top:auto;background:#f5f7fa;border-radius:10px;padding:12px 0;text-align:center;font-size:15px;color:#444;'>
-          Decisão da Comissão de Meteorologia e Segurança da AVIBAQ<br/>
-          <span style='font-size:13px;color:#888;'>Atualizado em ${boletim.publicado_em ? new Date(boletim.publicado_em).toLocaleString('pt-BR') : ''}</span>
-        </div>
-      </div>
-    `;
-    // Aguarda imagens carregarem
-    const imgs = Array.from(ghost.querySelectorAll('img'));
-    await Promise.all(imgs.map(img => new Promise(res => { img.onload = () => res(true); img.onerror = () => res(true); })));
-    // Captura imagem
-    const canvas = await html2canvas(ghost, { backgroundColor: '#F5F7FA', width: 1080, height: 1350, scale: 1, useCORS: true });
-    document.body.removeChild(ghost);
+    if (!cardRef.current) return;
+    // Esconde os botões temporariamente
+    const btns = cardRef.current.querySelector('.no-print') as HTMLElement;
+    const originalDisplay = btns?.style.display;
+    if (btns) btns.style.display = 'none';
+    // Aguarda o reflow
+    await new Promise(r => setTimeout(r, 50));
+    const canvas = await html2canvas(cardRef.current, { backgroundColor: '#f8fafc', scale: 2, useCORS: true });
+    if (btns) btns.style.display = originalDisplay || '';
     const link = document.createElement('a');
     link.download = `Boletim_AVIBAQ_${boletim.data.split('-').reverse().join('_')}_${boletim.periodo}.png`;
     link.href = canvas.toDataURL('image/png');
@@ -191,33 +143,28 @@ export const BoletimCard = ({ boletim }: BoletimCardProps) => {
   }
 
   return (
-    <div ref={cardRef} className="w-full max-w-full md:max-w-4xl mx-auto bg-white rounded-2xl shadow-lg ring-1 ring-black/5 px-2 py-6 md:px-10 md:py-12 font-sans tracking-normal">
+    <div ref={cardRef} className="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-lg ring-1 ring-black/5 px-6 py-8 md:px-10 md:py-12 font-sans tracking-normal">
       <CardHeader className="text-center bg-white/80 rounded-t-lg pb-0">
-        <div className="flex flex-col md:flex-row md:items-center justify-center mb-6 md:gap-8">
-          {/* Logo em cima no mobile, ao lado no desktop */}
-          <img 
-            src="https://elcbodhxzvoqpzamgown.supabase.co/storage/v1/object/public/public-assets/Logo%20AVIBAQ.png"
-            alt="Logo AVIBAQ"
-            className="w-16 h-16 md:w-16 md:h-16 rounded-full object-cover bg-white mb-2 md:mb-0"
-          />
-          <div className="flex flex-col items-center md:items-start">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-900 whitespace-nowrap flex items-center leading-tight mt-1" style={{lineHeight: 1.1, letterSpacing: 0}}>Boletim Meteorológico - AVIBAQ</h2>
-            <div className="flex items-center gap-4 text-sm md:text-base text-gray-600 mt-2 mb-2">
-              <div className="flex items-center gap-2">
-                <Calendar className="w-6 h-6 md:w-7 md:h-7" />
-                <span className="text-lg md:text-2xl font-bold text-gray-900">{boletim.data.split('-').reverse().join('/')}</span>
-              </div>
-              <Badge variant="outline" className="text-sm md:text-base px-3 py-1">
-                Período da {boletim.periodo === "manha" ? "Manhã" : "Tarde"}
-              </Badge>
+        <div className="flex flex-col items-center justify-center mb-6">
+          <div className="flex items-center justify-center gap-10 mb-6 items-center">
+            <img src="https://elcbodhxzvoqpzamgown.supabase.co/storage/v1/object/public/public-assets/Logo%20AVIBAQ.png" alt="Logo AVIBAQ" style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', background: '#fff' }} />
+            <h2 className="text-2xl font-bold text-gray-900 whitespace-nowrap flex items-center leading-tight mt-1" style={{lineHeight: 1.1, letterSpacing: 0}}>Boletim Meteorológico - AVIBAQ</h2>
+          </div>
+          <div className="flex items-center gap-6 text-base text-gray-600 mb-2 items-center">
+            <div className="flex items-center gap-2 items-center">
+              <Calendar className="w-7 h-7" />
+              <span className="text-2xl font-bold text-gray-900">{boletim.data.split('-').reverse().join('/')}</span>
             </div>
+            <Badge variant="outline" className="text-base px-3 py-1">
+              Período da {boletim.periodo === "manha" ? "Manhã" : "Tarde"}
+            </Badge>
           </div>
         </div>
       </CardHeader>
 
       <CardContent className="p-0">
         {/* Faixa da Bandeira */}
-        <div className={`${bandeiraConfig.color} p-4 text-sm font-semibold tracking-wide text-white uppercase transition-colors duration-300 rounded-t-xl flex items-center justify-center`}>
+        <div className={`${bandeiraConfig.color} p-4 text-sm font-semibold tracking-wide text-white uppercase transition-colors duration-300 rounded-t-xl flex items-center justify-center animate-[slideIn_0.4s_ease-in-out]`}>
           <Icon className="w-6 h-6 mr-2" />
           <span>{bandeiraConfig.text}</span>
         </div>
@@ -271,7 +218,7 @@ export const BoletimCard = ({ boletim }: BoletimCardProps) => {
                       src={u}
                       alt="Foto do boletim"
                       loading="lazy"
-                      className="rounded-lg shadow object-cover w-full h-40 cursor-pointer"
+                      className="rounded-lg shadow object-cover w-full h-40 cursor-pointer transition-transform duration-200 hover:scale-105"
                       onClick={() => setLightboxIdx(idx)}
                     />
                   ))}
@@ -283,7 +230,7 @@ export const BoletimCard = ({ boletim }: BoletimCardProps) => {
                       src={u}
                       alt="Foto do boletim"
                       loading="lazy"
-                      className="rounded-lg shadow object-cover w-[180px] h-[120px] flex-shrink-0 snap-center cursor-pointer"
+                      className="rounded-lg shadow object-cover w-[180px] h-[120px] flex-shrink-0 snap-center cursor-pointer transition-transform duration-200 hover:scale-105"
                       onClick={() => setLightboxIdx(idx)}
                     />
                   ))}
