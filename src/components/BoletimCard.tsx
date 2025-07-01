@@ -175,7 +175,7 @@ export const BoletimCard = ({ boletim }: BoletimCardProps) => {
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-3 text-gray-900">Motivo:</h3>
             <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-gray-800 leading-relaxed">{boletim.motivo}</p>
+              <p className="text-gray-800 leading-relaxed" style={{ whiteSpace: 'pre-line' }}>{boletim.motivo}</p>
             </div>
           </div>
 
