@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -33,6 +32,17 @@ export const AssinantesForm = () => {
       return;
     }
 
+    // Validação de e-mail simples
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast({
+        title: "E-mail inválido",
+        description: "Digite um e-mail válido.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsLoading(true);
     
     try {
@@ -58,11 +68,22 @@ export const AssinantesForm = () => {
           throw error;
         }
       } else {
+        // Chamar a Edge Function para enviar o e-mail de confirmação
+        await fetch('https://elcbodhxzvoqpzamgown.functions.supabase.co/send-confirmation-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: formData.email,
+            nome: formData.nome,
+            token: tokenConfirmacao
+          })
+        });
+
         setSuccess(true);
         setFormData({ nome: "", email: "", ehPiloto: false, aceitouTermos: false });
         toast({
           title: "Cadastro realizado!",
-          description: "Verifique seu e-mail para confirmar a inscrição.",
+          description: "Você começará a receber os boletins por e-mail.",
         });
       }
     } catch (error) {
@@ -84,7 +105,7 @@ export const AssinantesForm = () => {
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Cadastro Realizado!</h3>
           <p className="text-gray-600 mb-4">
-            Enviamos um e-mail de confirmação para você. Clique no link para ativar sua inscrição.
+            Você começará a receber os boletins por e-mail. Caso não queira mais receber, utilize o link de descadastro presente em todos os e-mails.
           </p>
           <Button onClick={() => setSuccess(false)} variant="outline">
             Fazer Novo Cadastro

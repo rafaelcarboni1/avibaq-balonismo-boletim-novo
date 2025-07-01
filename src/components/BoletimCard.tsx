@@ -1,9 +1,12 @@
-
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Download, Volume2, Calendar, AlertTriangle, CheckCircle, Clock } from "lucide-react";
-import { useState } from "react";
+import { useState, useRef } from "react";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import { useNavigate } from "react-router-dom";
+import html2canvas from "html2canvas";
 
 type BandeiraType = "verde" | "amarela" | "vermelha";
 type StatusVoo = "liberado" | "em_avaliacao" | "cancelado";
@@ -19,6 +22,8 @@ interface BoletimData {
   audio_url?: string;
   fotos?: string[];
   publicado_em?: string;
+  audios_urls?: string[];
+  fotos_urls?: string[];
 }
 
 interface BoletimCardProps {
@@ -53,6 +58,8 @@ const getBandeiraConfig = (bandeira: BandeiraType) => {
 
 export const BoletimCard = ({ boletim }: BoletimCardProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
+  const navigate = useNavigate();
+  const cardRef = useRef<HTMLDivElement>(null);
 
   if (!boletim) {
     return (
@@ -76,23 +83,85 @@ export const BoletimCard = ({ boletim }: BoletimCardProps) => {
   const bandeiraConfig = getBandeiraConfig(boletim.bandeira);
   const Icon = bandeiraConfig.icon;
   
+  function handleDownloadPDF() {
+    if (!boletim) return;
+    const doc = new jsPDF();
+    doc.setFontSize(18);
+    doc.text("Boletim Meteorológico - AVIBAQ", 14, 18);
+    doc.setFontSize(12);
+    doc.text(`Data: ${boletim.data.split('-').reverse().join('/')} - Período: ${boletim.periodo === 'manha' ? 'Manhã' : 'Tarde'}`, 14, 30);
+    doc.text(`Bandeira: ${boletim.bandeira.toUpperCase()}`, 14, 38);
+    doc.text(`Status: ${boletim.titulo_curto}`, 14, 46);
+    doc.text("Motivo:", 14, 56);
+    doc.setFontSize(11);
+    doc.text(boletim.motivo, 14, 64, { maxWidth: 180 });
+    if (boletim.fotos_urls && boletim.fotos_urls.length > 0) {
+      doc.setFontSize(12);
+      doc.text("Fotos anexadas:", 14, 80);
+      boletim.fotos_urls.forEach((url, idx) => {
+        doc.text(`- ${url}`, 18, 88 + idx * 8, { maxWidth: 180 });
+      });
+    }
+    if (boletim.audios_urls && boletim.audios_urls.length > 0) {
+      doc.setFontSize(12);
+      const y = 88 + (boletim.fotos_urls?.length || 0) * 8 + 8;
+      doc.text("Áudios anexados:", 14, y);
+      boletim.audios_urls.forEach((url, idx) => {
+        doc.text(`- ${url}`, 18, y + 8 + idx * 8, { maxWidth: 180 });
+      });
+    }
+    doc.save(`Boletim_AVIBAQ_${boletim.data.split('-').reverse().join('_')}_${boletim.periodo}.pdf`);
+  }
+
+  async function handleDownloadImage() {
+    if (!cardRef.current) return;
+    // Esconde os botões temporariamente
+    const btns = cardRef.current.querySelector('.no-print') as HTMLElement;
+    const originalDisplay = btns?.style.display;
+    if (btns) btns.style.display = 'none';
+    // Aguarda o reflow
+    await new Promise(r => setTimeout(r, 50));
+    const canvas = await html2canvas(cardRef.current, { backgroundColor: '#f8fafc', scale: 2, useCORS: true });
+    if (btns) btns.style.display = originalDisplay || '';
+    const link = document.createElement('a');
+    link.download = `Boletim_AVIBAQ_${boletim.data.split('-').reverse().join('_')}_${boletim.periodo}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  }
+
+  async function handleDownloadAudio(url: string, idx: number) {
+    if (!url) return;
+    const [ano, mes, dia] = boletim.data.split('-');
+    const dataFormatada = `${dia}-${mes}-${ano.slice(2)}`;
+    const fileName = `Boletim-dia-${dataFormatada}-audio-${idx + 1}.mp3`;
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = fileName;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+
   return (
-    <Card className="w-full max-w-4xl mx-auto bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200">
-      <CardHeader className="text-center bg-white/80 rounded-t-lg">
-        <div className="flex items-center justify-center space-x-3 mb-2">
-          <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
-            <span className="text-white font-bold text-lg">A</span>
+    <div ref={cardRef} className="w-full max-w-4xl mx-auto bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 font-sans tracking-normal">
+      <CardHeader className="text-center bg-white/80 rounded-t-lg pb-0">
+        <div className="flex flex-col items-center justify-center mb-6">
+          <div className="flex items-center justify-center gap-10 mb-6 items-center">
+            <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
+              <span className="text-white font-bold text-3xl">A</span>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 whitespace-nowrap flex items-center leading-tight mt-1" style={{lineHeight: 1.1, letterSpacing: 0}}>Boletim Meteorológico - AVIBAQ</h2>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900">Boletim Meteorológico - AVIBAQ</h2>
-        </div>
-        <div className="flex items-center justify-center space-x-4 text-sm text-gray-600">
-          <div className="flex items-center space-x-1">
-            <Calendar className="w-4 h-4" />
-            <span>{new Date(boletim.data).toLocaleDateString('pt-BR')}</span>
+          <div className="flex items-center gap-6 text-base text-gray-600 mb-2 items-center">
+            <div className="flex items-center gap-2 items-center">
+              <Calendar className="w-7 h-7" />
+              <span className="text-2xl font-bold text-gray-900">{boletim.data.split('-').reverse().join('/')}</span>
+            </div>
+            <Badge variant="outline" className="text-base px-3 py-1">
+              Período da {boletim.periodo === "manha" ? "Manhã" : "Tarde"}
+            </Badge>
           </div>
-          <Badge variant="outline">
-            Período da {boletim.periodo === "manha" ? "Manhã" : "Tarde"}
-          </Badge>
         </div>
       </CardHeader>
 
@@ -118,17 +187,10 @@ export const BoletimCard = ({ boletim }: BoletimCardProps) => {
           <div className="space-y-4">
             {boletim.audio_url && (
               <div className="bg-blue-50 p-4 rounded-lg">
-                <div className="flex items-center justify-between">
+                <div className="flex items-center">
                   <span className="text-sm font-medium text-blue-900">Áudio do Boletim</span>
-                  <Button
-                    size="sm"
-                    variant={isPlaying ? "destructive" : "default"}
-                    onClick={() => setIsPlaying(!isPlaying)}
-                  >
-                    <Volume2 className="w-4 h-4 mr-2" />
-                    {isPlaying ? "Pausar" : "Reproduzir"}
-                  </Button>
                 </div>
+                <audio controls src={boletim.audio_url} className="w-full mt-2" />
               </div>
             )}
 
@@ -148,21 +210,44 @@ export const BoletimCard = ({ boletim }: BoletimCardProps) => {
                 </div>
               </div>
             )}
+
+            {/* Fotos anexadas (fotos_urls) */}
+            {boletim.fotos_urls && boletim.fotos_urls.length > 0 && (
+              <div>
+                <h4 className="text-sm font-medium text-gray-700 mb-2">Fotos Anexadas</h4>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                  {boletim.fotos_urls.map((u: string, idx: number) => (
+                    <div key={u} className="aspect-square bg-gray-200 rounded-lg overflow-hidden">
+                      <img src={u} alt="Foto do boletim" loading="lazy" className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Botões de Ação */}
-          <div className="flex flex-wrap gap-3 mt-6">
-            <Button variant="outline" size="sm">
+          {/* Áudios anexados */}
+          {boletim.audios_urls?.length > 0 && (
+            <div className="my-4 space-y-2">
+              {boletim.audios_urls.map((u: string, idx: number) => (
+                <audio key={u} controls src={u} className="w-full my-2" />
+              ))}
+            </div>
+          )}
+
+          {/* Botões de Ação - não aparecem no print */}
+          <div className="flex flex-wrap gap-3 mt-6 no-print">
+            <Button variant="outline" size="sm" onClick={handleDownloadImage}>
               <Download className="w-4 h-4 mr-2" />
-              Baixar PDF
+              Baixar Imagem
             </Button>
-            {boletim.audio_url && (
-              <Button variant="outline" size="sm">
+            {boletim.audios_urls && boletim.audios_urls.length > 0 && boletim.audios_urls.map((url, idx) => (
+              <Button key={url} variant="outline" size="sm" onClick={() => handleDownloadAudio(url, idx)}>
                 <Volume2 className="w-4 h-4 mr-2" />
-                Ouvir Áudio
+                Baixar Áudio {boletim.audios_urls.length > 1 ? idx + 1 : ''}
               </Button>
-            )}
-            <Button variant="outline" size="sm">
+            ))}
+            <Button variant="outline" size="sm" onClick={() => navigate('/historico')}>
               <Calendar className="w-4 h-4 mr-2" />
               Ver Histórico
             </Button>
@@ -181,6 +266,6 @@ export const BoletimCard = ({ boletim }: BoletimCardProps) => {
           )}
         </div>
       </CardContent>
-    </Card>
+    </div>
   );
 };

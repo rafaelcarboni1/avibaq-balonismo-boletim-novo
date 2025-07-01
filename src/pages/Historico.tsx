@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Header } from "@/components/Layout/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -9,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, Download, Volume2, Filter } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { BoletimCard } from "@/components/BoletimCard";
 
 type BandeiraTipo = Database["public"]["Enums"]["bandeira_tipo"];
 type PeriodoTipo = Database["public"]["Enums"]["periodo_tipo"];
@@ -31,8 +32,8 @@ const Historico = () => {
   const [filtros, setFiltros] = useState({
     dataInicio: "",
     dataFim: "",
-    bandeira: "",
-    periodo: ""
+    bandeira: "todos",
+    periodo: "todos"
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -55,10 +56,10 @@ const Historico = () => {
       if (filtros.dataFim) {
         query = query.lte("data", filtros.dataFim);
       }
-      if (filtros.bandeira) {
+      if (filtros.bandeira && filtros.bandeira !== "todos") {
         query = query.eq("bandeira", filtros.bandeira as BandeiraTipo);
       }
-      if (filtros.periodo) {
+      if (filtros.periodo && filtros.periodo !== "todos") {
         query = query.eq("periodo", filtros.periodo as PeriodoTipo);
       }
 
@@ -85,8 +86,8 @@ const Historico = () => {
     setFiltros({
       dataInicio: "",
       dataFim: "",
-      bandeira: "",
-      periodo: ""
+      bandeira: "todos",
+      periodo: "todos"
     });
     setIsLoading(true);
     fetchBoletins();
@@ -164,7 +165,7 @@ const Historico = () => {
                     <SelectValue placeholder="Todas" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todas</SelectItem>
+                    <SelectItem value="todos">Todas</SelectItem>
                     <SelectItem value="verde">Verde</SelectItem>
                     <SelectItem value="amarela">Amarela</SelectItem>
                     <SelectItem value="vermelha">Vermelha</SelectItem>
@@ -183,7 +184,7 @@ const Historico = () => {
                     <SelectValue placeholder="Todos" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos</SelectItem>
+                    <SelectItem value="todos">Todos</SelectItem>
                     <SelectItem value="manha">Manhã</SelectItem>
                     <SelectItem value="tarde">Tarde</SelectItem>
                   </SelectContent>
@@ -233,7 +234,7 @@ const Historico = () => {
                         <div className="flex items-center space-x-2">
                           <Calendar className="w-4 h-4 text-gray-500" />
                           <span className="font-medium">
-                            {new Date(boletim.data).toLocaleDateString('pt-BR')}
+                            {boletim.data.split('-').reverse().join('/')}
                           </span>
                         </div>
                         <Badge variant="outline">
@@ -267,16 +268,16 @@ const Historico = () => {
                     </div>
                     
                     <div className="flex space-x-2 mt-4 lg:mt-0">
-                      <Button variant="outline" size="sm">
-                        <Download className="w-4 h-4 mr-1" />
-                        PDF
-                      </Button>
-                      {boletim.audio_url && (
-                        <Button variant="outline" size="sm">
-                          <Volume2 className="w-4 h-4 mr-1" />
-                          Áudio
-                        </Button>
-                      )}
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button variant="default" size="sm">
+                            Visualizar Detalhes
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-3xl w-full p-0 bg-transparent border-none shadow-none">
+                          <BoletimCard boletim={boletim as any} />
+                        </DialogContent>
+                      </Dialog>
                     </div>
                   </div>
                 </CardContent>

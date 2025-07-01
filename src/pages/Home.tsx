@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Header } from "@/components/Layout/Header";
 import { BoletimCard } from "@/components/BoletimCard";
@@ -26,20 +25,32 @@ const Home = () => {
   useEffect(() => {
     const fetchBoletimHoje = async () => {
       try {
-        const hoje = new Date().toISOString().split('T')[0];
-        
+        // Ajuste para fuso horário de São Paulo (GMT-3)
+        const tz = 'America/Sao_Paulo';
+        const hoje = new Date();
+        const localDate = hoje.toLocaleDateString('sv-SE', { timeZone: tz }); // 'YYYY-MM-DD'
         const { data, error } = await supabase
           .from("boletins")
           .select("*")
-          .eq("data", hoje)
-          .eq("publicado", true)
+          .eq("data", localDate)
           .order("periodo", { ascending: false })
           .limit(1);
-
         if (error) {
           console.error("Erro ao buscar boletim:", error);
         } else {
           setBoletimHoje(data?.[0] || null);
+        }
+        // Se não houver boletim hoje, buscar o mais recente publicado
+        if (!data || data.length === 0) {
+          const { data: ultimos, error: err2 } = await supabase
+            .from("boletins")
+            .select("*")
+            .order("data", { ascending: false })
+            .order("periodo", { ascending: false })
+            .limit(1);
+          if (!err2 && ultimos && ultimos.length > 0) {
+            setBoletimHoje(ultimos[0]);
+          }
         }
       } catch (error) {
         console.error("Erro ao buscar boletim:", error);
@@ -47,7 +58,6 @@ const Home = () => {
         setIsLoading(false);
       }
     };
-
     fetchBoletimHoje();
   }, []);
 
