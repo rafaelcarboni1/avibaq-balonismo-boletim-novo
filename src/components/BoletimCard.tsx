@@ -145,19 +145,24 @@ export const BoletimCard = ({ boletim }: BoletimCardProps) => {
   return (
     <div ref={cardRef} className="w-full max-w-md md:max-w-4xl mx-auto bg-white rounded-2xl shadow-lg ring-1 ring-black/5 px-3 py-6 md:px-10 md:py-12 font-sans tracking-normal">
       <CardHeader className="text-center bg-white/80 rounded-t-lg pb-0">
-        <div className="flex flex-col items-center justify-center mb-6">
-          <div className="flex items-center justify-center gap-10 mb-6 items-center">
-            <img src="https://elcbodhxzvoqpzamgown.supabase.co/storage/v1/object/public/public-assets/Logo%20AVIBAQ.png" alt="Logo AVIBAQ" style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', background: '#fff' }} />
-            <h2 className="text-2xl font-bold text-gray-900 whitespace-nowrap flex items-center leading-tight mt-1" style={{lineHeight: 1.1, letterSpacing: 0}}>Boletim Meteorológico - AVIBAQ</h2>
-          </div>
-          <div className="flex items-center gap-6 text-base text-gray-600 mb-2 items-center">
-            <div className="flex items-center gap-2 items-center">
-              <Calendar className="w-7 h-7" />
-              <span className="text-2xl font-bold text-gray-900">{boletim.data.split('-').reverse().join('/')}</span>
+        <div className="flex flex-col md:flex-row items-center justify-center mb-6 md:gap-10">
+          {/* Logo em cima no mobile, ao lado no desktop */}
+          <img 
+            src="https://elcbodhxzvoqpzamgown.supabase.co/storage/v1/object/public/public-assets/Logo%20AVIBAQ.png"
+            alt="Logo AVIBAQ"
+            className="w-16 h-16 md:w-16 md:h-16 rounded-full object-cover bg-white mb-2 md:mb-0"
+          />
+          <div className="flex flex-col items-center md:items-start">
+            <h2 className="text-xl md:text-2xl font-bold text-gray-900 whitespace-nowrap flex items-center leading-tight mt-1" style={{lineHeight: 1.1, letterSpacing: 0}}>Boletim Meteorológico - AVIBAQ</h2>
+            <div className="flex items-center gap-4 text-sm md:text-base text-gray-600 mt-2 mb-2">
+              <div className="flex items-center gap-2">
+                <Calendar className="w-6 h-6 md:w-7 md:h-7" />
+                <span className="text-lg md:text-2xl font-bold text-gray-900">{boletim.data.split('-').reverse().join('/')}</span>
+              </div>
+              <Badge variant="outline" className="text-sm md:text-base px-3 py-1">
+                Período da {boletim.periodo === "manha" ? "Manhã" : "Tarde"}
+              </Badge>
             </div>
-            <Badge variant="outline" className="text-base px-3 py-1">
-              Período da {boletim.periodo === "manha" ? "Manhã" : "Tarde"}
-            </Badge>
           </div>
         </div>
       </CardHeader>
