@@ -92,7 +92,7 @@ export default async function handler(req, res) {
 
     try {
       await resend.emails.send({
-        from: 'AVIBAQ <no-reply@avibaq-balonismo-boletim-novo.vercel.app>',
+        from: 'AVIBAQ <no-reply@avibaq.org>',
         to: assinante.email,
         subject: titulo,
         html,
