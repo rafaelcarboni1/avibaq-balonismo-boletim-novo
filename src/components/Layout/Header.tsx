@@ -16,18 +16,10 @@ export const Header = () => {
             </div>
           </div>
           <nav className="hidden md:flex space-x-6">
-            <Button variant="ghost" onClick={() => navigate("/")}>
-              Início
-            </Button>
-            <Button variant="ghost" onClick={() => navigate("/historico")}>
-              Histórico
-            </Button>
-            <Button variant="ghost" onClick={() => navigate("/quem-somos")}>
-              Quem Somos
-            </Button>
-            <Button variant="outline" onClick={() => navigate("/admin")}>
-              Área Admin
-            </Button>
+            <Button variant="ghost" className="hover:text-primary" onClick={() => navigate("/")}>Início</Button>
+            <Button variant="ghost" className="hover:text-primary" onClick={() => navigate("/historico")}>Histórico</Button>
+            <Button variant="ghost" className="hover:text-primary" onClick={() => navigate("/quem-somos")}>Quem Somos</Button>
+            <Button variant="outline" className="hover:text-primary" onClick={() => navigate("/admin")}>Área Admin</Button>
           </nav>
         </div>
       </div>
