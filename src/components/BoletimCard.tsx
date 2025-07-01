@@ -142,7 +142,7 @@ export const BoletimCard = ({ boletim }: BoletimCardProps) => {
   }
 
   return (
-    <div ref={cardRef} className="w-full max-w-4xl mx-auto bg-gradient-to-br from-blue-50 to-blue-100 border-2 border-blue-200 font-sans tracking-normal">
+    <div ref={cardRef} className="w-full max-w-4xl mx-auto bg-white rounded-2xl shadow-lg ring-1 ring-black/5 px-6 py-8 md:px-10 md:py-12 font-sans tracking-normal">
       <CardHeader className="text-center bg-white/80 rounded-t-lg pb-0">
         <div className="flex flex-col items-center justify-center mb-6">
           <div className="flex items-center justify-center gap-10 mb-6 items-center">
@@ -163,11 +163,9 @@ export const BoletimCard = ({ boletim }: BoletimCardProps) => {
 
       <CardContent className="p-0">
         {/* Faixa da Bandeira */}
-        <div className={`${bandeiraConfig.color} text-white p-4`}>
-          <div className="flex items-center justify-center space-x-3">
-            <Icon className="w-6 h-6" />
-            <span className="text-lg font-bold">{bandeiraConfig.text}</span>
-          </div>
+        <div className={`${bandeiraConfig.color} p-4 text-sm font-semibold tracking-wide text-white uppercase transition-colors duration-300 rounded-t-xl flex items-center justify-center`}>
+          <Icon className="w-6 h-6 mr-2" />
+          <span>{bandeiraConfig.text}</span>
         </div>
 
         {/* Conteúdo Principal */}
@@ -175,7 +173,7 @@ export const BoletimCard = ({ boletim }: BoletimCardProps) => {
           <div className="mb-6">
             <h3 className="text-lg font-semibold mb-3 text-gray-900">Motivo:</h3>
             <div className="bg-gray-50 p-4 rounded-lg">
-              <p className="text-gray-800 leading-relaxed" style={{ whiteSpace: 'pre-line' }}>{boletim.motivo}</p>
+              <p className="text-gray-700 leading-relaxed mt-4" style={{ whiteSpace: 'pre-line' }}>{boletim.motivo}</p>
             </div>
           </div>
 
