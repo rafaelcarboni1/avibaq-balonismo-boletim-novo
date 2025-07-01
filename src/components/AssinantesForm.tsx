@@ -86,7 +86,7 @@ export const AssinantesForm = () => {
 
   if (success) {
     return (
-      <Card className="w-full max-w-md mx-auto">
+      <Card className="w-full max-w-md mx-auto bg-white rounded-xl shadow-md px-8 py-8">
         <CardContent className="p-6 text-center">
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Cadastro Realizado!</h3>
@@ -102,7 +102,7 @@ export const AssinantesForm = () => {
   }
 
   return (
-    <Card className="w-full max-w-md mx-auto">
+    <Card className="w-full max-w-md mx-auto bg-white rounded-xl shadow-md px-8 py-8">
       <CardHeader className="text-center">
         <div className="flex items-center justify-center space-x-2 mb-2">
           <Mail className="w-6 h-6 text-blue-600" />
@@ -114,7 +114,7 @@ export const AssinantesForm = () => {
       </CardHeader>
       
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <Label htmlFor="nome">Nome Completo *</Label>
             <Input
@@ -124,6 +124,7 @@ export const AssinantesForm = () => {
               onChange={(e) => setFormData(prev => ({ ...prev, nome: e.target.value }))}
               required
               placeholder="Seu nome completo"
+              className="focus:ring-primary focus:border-primary"
             />
           </div>
 
@@ -136,6 +137,7 @@ export const AssinantesForm = () => {
               onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
               required
               placeholder="seu@email.com"
+              className="focus:ring-primary focus:border-primary"
             />
           </div>
 
