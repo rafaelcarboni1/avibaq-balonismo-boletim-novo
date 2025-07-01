@@ -20,6 +20,7 @@ export default function Descadastrar() {
       .eq("token_descadastro", token)
       .select()
       .then(({ error, data }) => {
+        console.log("Descadastro:", { error, data, token });
         if (error || !data || data.length === 0) setStatus("fail");
         else setStatus("ok");
       });
