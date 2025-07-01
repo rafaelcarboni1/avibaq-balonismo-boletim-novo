@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -10,9 +9,7 @@ export const Header = () => {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-lg">A</span>
-            </div>
+            <img src="https://elcbodhxzvoqpzamgown.supabase.co/storage/v1/object/public/public-assets/Logo%20AVIBAQ.png" alt="Logo AVIBAQ" style={{ width: 48, height: 48, borderRadius: '50%', objectFit: 'cover', background: '#fff' }} />
             <div>
               <h1 className="text-xl font-bold text-gray-900">AVIBAQ</h1>
               <p className="text-sm text-gray-600">Associação de Pilotos e Empresas de Balonismo</p>
