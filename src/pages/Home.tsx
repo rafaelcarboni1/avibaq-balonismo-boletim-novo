@@ -23,33 +23,50 @@ const Home = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const fetchBoletimHoje = async () => {
+    const fetchBoletim = async () => {
       try {
         // Ajuste para fuso horário de São Paulo (GMT-3)
         const tz = 'America/Sao_Paulo';
         const hoje = new Date();
         const localDate = hoje.toLocaleDateString('sv-SE', { timeZone: tz }); // 'YYYY-MM-DD'
-        const { data, error } = await supabase
+        // 1. Buscar boletim de hoje
+        let { data, error } = await supabase
           .from("boletins")
           .select("*")
           .eq("data", localDate)
           .order("periodo", { ascending: false })
           .limit(1);
         if (error) {
-          console.error("Erro ao buscar boletim:", error);
-        } else {
-          setBoletimHoje(data?.[0] || null);
+          console.error("Erro ao buscar boletim de hoje:", error);
         }
-        // Se não houver boletim hoje, buscar o mais recente publicado
-        if (!data || data.length === 0) {
-          const { data: ultimos, error: err2 } = await supabase
+        if (data && data.length > 0) {
+          setBoletimHoje(data[0]);
+        } else {
+          // 2. Buscar boletim do próximo dia (amanhã)
+          const amanha = new Date(hoje.getTime() + 24 * 60 * 60 * 1000);
+          const localAmanha = amanha.toLocaleDateString('sv-SE', { timeZone: tz });
+          const { data: dataAmanha, error: errorAmanha } = await supabase
             .from("boletins")
             .select("*")
-            .order("data", { ascending: false })
+            .eq("data", localAmanha)
             .order("periodo", { ascending: false })
             .limit(1);
-          if (!err2 && ultimos && ultimos.length > 0) {
-            setBoletimHoje(ultimos[0]);
+          if (errorAmanha) {
+            console.error("Erro ao buscar boletim de amanhã:", errorAmanha);
+          }
+          if (dataAmanha && dataAmanha.length > 0) {
+            setBoletimHoje(dataAmanha[0]);
+          } else {
+            // 3. Buscar o mais recente do passado
+            const { data: ultimos, error: err2 } = await supabase
+              .from("boletins")
+              .select("*")
+              .order("data", { ascending: false })
+              .order("periodo", { ascending: false })
+              .limit(1);
+            if (!err2 && ultimos && ultimos.length > 0) {
+              setBoletimHoje(ultimos[0]);
+            }
           }
         }
       } catch (error) {
@@ -58,7 +75,7 @@ const Home = () => {
         setIsLoading(false);
       }
     };
-    fetchBoletimHoje();
+    fetchBoletim();
   }, []);
 
   return (
