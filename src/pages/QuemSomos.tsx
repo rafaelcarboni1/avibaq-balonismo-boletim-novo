@@ -1,3 +1,4 @@
+// Alteração forçada para commit e deploy
 import { Header } from "@/components/Layout/Header";
 
 export default function QuemSomos() {
