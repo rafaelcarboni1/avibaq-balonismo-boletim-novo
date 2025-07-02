@@ -119,20 +119,8 @@ const Home = () => {
           )}
         </section>
 
-        {/* Formulário de Cadastro */}
-        <section className="mb-12">
-          <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Não Perca Nenhum Boletim</h2>
-            <p className="text-gray-600">
-              Receba as condições meteorológicas diretamente no seu e-mail
-            </p>
-          </div>
-          
-          <AssinantesForm />
-        </section>
-
         {/* Links Úteis */}
-        <section className="grid md:grid-cols-3 gap-6">
+        <section className="grid md:grid-cols-3 gap-6 mb-12">
           <Card className="text-center">
             <CardContent className="p-6">
               <h3 className="text-lg font-semibold mb-2">Histórico de Boletins</h3>
@@ -168,6 +156,18 @@ const Home = () => {
               </a>
             </CardContent>
           </Card>
+        </section>
+
+        {/* Formulário de Cadastro */}
+        <section className="mb-12">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Não Perca Nenhum Boletim</h2>
+            <p className="text-gray-600">
+              Receba as condições meteorológicas diretamente no seu e-mail
+            </p>
+          </div>
+          
+          <AssinantesForm />
         </section>
       </main>
 
