@@ -1,71 +1,78 @@
+import { Header } from "@/components/Layout/Header";
+
 export default function QuemSomos() {
   return (
-    <article className="prose prose-slate max-w-4xl mx-auto px-4 sm:px-0">
-      <h1 className="text-center">Quem Somos</h1>
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <main className="py-10">
+        <article className="prose prose-slate max-w-4xl mx-auto px-4 sm:px-0 prose-p:mb-6 prose-h2:mt-12 prose-h2:mb-4 prose-h1:mb-8 prose-ul:mb-6 prose-table:my-8 prose-blockquote:my-8">
+          <h1 className="text-center">Quem Somos</h1>
 
-      <h2>Nossa História</h2>
-      <p>Fundada em <strong>2021</strong>, a <strong>AVIBAQ – Associação de Pilotos e Empresas de Balonismo de Praia Grande/SC</strong> nasceu da união de pilotos, instrutores e operadores de balões que atuam no principal polo de balonismo do Sul do Brasil. O objetivo era criar um canal oficial para divulgar boletins meteorológicos confiáveis, dialogar com o poder público municipal e padronizar procedimentos de segurança para todos os voos na região.</p>
+          <h2>Nossa História</h2>
+          <p>Fundada em <strong>2021</strong>, a <strong>AVIBAQ – Associação de Pilotos e Empresas de Balonismo de Praia Grande/SC</strong> nasceu da união de pilotos, instrutores e operadores de balões que atuam no principal polo de balonismo do Sul do Brasil. O objetivo era criar um canal oficial para divulgar boletins meteorológicos confiáveis, dialogar com o poder público municipal e padronizar procedimentos de segurança para todos os voos na região.</p>
 
-      <h2>Missão</h2>
-      <blockquote>
-        <strong>Promover a segurança e a excelência do balonismo em Praia Grande/SC, fornecendo informação técnica de qualidade, <em>implementando regras e protocolos de segurança cada vez mais aprimorados</em> e representando os interesses coletivos de pilotos e empresas.</strong>
-      </blockquote>
+          <h2>Missão</h2>
+          <blockquote>
+            <strong>Promover a segurança e a excelência do balonismo em Praia Grande/SC, fornecendo informação técnica de qualidade, <em>implementando regras e protocolos de segurança cada vez mais aprimorados</em> e representando os interesses coletivos de pilotos e empresas.</strong>
+          </blockquote>
 
-      <h2>Visão</h2>
-      <p>Ser reconhecida, até 2030, como a principal referência regional em padronização operacional, treinamento e divulgação de informações meteorológicas para o voo de balão.</p>
+          <h2>Visão</h2>
+          <p>Ser reconhecida, até 2030, como a principal referência regional em padronização operacional, treinamento e divulgação de informações meteorológicas para o voo de balão.</p>
 
-      <h2>Valores</h2>
-      <div className="overflow-x-auto">
-      <table>
-        <thead>
-          <tr><th>Valor</th><th>O que significa para nós</th></tr>
-        </thead>
-        <tbody>
-          <tr><td><strong>Segurança</strong></td><td>Nenhum voo vale um risco desnecessário.</td></tr>
-          <tr><td><strong>Transparência</strong></td><td>Boletins e decisões sempre publicados de forma pública e justificada.</td></tr>
-          <tr><td><strong>Colaboração</strong></td><td>Pilotos, meteorologistas e poder público trabalhando juntos.</td></tr>
-          <tr><td><strong>Sustentabilidade</strong></td><td>Operar com respeito ao meio ambiente e às comunidades sobrevoadas.</td></tr>
-        </tbody>
-      </table>
-      </div>
+          <h2>Valores</h2>
+          <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr><th>Valor</th><th>O que significa para nós</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Segurança</strong></td><td>Nenhum voo vale um risco desnecessário.</td></tr>
+              <tr><td><strong>Transparência</strong></td><td>Boletins e decisões sempre publicados de forma pública e justificada.</td></tr>
+              <tr><td><strong>Colaboração</strong></td><td>Pilotos, meteorologistas e poder público trabalhando juntos.</td></tr>
+              <tr><td><strong>Sustentabilidade</strong></td><td>Operar com respeito ao meio ambiente e às comunidades sobrevoadas.</td></tr>
+            </tbody>
+          </table>
+          </div>
 
-      <h2>O que fazemos</h2>
-      <ul>
-        <li><strong>Boletim Meteorológico Diário</strong> – publicado às 19 h com bandeira Verde, Amarela ou Vermelha, válido exclusivamente para Praia Grande/SC e entorno.</li>
-        <li><strong>Comissão de Meteorologia e Segurança</strong> – grupo de especialistas que analisa dados de vento, visibilidade e teto de nuvem na região.</li>
-        <li><strong>Treinamentos</strong> – workshops semestrais de segurança operacional, meteorologia aplicada e legislação aeronáutica.</li>
-        <li><strong>Protocolos de Segurança</strong> – desenvolvimento contínuo de SOPs, check-lists e regras operacionais alinhados às melhores práticas internacionais de balonismo.</li>
-        <li><strong>Representação Setorial</strong> – diálogo com Prefeitura, Defesa Civil, imprensa, , ANAC e órgãos de turismo locais.</li>
-      </ul>
+          <h2>O que fazemos</h2>
+          <ul>
+            <li><strong>Boletim Meteorológico Diário</strong> – publicado às 19 h com bandeira Verde, Amarela ou Vermelha, válido exclusivamente para Praia Grande/SC e entorno.</li>
+            <li><strong>Comissão de Meteorologia e Segurança</strong> – grupo de especialistas que analisa dados de vento, visibilidade e teto de nuvem na região.</li>
+            <li><strong>Treinamentos</strong> – workshops semestrais de segurança operacional, meteorologia aplicada e legislação aeronáutica.</li>
+            <li><strong>Protocolos de Segurança</strong> – desenvolvimento contínuo de SOPs, check-lists e regras operacionais alinhados às melhores práticas internacionais de balonismo.</li>
+            <li><strong>Representação Setorial</strong> – diálogo com Prefeitura, Defesa Civil, imprensa, , ANAC e órgãos de turismo locais.</li>
+          </ul>
 
-      <h2>Estrutura Organizacional</h2>
-      <div className="overflow-x-auto">
-      <table>
-        <thead>
-          <tr><th>Cargo</th><th>Responsável</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>Presidente</td><td><strong>Murilo Gonçalves</strong></td></tr>
-          <tr><td>Vice-Presidente</td><td><strong>João Vitor dos Santos Justo</strong></td></tr>
-          <tr><td>Secretário</td><td><strong>Gabriel Ramos</strong></td></tr>
-          <tr><td>Vice Secretário</td><td><strong>João Paulo</strong></td></tr>
-          <tr><td>Tesoureiro</td><td><strong>Daniel Zeferino Carlos</strong></td></tr>
-          <tr><td>Vice Tesoureiro</td><td><strong>Rodrigo Peretto</strong></td></tr>
-          <tr><td>Conselho Fiscal 1</td><td>Gabriel Rocha</td></tr>
-          <tr><td>Conselho Fiscal 2</td><td>Rafael Cirimbelli da Luz</td></tr>
-        </tbody>
-      </table>
-      </div>
+          <h2>Estrutura Organizacional</h2>
+          <div className="overflow-x-auto">
+          <table>
+            <thead>
+              <tr><th>Cargo</th><th>Responsável</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Presidente</td><td><strong>Murilo Gonçalves</strong></td></tr>
+              <tr><td>Vice-Presidente</td><td><strong>João Vitor dos Santos Justo</strong></td></tr>
+              <tr><td>Secretário</td><td><strong>Gabriel Ramos</strong></td></tr>
+              <tr><td>Vice Secretário</td><td><strong>João Paulo</strong></td></tr>
+              <tr><td>Tesoureiro</td><td><strong>Daniel Zeferino Carlos</strong></td></tr>
+              <tr><td>Vice Tesoureiro</td><td><strong>Rodrigo Peretto</strong></td></tr>
+              <tr><td>Conselho Fiscal 1</td><td>Gabriel Rocha</td></tr>
+              <tr><td>Conselho Fiscal 2</td><td>Rafael Cirimbelli da Luz</td></tr>
+            </tbody>
+          </table>
+          </div>
 
-      <h2>Associe-se</h2>
-      <p>Pilotos comerciais, instrutores e empresas de balonismo que operam em Praia Grande/SC podem solicitar filiação enviando e-mail para <strong>contato@avibaq.org</strong>. Os associados têm acesso a treinamentos exclusivos, material didático e participação nas reuniões da entidade.</p>
+          <h2>Associe-se</h2>
+          <p>Pilotos comerciais, instrutores e empresas de balonismo que operam em Praia Grande/SC podem solicitar filiação enviando e-mail para <strong>contato@avibaq.org</strong>. Os associados têm acesso a treinamentos exclusivos, material didático e participação nas reuniões da entidade.</p>
 
-      <h2>Contato</h2>
-      <ul>
-        <li><strong>E-mail geral:</strong> contato@avibaq.org</li>
-        <li><strong>Telefone/WhatsApp:</strong> (48) 99985-1133</li>
-        <li><strong>Endereço:</strong> Praia Grande/SC – 88990-000</li>
-      </ul>
-    </article>
+          <h2>Contato</h2>
+          <ul>
+            <li><strong>E-mail geral:</strong> contato@avibaq.org</li>
+            <li><strong>Telefone/WhatsApp:</strong> (48) 99985-1133</li>
+            <li><strong>Endereço:</strong> Praia Grande/SC – 88990-000</li>
+          </ul>
+        </article>
+      </main>
+    </div>
   );
 } 
