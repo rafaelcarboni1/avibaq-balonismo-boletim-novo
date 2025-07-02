@@ -107,3 +107,7 @@ All colors MUST be HSL.
 html {
   scroll-behavior: smooth;
 }
+
+article table { @apply w-full text-sm border-collapse; }
+article th { @apply bg-gray-100 font-medium px-3 py-2; }
+article td { @apply border-t px-3 py-2; }
