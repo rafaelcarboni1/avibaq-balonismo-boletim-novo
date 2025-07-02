@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Historico from "./pages/Historico";
-import QuemSomos from "./pages/QuemSomos";
+import QuemSomos from "./pages/quem-somos.mdx";
 import PoliticaPrivacidade from "./pages/PoliticaPrivacidade";
 import Acessibilidade from "./pages/Acessibilidade";
 import NotFound from "./pages/NotFound";
