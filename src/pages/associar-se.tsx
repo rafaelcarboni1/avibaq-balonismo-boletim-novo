@@ -1,3 +1,4 @@
+// Alteração forçada para commit e deploy
 import { useState } from "react";
 
 const tipos = [
