@@ -8,7 +8,7 @@ export default function QuemSomos() {
       <main className="py-10">
         <article
           id="about-body"
-          className="prose prose-slate max-w-4xl mx-auto space-y-6 [&_h2]:mt-10 [&_h2]:mb-4 [&_h3]:mt-8 [&_h3]:mb-3"
+          className="prose prose-slate max-w-4xl mx-auto px-4 sm:px-0 space-y-6 [&_h2]:mt-10 [&_h2]:mb-4 [&_h3]:mt-8 [&_h3]:mb-3"
         >
           <h1 className="text-center">Quem Somos</h1>
 
