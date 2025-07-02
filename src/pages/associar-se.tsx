@@ -16,6 +16,7 @@ export default function AssociarSe() {
     observacoes: "",
     cpf: "",
     cnpj: "",
+    nome_empresa: "",
     rbac103: "",
     rbac91: "",
     qtd_baloes: "",
@@ -46,6 +47,7 @@ export default function AssociarSe() {
       if (!form.rbac103 && !form.rbac91) return "Preencha pelo menos um dos campos: RBAC 103 ou RBAC 91.";
     }
     if (tipo === "agencia") {
+      if (!form.nome_empresa) return "Informe o nome da empresa.";
       if (!form.cnpj) return "Informe o CNPJ.";
       if (!form.qtd_baloes) return "Informe o número de balões.";
     }
@@ -136,6 +138,10 @@ export default function AssociarSe() {
             )}
             {tipo === "agencia" && (
               <>
+                <div>
+                  <label className="block font-medium mb-1">Nome da Empresa *</label>
+                  <input name="nome_empresa" value={form.nome_empresa} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" required />
+                </div>
                 <div>
                   <label className="block font-medium mb-1">CNPJ *</label>
                   <input name="cnpj" value={form.cnpj} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" required />
