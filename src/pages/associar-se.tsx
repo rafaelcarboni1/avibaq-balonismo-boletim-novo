@@ -195,6 +195,18 @@ export default function AssociarSe() {
             <p className="text-center text-gray-600 mb-6">
               Investimento: taxa de inscrição única <b>R$ 50</b> + mensalidade <b>R$ 50</b>.
             </p>
+            <div className="mb-4 bg-gray-50 border border-gray-200 rounded-lg p-4 text-left">
+              <p className="font-semibold mb-2 text-gray-700">Dados para o pagamento da taxa de inscrição:</p>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="font-medium">Pix</span>
+                <span className="bg-gray-100 px-2 py-1 rounded text-sm select-all" id="pix-chave">999.999.999-99</span>
+                <button type="button" className="ml-2 text-primary underline text-sm" onClick={() => {navigator.clipboard.writeText('999.999.999-99')}}>
+                  Copiar chave
+                </button>
+              </div>
+              <div className="text-sm text-gray-600 mb-1">Nome: <span className="font-medium">Teste</span></div>
+              <div className="text-sm text-gray-600">Após o pagamento, anexe o comprovante abaixo.</div>
+            </div>
             <div>
               <label className="block font-medium mb-1">Comprovante de pagamento *</label>
               <input
