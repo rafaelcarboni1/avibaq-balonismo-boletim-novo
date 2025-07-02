@@ -83,16 +83,16 @@ export default function AssociarSe() {
           <form className="space-y-5" onSubmit={handleNext}>
             <div>
               <label className="block font-medium mb-1">Nome completo *</label>
-              <input name="nome_completo" value={form.nome_completo} onChange={handleChange} className="input w-full" required />
+              <input name="nome_completo" value={form.nome_completo} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" required />
             </div>
             <div className="flex gap-4">
               <div className="flex-1">
                 <label className="block font-medium mb-1">E-mail *</label>
-                <input name="email" type="email" value={form.email} onChange={handleChange} className="input w-full" required />
+                <input name="email" type="email" value={form.email} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" required />
               </div>
               <div className="flex-1">
                 <label className="block font-medium mb-1">Telefone *</label>
-                <input name="telefone" value={form.telefone} onChange={handleChange} className="input w-full" required />
+                <input name="telefone" value={form.telefone} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" required />
               </div>
             </div>
             <div>
@@ -116,21 +116,21 @@ export default function AssociarSe() {
               <>
                 <div>
                   <label className="block font-medium mb-1">CPF *</label>
-                  <input name="cpf" value={form.cpf} onChange={handleChange} className="input w-full" required />
+                  <input name="cpf" value={form.cpf} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" required />
                 </div>
                 <div className="flex gap-4">
                   <div className="flex-1">
                     <label className="block font-medium mb-1">RBAC 103</label>
-                    <input name="rbac103" value={form.rbac103} onChange={handleChange} className="input w-full" />
+                    <input name="rbac103" value={form.rbac103} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" />
                   </div>
                   <div className="flex-1">
                     <label className="block font-medium mb-1">RBAC 91</label>
-                    <input name="rbac91" value={form.rbac91} onChange={handleChange} className="input w-full" />
+                    <input name="rbac91" value={form.rbac91} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" />
                   </div>
                 </div>
                 <div>
                   <label className="block font-medium mb-1">Observações</label>
-                  <textarea name="observacoes" value={form.observacoes} onChange={handleChange} className="input w-full" rows={2} />
+                  <textarea name="observacoes" value={form.observacoes} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" rows={2} />
                 </div>
               </>
             )}
@@ -138,21 +138,21 @@ export default function AssociarSe() {
               <>
                 <div>
                   <label className="block font-medium mb-1">CNPJ *</label>
-                  <input name="cnpj" value={form.cnpj} onChange={handleChange} className="input w-full" required />
+                  <input name="cnpj" value={form.cnpj} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" required />
                 </div>
                 <div className="flex gap-4">
                   <div className="flex-1">
                     <label className="block font-medium mb-1">Nº de balões *</label>
-                    <input name="qtd_baloes" type="number" value={form.qtd_baloes} onChange={handleChange} className="input w-full" required />
+                    <input name="qtd_baloes" type="number" value={form.qtd_baloes} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" required />
                   </div>
                   <div className="flex-1">
                     <label className="block font-medium mb-1">Volumes (m³, separados por vírgula)</label>
-                    <input name="volumes_baloes" value={form.volumes_baloes} onChange={handleChange} className="input w-full" />
+                    <input name="volumes_baloes" value={form.volumes_baloes} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" />
                   </div>
                 </div>
                 <div>
                   <label className="block font-medium mb-1">Observações</label>
-                  <textarea name="observacoes" value={form.observacoes} onChange={handleChange} className="input w-full" rows={2} />
+                  <textarea name="observacoes" value={form.observacoes} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" rows={2} />
                 </div>
               </>
             )}
@@ -178,7 +178,7 @@ export default function AssociarSe() {
                 type="file"
                 accept=".pdf,.jpg,.jpeg,.png"
                 onChange={handleChange}
-                className="input w-full"
+                className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition"
                 required
               />
               <span className="text-xs text-gray-500">PDF, JPG ou PNG até 5MB</span>
