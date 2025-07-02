@@ -1,5 +1,6 @@
 // Alteração forçada para commit e deploy
 import { useState } from "react";
+import { useRouter } from "next/router";
 
 const tipos = [
   { value: "piloto", label: "Piloto" },
@@ -7,6 +8,7 @@ const tipos = [
 ];
 
 export default function AssociarSe() {
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [tipo, setTipo] = useState("piloto");
   const [form, setForm] = useState({
@@ -68,13 +70,29 @@ export default function AssociarSe() {
     setStep(2);
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     const err = validarCamposEtapa2();
     if (err) return setErro(err);
     setErro("");
-    // Aqui vai a integração com a API na próxima etapa
-    alert("Inscrição enviada! (integração na próxima etapa)");
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+      Object.entries(form).forEach(([key, value]) => {
+        if (value) formData.append(key, value);
+      });
+      const res = await fetch("/api/join", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erro ao enviar inscrição");
+      router.push("/inscricao-recebida");
+    } catch (e: any) {
+      setErro(e.message || "Erro inesperado ao enviar inscrição");
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
