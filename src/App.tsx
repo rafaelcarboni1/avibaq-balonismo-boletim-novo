@@ -16,6 +16,7 @@ import AdminLogin from "./pages/AdminLogin";
 import RequireAdmin from "@/components/RequireAdmin";
 import AdminRegister from "./pages/AdminRegister";
 import AssociarSe from "./pages/associar-se";
+import InscricaoRecebida from "./pages/inscricao-recebida";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/historico" element={<Historico />} />
           <Route path="/quem-somos" element={<QuemSomos />} />
           <Route path="/associar-se" element={<AssociarSe />} />
+          <Route path="/inscricao-recebida" element={<InscricaoRecebida />} />
           <Route path="/politica-privacidade" element={<PoliticaPrivacidade />} />
           <Route path="/acessibilidade" element={<Acessibilidade />} />
           <Route path="/descadastrar" element={<Descadastrar />} />
