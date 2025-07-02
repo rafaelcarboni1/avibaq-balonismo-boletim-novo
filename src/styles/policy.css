@@ -1,0 +1,3 @@
+article#policy-body h2 { @apply mt-10 mb-4 text-xl font-semibold; }
+article#policy-body h3 { @apply mt-8 mb-3 text-lg font-medium; }
+article#policy-body p  { @apply mb-4 leading-relaxed; } 

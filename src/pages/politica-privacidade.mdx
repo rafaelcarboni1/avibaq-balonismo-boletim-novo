@@ -1,0 +1,99 @@
+import PageLayout from "@/components/PageLayout";
+import TableOfContents from "@/components/TableOfContents";
+import "@/styles/policy.css";
+
+export const metadata = {
+  title: "Política de Privacidade – AVIBAQ",
+  description: "Saiba como coletamos, usamos e protegemos seus dados",
+};
+
+export default function PoliticaPrivacidade() {
+  return (
+    <PageLayout>
+      {/* Índice automático */}
+      <TableOfContents
+        className="sticky top-24 hidden lg:block float-right w-56 ml-8"
+        minHeadingLevel={2}
+        maxHeadingLevel={3}
+      />
+
+      <article id="policy-body" className="prose policy max-w-4xl mx-auto">
+        {/* --- Conteúdo markdown abaixo --- */}
+        
+<h1 className="text-slate-800 dark:text-slate-100">Política de Privacidade – AVIBAQ</h1>
+
+### 1. Quem somos
+A **AVIBAQ – Associação de Pilotos e Empresas de Balonismo** (CNPJ XX.XXX.XXX/0001-XX) …
+
+### 2. Quais dados coletamos e por quê
+<div className="overflow-x-auto">
+
+| Categoria | Quando é coletado | Finalidade |
+|-----------|-------------------|------------|
+| **Nome** | Cadastro para receber boletim | Personalizar comunicação |
+| **E-mail** | Cadastro ou contato | Envio de boletins / respostas |
+| **Sou piloto?** | Check-box opcional | Segmentar mensagens |
+| **Logs de acesso (IP, navegador)** | Navegação | Segurança e estatísticas |
+| **Cookies essenciais** | Navegação | Manter sessão e preferências |
+| **Cookies analíticos** | Consentimento no banner | Métricas anônimas |
+
+</div>
+<small>*Não coletamos dados sensíveis nem vendemos informações.*</small>
+
+### 3. Base legal de tratamento
+<div className="overflow-x-auto">
+
+| Atividade | Base legal (LGPD) |
+|-----------|------------------|
+| Envio do boletim | Consentimento · art. 7º I |
+| Resposta a contato | Execução de contrato · art. 7º V |
+| Logs de segurança | Legítimo interesse · art. 7º IX |
+
+</div>
+
+### 4. Armazenamento e proteção
+Dados hospedados na **Supabase** (UE) …
+
+### 5. Compartilhamento
+<div className="overflow-x-auto">
+
+| Terceiro | Motivo | País |
+|----------|--------|------|
+| SendGrid | Envio de e-mails | EUA |
+| Supabase | Hospedagem & BD | UE |
+| Plausible | Analytics (opt-in) | UE |
+
+</div>
+
+### 6. Seus direitos
+Você pode confirmar, acessar, corrigir, portar ou excluir seus dados. Escreva para **privacidade@avibaq.org**.
+
+### 7. Retenção
+<div className="overflow-x-auto">
+
+| Dado | Prazo | Exclusão |
+|------|-------|----------|
+| Nome / e-mail | Até opt-out | Imediata |
+| Backups | 30 dias | Rotação |
+| Logs | 6 meses | Rotação |
+
+</div>
+
+### 8. Cookies
+Essenciais (não desativáveis) e analíticos (opt-in no banner).
+
+### 9. Crianças e adolescentes
+Não direcionado a menores de 18 anos; dados identificados serão removidos.
+
+### 10. Alterações
+Publicaremos nova versão com data de revisão; avisaremos assinantes se houver mudanças substanciais.
+
+### 11. Encarregado de dados (DPO)
+> **Rafael Carvalho**  
+> privacidade@avibaq.org  
+> Praia Grande / SC
+
+      </article>
+    </PageLayout>
+  );
+} 
