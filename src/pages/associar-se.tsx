@@ -1,6 +1,6 @@
 // Alteração forçada para commit e deploy
 import { useState } from "react";
-import { useRouter } from "next/router";
+import { useNavigate } from "react-router-dom";
 
 const tipos = [
   { value: "piloto", label: "Piloto" },
@@ -8,7 +8,7 @@ const tipos = [
 ];
 
 export default function AssociarSe() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [tipo, setTipo] = useState("piloto");
   const [form, setForm] = useState({
@@ -87,7 +87,7 @@ export default function AssociarSe() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erro ao enviar inscrição");
-      router.push("/inscricao-recebida");
+      navigate("/inscricao-recebida");
     } catch (e: any) {
       setErro(e.message || "Erro inesperado ao enviar inscrição");
     } finally {
