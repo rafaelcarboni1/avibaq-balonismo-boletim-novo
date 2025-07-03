@@ -182,7 +182,7 @@ const Home = () => {
               {/* Visor PDF responsivo */}
               <div className="aspect-video w-full max-h-[600px] overflow-hidden ring-1 ring-black/5 rounded-lg">
                 <iframe
-                  src="https://elcbodhxzvoqpzamgown.supabase.co/storage/v1/object/public/public-assets/protocolos/AVIBAQ-protocolos-seguranca.pdf#toolbar=0&navpanes=0"
+                  src="https://elcbodhxzvoqpzamgown.supabase.co/storage/v1/object/public/public-assets//AVIBAQ-protocolos-seguranca.pdf#toolbar=0&navpanes=0"
                   title="Protocolos de Segurança"
                   className="w-full h-full"
                 />
@@ -190,7 +190,7 @@ const Home = () => {
 
               <div className="text-center">
                 <a
-                  href="https://elcbodhxzvoqpzamgown.supabase.co/storage/v1/object/public/public-assets/protocolos/AVIBAQ-protocolos-seguranca.pdf"
+                  href="https://elcbodhxzvoqpzamgown.supabase.co/storage/v1/object/public/public-assets//AVIBAQ-protocolos-seguranca.pdf"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary text-white hover:bg-primary2 transition-colors text-sm font-medium"
