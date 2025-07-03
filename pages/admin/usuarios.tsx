@@ -80,7 +80,7 @@ export default function UsuariosAdmin() {
 
   return (
     <ProtectedRoute allowedRoles={["admin"]}>
-      <DashboardLayout>
+      <DashboardLayout title="Usuários do Sistema">
         <div className="max-w-4xl mx-auto mt-8">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-bold">Usuários do Sistema</h1>
