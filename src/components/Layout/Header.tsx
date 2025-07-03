@@ -1,8 +1,9 @@
+import React from "react";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 
 export const Header = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-200">
@@ -16,10 +17,10 @@ export const Header = () => {
             </div>
           </div>
           <nav className="hidden md:flex space-x-6">
-            <Button variant="ghost" className="hover:text-primary" onClick={() => navigate("/")}>Início</Button>
-            <Button variant="ghost" className="hover:text-primary" onClick={() => navigate("/historico")}>Histórico</Button>
-            <Button variant="ghost" className="hover:text-primary" onClick={() => navigate("/quem-somos")}>Quem Somos</Button>
-            <Button variant="outline" className="hover:text-primary" onClick={() => navigate("/admin")}>Área Admin</Button>
+            <Button variant="ghost" className="hover:text-primary" onClick={() => router.push("/")}>Início</Button>
+            <Button variant="ghost" className="hover:text-primary" onClick={() => router.push("/historico")}>Histórico</Button>
+            <Button variant="ghost" className="hover:text-primary" onClick={() => router.push("/quem-somos")}>Quem Somos</Button>
+            <Button variant="outline" className="hover:text-primary" onClick={() => router.push("/admin/login")}>Área Admin</Button>
           </nav>
         </div>
       </div>

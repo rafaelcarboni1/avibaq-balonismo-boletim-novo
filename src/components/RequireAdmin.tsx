@@ -1,28 +1,28 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 import { supabase } from "@/integrations/supabase/client";
 
 export default function RequireAdmin({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useEffect(() => {
     const checkAdmin = async () => {
       const { data: userData } = await supabase.auth.getUser();
       const email = userData?.user?.email;
       if (!email) {
-        navigate("/admin/login");
+        router.push("/admin/login");
         return;
       }
       const { data: adminData } = await supabase
-        .from("usuarios_admin")
+        .from("users")
         .select("email")
         .eq("email", email)
         .single();
       if (!adminData) {
         await supabase.auth.signOut();
-        navigate("/admin/login");
+        router.push("/admin/login");
         return;
       }
       setAuthorized(true);

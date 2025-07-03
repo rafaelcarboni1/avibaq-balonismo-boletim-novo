@@ -1,0 +1,12 @@
+{
+  "/_app": "pages/_app.js",
+  "/_error": "pages/_error.js",
+  "/_document": "pages/_document.js",
+  "/": "pages/index.js",
+  "/404": "pages/404.js",
+  "/admin/login": "pages/admin/login.js",
+  "/membros": "pages/membros.js",
+  "/admin/dashboard": "pages/admin/dashboard.js",
+  "/associar-se": "pages/associar-se.js",
+  "/admin/associados": "pages/admin/associados.js"
+}

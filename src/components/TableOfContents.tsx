@@ -6,7 +6,7 @@ export default function TableOfContents({ className = "", minHeadingLevel = 2, m
     const selector = Array.from({ length: maxHeadingLevel - minHeadingLevel + 1 })
       .map((_, i) => `#policy-body h${i + minHeadingLevel}`)
       .join(",");
-    setHeadings([...document.querySelectorAll(selector)]);
+    setHeadings(Array.from(document.querySelectorAll(selector)));
   }, []);
   return (
     <nav className={className}>
