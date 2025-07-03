@@ -62,7 +62,6 @@ export default function AssociarSe() {
     if (!form.nome_completo || !form.email || !form.telefone) return "Preencha todos os campos obrigatórios.";
     if (tipo === "piloto") {
       if (!form.cpf) return "Informe o CPF.";
-      if (!form.rbac103 && !form.rbac91) return "Preencha pelo menos um dos campos: RBAC 103 ou RBAC 91.";
     }
     if (tipo === "agencia") {
       if (!form.nome_empresa) return "Informe o nome da empresa.";

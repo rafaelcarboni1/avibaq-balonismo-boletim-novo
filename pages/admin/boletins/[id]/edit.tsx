@@ -209,7 +209,7 @@ export default function AdminBoletimEditForm() {
     }
     // Update
     let boletimId = id;
-    const { data: updated, error } = await supabase.from("boletins").update({
+    const updatePrincipalPayload = {
       data: dataDb,
       periodo: periodoDb,
       bandeira: bandeiraDb,
@@ -218,8 +218,11 @@ export default function AdminBoletimEditForm() {
       titulo_curto: form.titulo_curto,
       atualizado_em: new Date().toISOString(),
       publicado: true,
-    }).eq("id", id).select("id").single();
+    };
+    console.log('Payload update principal:', updatePrincipalPayload);
+    const { data: updated, error } = await supabase.from("boletins").update(updatePrincipalPayload).eq("id", id).select("id").single();
     if (error) {
+      console.error("Erro detalhado Supabase:", error);
       toast.error("Erro ao salvar boletim");
       setLoading(false);
       return;
@@ -241,10 +244,15 @@ export default function AdminBoletimEditForm() {
     await deleteFromStorage(fotosToDelete);
     // Atualizar boletim com arrays de URLs
     const updatePayload = {
-      audios_urls: audioUrls,
-      fotos_urls: fotoUrls,
+      audios_urls: Array.isArray(audioUrls) ? audioUrls : [],
+      fotos_urls: Array.isArray(fotoUrls) ? fotoUrls : [],
     };
-    const { data: updateData, error: updateError } = await supabase.from("boletins").update(updatePayload as any).eq("id", boletimId).select("id");
+    console.log('Payload update boletim:', updatePayload);
+    const { data: updateData, error: updateError } = await supabase
+      .from("boletins")
+      .update(updatePayload)
+      .eq("id", boletimId)
+      .select("id");
     if (updateError) {
       console.error("UPDATE boletim error ↴", updateError);
       toast.error(updateError.message + (updateError.details ? `: ${updateError.details}` : ""));

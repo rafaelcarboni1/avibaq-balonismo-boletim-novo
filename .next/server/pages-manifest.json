@@ -2,7 +2,7 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/associar-se": "pages/associar-se.js",
-  "/inscricao-recebida": "pages/inscricao-recebida.js",
-  "/": "pages/index.js"
+  "/admin/boletins/[id]/edit": "pages/admin/boletins/[id]/edit.js",
+  "/admin/usuarios": "pages/admin/usuarios.js",
+  "/admin/boletins": "pages/admin/boletins.js"
 }

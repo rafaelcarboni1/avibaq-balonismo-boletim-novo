@@ -472,9 +472,7 @@ export default function AdminAssociados() {
       <div className="container mx-auto py-8 px-4">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold">Gerenciar Associados</h1>
-          <Button onClick={() => router.push("/admin/boletins")}>
-            Voltar aos Boletins
-          </Button>
+          <Button onClick={() => router.push("/admin/dashboard")}>Voltar ao Dashboard</Button>
         </div>
 
         <Tabs defaultValue="pendentes" className="w-full">
