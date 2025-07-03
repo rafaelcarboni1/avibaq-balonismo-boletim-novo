@@ -170,6 +170,37 @@ const Home = () => {
 
         {/* Vitrine de Associados em Dia */}
         <HomeSectionMembros />
+
+        {/* Protocolos de Segurança – AVIBAQ */}
+        <section className="mt-20">
+          <div className="max-w-5xl mx-auto px-4">
+            <div className="bg-white rounded-2xl shadow-lg ring-1 ring-black/5 px-8 py-10 space-y-6">
+              <h2 className="text-2xl font-semibold text-center">
+                Protocolos de Segurança – AVIBAQ
+              </h2>
+
+              {/* Visor PDF responsivo */}
+              <div className="aspect-video w-full max-h-[600px] overflow-hidden ring-1 ring-black/5 rounded-lg">
+                <iframe
+                  src="https://elcbodhxzvoqpzamgown.supabase.co/storage/v1/object/public/public-assets/protocolos/AVIBAQ-protocolos-seguranca.pdf#toolbar=0&navpanes=0"
+                  title="Protocolos de Segurança"
+                  className="w-full h-full"
+                />
+              </div>
+
+              <div className="text-center">
+                <a
+                  href="https://elcbodhxzvoqpzamgown.supabase.co/storage/v1/object/public/public-assets/protocolos/AVIBAQ-protocolos-seguranca.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-primary text-white hover:bg-primary2 transition-colors text-sm font-medium"
+                >
+                  Baixar PDF
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
 
       {/* Rodapé */}
