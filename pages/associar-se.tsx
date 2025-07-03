@@ -276,44 +276,6 @@ export default function AssociarSe() {
                   </div>
                 </>
               ) : null}
-              {tipo === "piloto" && (
-                <div className="mt-6">
-                  <label className="block font-medium mb-2">Selecione o(s) registro(s) que possui *</label>
-                  <div className="flex gap-4">
-                    <label className="flex items-center gap-2">
-                      <input type="checkbox" checked={rbac103} onChange={e => setRbac103(e.target.checked)} /> RBAC 103
-                    </label>
-                    <label className="flex items-center gap-2">
-                      <input type="checkbox" checked={rbac61} onChange={e => setRbac61(e.target.checked)} /> RBAC 61
-                    </label>
-                  </div>
-                  <div className="text-xs text-gray-500 mt-2">Se possuir ambos, preencha os dois blocos abaixo. Se só possuir um, preencha apenas o correspondente.</div>
-                  <div className="text-xs text-red-500 mt-1">É obrigatório preencher pelo menos um dos dois registros para enviar a inscrição.</div>
-                  {rbac103 && (
-                    <div className="border rounded-lg p-4 mt-4 bg-gray-50">
-                      <div className="font-semibold mb-2">RBAC 103</div>
-                      <div className="mb-2">CPF: <span className="font-mono">{form.cpf}</span></div>
-                      <label className="block font-medium">Data de validade do registro *</label>
-                      <input type="date" className="input" value={validadeRbac103} onChange={e => setValidadeRbac103(e.target.value)} required={rbac103} />
-                      <label className="block font-medium mt-2">Associação responsável pela validação *</label>
-                      <input type="text" className="input" value={associacaoRbac103} onChange={e => setAssociacaoRbac103(e.target.value)} required={rbac103} />
-                    </div>
-                  )}
-                  {rbac61 && (
-                    <div className="border rounded-lg p-4 mt-4 bg-gray-50">
-                      <div className="font-semibold mb-2">RBAC 61</div>
-                      <label className="block font-medium">Código ANAC *</label>
-                      <input type="text" className="input" value={codigoAnac} onChange={e => setCodigoAnac(e.target.value)} required={rbac61} />
-                      <label className="block font-medium mt-2">Validade da habilitação *</label>
-                      <input type="date" className="input" value={validadeHabilitacao} onChange={e => setValidadeHabilitacao(e.target.value)} required={rbac61} />
-                      <label className="block font-medium mt-2">Número da licença *</label>
-                      <input type="text" className="input" value={numeroLicenca} onChange={e => setNumeroLicenca(e.target.value)} required={rbac61} />
-                      <label className="block font-medium mt-2">Validade do Certificado Médico Aeronáutico *</label>
-                      <input type="date" className="input" value={validadeCma} onChange={e => setValidadeCma(e.target.value)} required={rbac61} />
-                    </div>
-                  )}
-                </div>
-              )}
               {erro && <div className="text-red-600 text-sm">{erro}</div>}
               <button
                 type="submit"
