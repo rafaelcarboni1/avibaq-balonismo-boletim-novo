@@ -5,7 +5,7 @@ import { Download, Volume2, Calendar, AlertTriangle, CheckCircle, Clock } from "
 import { useState, useRef } from "react";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/router";
 import html2canvas from "html2canvas";
 
 type BandeiraType = "verde" | "amarela" | "vermelha";
@@ -58,7 +58,7 @@ const getBandeiraConfig = (bandeira: BandeiraType) => {
 
 export const BoletimCard = ({ boletim }: BoletimCardProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const navigate = useNavigate();
+  const router = useRouter();
   const cardRef = useRef<HTMLDivElement>(null);
   const [lightboxIdx, setLightboxIdx] = useState<number | null>(null);
 
@@ -287,7 +287,7 @@ export const BoletimCard = ({ boletim }: BoletimCardProps) => {
                 Baixar Áudio {boletim.audios_urls.length > 1 ? idx + 1 : ''}
               </Button>
             ))}
-            <Button variant="outline" size="sm" onClick={() => navigate('/historico')}>
+            <Button variant="outline" size="sm" onClick={() => router.push('/historico')}>
               <Calendar className="w-4 h-4 mr-2" />
               Ver Histórico
             </Button>
