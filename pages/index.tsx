@@ -83,23 +83,25 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <main className="container mx-auto px-4 py-8">
+      <main className="space-y-16 sm:space-y-24 container mx-auto px-4 py-8">
         {/* Seção Principal com Missão */}
         <section className="text-center mb-12">
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
               Associação de Pilotos e Empresas de Balonismo
             </h1>
-            <p className="text-xl text-gray-600 mb-8">
-              Promovendo a segurança e excelência no balonismo em Praia Grande/SC através de informações meteorológicas precisas e confiáveis para nossa comunidade.
-            </p>
+            <article className="prose prose-slate text-[15px] sm:text-base leading-relaxed mx-auto">
+              <p className="text-xl sm:text-xl text-gray-600 mb-8">
+                Promovendo a segurança e excelência no balonismo em Praia Grande/SC através de informações meteorológicas precisas e confiáveis para nossa comunidade.
+              </p>
+            </article>
           </div>
         </section>
 
         {/* Boletim do Dia */}
         <section className="mb-12">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Boletim de Hoje</h2>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Boletim de Hoje</h2>
             <p className="text-gray-600">
               Condições meteorológicas atualizadas diariamente até às 19h
             </p>
@@ -118,6 +120,7 @@ const Home = () => {
             <BoletimCard boletim={boletimHoje} />
           )}
         </section>
+        <ProtocolosSection />
 
         {/* Links Úteis */}
         <section className="grid md:grid-cols-3 gap-6 mb-12">
@@ -171,7 +174,6 @@ const Home = () => {
 
         {/* Vitrine de Associados em Dia */}
         <HomeSectionMembros />
-        <ProtocolosSection />
       </main>
 
       {/* Rodapé */}

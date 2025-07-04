@@ -6,17 +6,19 @@ function ProtocolosSection() {
     "https://elcbodhxzvoqpzamgown.supabase.co/storage/v1/object/public/public-assets//AVIBAQ%20-%20CheckList%20Voo%20(revisado).pdf";
 
   return (
-    <section className="mt-20">
+    <section className="mt-12 mb-12">
       <div className="max-w-5xl mx-auto px-4">
         <div className="bg-white rounded-2xl shadow-lg ring-1 ring-black/5 px-8 py-10 space-y-5">
           {/* título + subtítulo */}
           <div className="text-center space-y-2">
-            <h2 className="text-2xl font-semibold">
+            <h2 className="text-xl sm:text-2xl font-semibold">
               Protocolos de Segurança – AVIBAQ
             </h2>
-            <p className="text-sm text-gray-600">
-              Versão aprimorada de rotinas operacionais e checklist para voos em Praia&nbsp;Grande/SC.
-            </p>
+            <article className="prose prose-slate text-[15px] sm:text-base leading-relaxed mx-auto">
+              <p className="text-sm text-gray-600">
+                Versão aprimorada de rotinas operacionais e checklist para voos em Praia&nbsp;Grande/SC.
+              </p>
+            </article>
           </div>
 
           {/* mini-preview */}
