@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "../../../src/integrations/supabase/client";
 import { Button } from "../../../src/components/ui/button";
@@ -43,6 +43,12 @@ export default function AdminBoletimForm() {
   const [audiosToDelete, setAudiosToDelete] = useState<string[]>([]);
   const [fotosToDelete, setFotosToDelete] = useState<string[]>([]);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const [recordedChunks, setRecordedChunks] = useState<Blob[]>([]);
+  const [audioPreviewUrl, setAudioPreviewUrl] = useState<string | null>(null);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const recordingInterval = useRef<NodeJS.Timeout | null>(null);
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -235,107 +241,236 @@ export default function AdminBoletimForm() {
     router.push("/admin/boletins");
   }
 
+  // Iniciar gravação
+  const startRecording = useCallback(async () => {
+    setRecordedChunks([]);
+    setAudioPreviewUrl(null);
+    setRecordingTime(0);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      let localChunks: Blob[] = [];
+      const recorder = new window.MediaRecorder(stream);
+      setMediaRecorder(recorder);
+      recorder.ondataavailable = (e) => {
+        if (e.data.size > 0) localChunks.push(e.data);
+      };
+      recorder.onstop = () => {
+        const blob = new Blob(localChunks, { type: "audio/webm" });
+        setAudioPreviewUrl(URL.createObjectURL(blob));
+        setRecordedChunks([]); // Limpa o state
+        if (recordingInterval.current) clearInterval(recordingInterval.current);
+      };
+      recorder.start();
+      setIsRecording(true);
+      // Inicia contador de tempo
+      recordingInterval.current = setInterval(() => {
+        setRecordingTime((t) => t + 1);
+      }, 1000);
+    } catch (err) {
+      toast.error("Não foi possível acessar o microfone.");
+    }
+  }, []);
+
+  // Parar gravação
+  const stopRecording = useCallback(() => {
+    if (mediaRecorder && isRecording) {
+      mediaRecorder.stop();
+      setIsRecording(false);
+      if (recordingInterval.current) {
+        clearInterval(recordingInterval.current);
+        recordingInterval.current = null;
+      }
+    }
+  }, [mediaRecorder, isRecording]);
+
+  // Adicionar áudio gravado à lista
+  const handleAddRecordedAudio = () => {
+    if (!audioPreviewUrl) return;
+    fetch(audioPreviewUrl)
+      .then(res => res.blob())
+      .then(blob => {
+        const file = new File([blob], `gravacao-${Date.now()}.webm`, { type: "audio/webm" });
+        setAudioFiles((prev) => [...prev, file].slice(0, 5));
+        setAudioPreviewUrl(null);
+        setRecordedChunks([]);
+      });
+  };
+
+  // Formatar tempo mm:ss
+  function formatTime(sec: number) {
+    const m = Math.floor(sec / 60).toString().padStart(2, '0');
+    const s = (sec % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+  }
+
   return (
-    <div className="max-w-xl mx-auto py-10">
-      <h1 className="text-2xl font-bold mb-6">Novo Boletim</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block mb-1 font-medium">Data do Voo</label>
-          <Input type="date" name="data" value={form.data} onChange={handleChange} required />
-        </div>
-        <div>
-          <label className="block mb-1 font-medium">Período</label>
-          <select name="periodo" value={form.periodo} onChange={handleChange} className="w-full border rounded px-3 py-2">
-            <option value="manha">Manhã</option>
-            <option value="tarde">Tarde</option>
-          </select>
-        </div>
-        <div>
-          <label className="block mb-1 font-medium">Bandeira</label>
-          <select name="bandeira" value={form.bandeira} onChange={handleChange} className="w-full border rounded px-3 py-2">
-            <option value="verde">Verde</option>
-            <option value="amarela">Amarela</option>
-            <option value="vermelha">Vermelha</option>
-          </select>
-        </div>
-        <div>
-          <label className="block mb-1 font-medium">Status Resumido</label>
-          <Input name="titulo_curto" value={form.titulo_curto} readOnly required />
-        </div>
-        <div>
-          <label className="block mb-1 font-medium">Motivo</label>
-          <Textarea name="motivo" value={form.motivo} onChange={handleChange} required rows={4} />
-        </div>
-        <div>
-          <label className="block mb-1 font-medium">Áudios (máx 5, até 10MB cada)</label>
-          <input
-            ref={audioInputRef}
-            type="file"
-            accept="audio/*"
-            onChange={handleAddAudio}
-            multiple
-            disabled={audioFiles.length >= 5}
-          />
-          <ul className="mt-2 space-y-1">
-            {audioFiles.map((file, idx) => (
-              <li key={idx} className="flex items-center gap-2">
-                <span>🎤 {file.name} ({(file.size/1024/1024).toFixed(1)}MB)</span>
-                <button type="button" className="text-red-600" onClick={() => handleRemoveAudio(idx)}>Remover</button>
-              </li>
-            ))}
-          </ul>
-          {audioFiles.length < 5 && (
-            <button type="button" className="mt-2 text-blue-600 underline" onClick={() => audioInputRef.current?.click()}>Adicionar áudio</button>
-          )}
-        </div>
-        <div>
-          <label className="block mb-1 font-medium">Fotos (máx 4, até 1MB cada)</label>
-          <input
-            ref={fotoInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleAddFotos}
-            multiple
-            disabled={fotoFiles.length >= 4}
-          />
-          <div className="flex gap-2 mt-2">
-            {fotoFiles.map((file, idx) => (
-              <div key={idx} className="relative">
-                <img
-                  src={URL.createObjectURL(file)}
-                  alt={file.name}
-                  className="w-20 h-20 object-cover rounded border cursor-pointer"
-                  onClick={() => setLightboxUrl(URL.createObjectURL(file))}
-                />
-                <button type="button" className="absolute top-0 right-0 bg-white text-red-600 rounded-full px-1" onClick={() => handleRemoveFoto(idx)}>x</button>
-              </div>
-            ))}
-          </div>
-        </div>
-        {lightboxUrl && (
-          <Dialog open={!!lightboxUrl} onOpenChange={() => setLightboxUrl(null)}>
-            <DialogContent className="flex flex-col items-center justify-center bg-black/90 p-4">
-              <img
-                src={lightboxUrl}
-                alt="Foto ampliada"
-                className="max-h-[80vh] max-w-[90vw] rounded shadow-lg"
-                style={{ objectFit: "contain" }}
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-8">
+      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl p-8 border border-gray-100">
+        <h1 className="text-3xl font-bold text-primary mb-2 text-center">Novo Boletim</h1>
+        <p className="text-gray-500 text-center mb-8">Preencha os dados do boletim meteorológico para publicar no sistema.</p>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Data do Voo</label>
+              <Input
+                type="date"
+                name="data"
+                value={form.data}
+                onChange={handleChange}
+                required
+                className="w-full"
               />
-              <Button
-                className="mt-4"
-                variant="destructive"
-                onClick={() => setLightboxUrl(null)}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Período</label>
+              <select
+                name="periodo"
+                value={form.periodo}
+                onChange={handleChange}
+                className="w-full rounded border-gray-300 focus:ring-primary focus:border-primary"
+                required
               >
-                Fechar
+                <option value="manha">☀️ Manhã</option>
+                <option value="tarde">🌇 Tarde</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Bandeira</label>
+              <div className="relative">
+                <select
+                  name="bandeira"
+                  value={form.bandeira}
+                  onChange={handleChange}
+                  className="w-full rounded border-gray-300 focus:ring-primary focus:border-primary appearance-none pr-10"
+                  required
+                >
+                  <option value="verde">
+                    🟢 Verde
+                  </option>
+                  <option value="amarela">
+                    🟡 Amarela
+                  </option>
+                  <option value="vermelha">
+                    🔴 Vermelha
+                  </option>
+                </select>
+                {/* Ícone visual da bandeira selecionada, sobreposto à direita */}
+                <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
+                  {form.bandeira === "verde" && <span className="inline-block w-4 h-4 rounded-full bg-green-500 border border-green-700" />}
+                  {form.bandeira === "amarela" && <span className="inline-block w-4 h-4 rounded-full bg-yellow-400 border border-yellow-600" />}
+                  {form.bandeira === "vermelha" && <span className="inline-block w-4 h-4 rounded-full bg-red-500 border border-red-700" />}
+                </span>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Status Resumido</label>
+              <Input
+                name="titulo_curto"
+                value={form.titulo_curto}
+                onChange={handleChange}
+                required
+                className="w-full"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Motivo</label>
+            <Textarea
+              name="motivo"
+              value={form.motivo}
+              onChange={handleChange}
+              rows={3}
+              className="w-full"
+              placeholder="Descreva o motivo do status do voo (opcional)"
+            />
+          </div>
+          {/* Áudios */}
+          <div className="pt-4 border-t border-gray-200">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Áudios <span className="font-normal text-xs text-gray-400">(máx 5, até 10MB cada)</span></label>
+            <div className="flex flex-col md:flex-row gap-4 items-center">
+              <Input
+                type="file"
+                accept="audio/*"
+                multiple
+                onChange={handleAddAudio}
+                ref={audioInputRef}
+                className="w-full md:w-auto"
+              />
+              <Button type="button" variant="outline" onClick={() => audioInputRef.current?.click()}>Adicionar áudio</Button>
+              <Button type="button" variant={isRecording ? "destructive" : "secondary"} onClick={isRecording ? stopRecording : startRecording}>
+                {isRecording ? "Parar Gravação" : "Gravar Áudio"}
               </Button>
-            </DialogContent>
-          </Dialog>
-        )}
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={() => router.push("/admin/boletins")}>Cancelar</Button>
-          <Button type="submit" {...(loading ? { disabled: true } : {})}>Criar Boletim</Button>
-        </div>
-      </form>
+              {isRecording && (
+                <span className="ml-2 text-sm font-mono text-gray-600">{formatTime(recordingTime)}</span>
+              )}
+            </div>
+            {/* Preview e confirmação do áudio gravado */}
+            {audioPreviewUrl && (
+              <div className="mt-3 flex flex-col gap-2 items-start">
+                <audio controls src={audioPreviewUrl} className="w-full" />
+                <div className="flex gap-2">
+                  <Button type="button" size="sm" onClick={handleAddRecordedAudio}>Adicionar à lista</Button>
+                  <Button type="button" size="sm" variant="ghost" onClick={() => { setAudioPreviewUrl(null); setRecordedChunks([]); }}>Descartar</Button>
+                </div>
+              </div>
+            )}
+            {/* Lista de áudios selecionados */}
+            {audioFiles.length > 0 && (
+              <ul className="mt-2 space-y-1 text-sm text-gray-700">
+                {audioFiles.map((file, idx) => (
+                  <li key={idx} className="flex items-center gap-2">
+                    <span className="truncate max-w-xs">{file.name}</span>
+                    <Button type="button" size="sm" variant="ghost" onClick={() => handleRemoveAudio(idx)}>
+                      Remover
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          {/* Fotos */}
+          <div className="pt-4 border-t border-gray-200">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Fotos <span className="font-normal text-xs text-gray-400">(máx 4, até 1MB cada)</span></label>
+            <div className="flex flex-col md:flex-row gap-4 items-center">
+              <Input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleAddFotos}
+                ref={fotoInputRef}
+                className="w-full md:w-auto"
+              />
+            </div>
+            {/* Lista de fotos selecionadas */}
+            {fotoFiles.length > 0 && (
+              <ul className="mt-2 flex flex-wrap gap-3">
+                {fotoFiles.map((file, idx) => (
+                  <li key={idx} className="relative group">
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={file.name}
+                      className="w-20 h-20 object-cover rounded shadow border border-gray-200"
+                    />
+                    <button
+                      type="button"
+                      className="absolute top-1 right-1 bg-white bg-opacity-80 rounded-full p-1 text-xs text-red-600 hover:bg-red-100"
+                      onClick={() => handleRemoveFoto(idx)}
+                    >
+                      &times;
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+          <div className="flex justify-end gap-4 pt-6">
+            <Button type="button" variant="outline" onClick={() => router.push('/admin/boletins')}>Cancelar</Button>
+            <Button type="submit" disabled={loading} className="bg-primary text-white hover:bg-primary-dark">
+              {loading ? "Salvando..." : "Criar Boletim"}
+            </Button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 } 
