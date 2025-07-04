@@ -40,12 +40,13 @@ export default function AdminBoletinsList() {
     try {
       const from = (pageNum - 1) * pageSize;
       const to = from + pageSize - 1;
+      console.log('DEBUG PAGINAÇÃO', { pageNum, from, to, pageSize });
       const { data, error, count } = await supabase
         .from("boletins")
         .select("*", { count: "exact" })
         .order("data", { ascending: false })
         .range(from, to);
-      console.log('Paginação:', { from, to, length: data?.length, data });
+      console.log('RESULTADO SUPABASE', { data, count });
       if (error) throw error;
       setBoletins(data || []);
       setTotal(count || 0);
@@ -148,7 +149,7 @@ export default function AdminBoletinsList() {
                       {boletins.map((boletim) => (
                         <tr key={boletim.id} className="hover:bg-gray-50">
                           <td className="border border-gray-200 px-4 py-2">
-                            {new Date(boletim.data).toLocaleDateString("pt-BR")}
+                            {boletim.data ? (() => { const [ano, mes, dia] = boletim.data.split('-'); return `${dia}/${mes}/${ano}`; })() : ''}
                           </td>
                           <td className="border border-gray-200 px-4 py-2 capitalize">
                             {boletim.periodo}
