@@ -5,6 +5,7 @@ import { AssinantesForm } from "../src/components/AssinantesForm";
 import { Card, CardContent } from "../src/components/ui/card";
 import { supabase } from "../src/integrations/supabase/client";
 import HomeSectionMembros from "../src/components/HomeSectionMembros";
+import ProtocolosSection from "../src/components/ProtocolosSection";
 
 interface BoletimData {
   id: string;
@@ -170,6 +171,7 @@ const Home = () => {
 
         {/* Vitrine de Associados em Dia */}
         <HomeSectionMembros />
+        <ProtocolosSection />
       </main>
 
       {/* Rodapé */}
