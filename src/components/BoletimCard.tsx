@@ -68,7 +68,7 @@ export const BoletimCard = ({ boletim }: BoletimCardProps) => {
         <CardHeader className="text-center bg-white/80 rounded-t-lg">
           <div className="flex items-center justify-center space-x-3 mb-2">
             <img src="https://elcbodhxzvoqpzamgown.supabase.co/storage/v1/object/public/public-assets/Logo%20AVIBAQ.png" alt="Logo AVIBAQ" style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', background: '#fff' }} />
-            <h2 className="text-2xl font-bold text-gray-900">Boletim Meteorológico - AVIBAQ</h2>
+            <h2 className="text-lg sm:text-2xl font-bold text-gray-900">Boletim Meteorológico - AVIBAQ</h2>
           </div>
         </CardHeader>
         <CardContent className="p-8 text-center">
@@ -148,14 +148,14 @@ export const BoletimCard = ({ boletim }: BoletimCardProps) => {
         <div className="flex flex-col items-center justify-center mb-6">
           <div className="flex items-center justify-center gap-10 mb-6 items-center">
             <img src="https://elcbodhxzvoqpzamgown.supabase.co/storage/v1/object/public/public-assets/Logo%20AVIBAQ.png" alt="Logo AVIBAQ" style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', background: '#fff' }} />
-            <h2 className="text-2xl font-bold text-gray-900 whitespace-nowrap flex items-center leading-tight mt-1" style={{lineHeight: 1.1, letterSpacing: 0}}>Boletim Meteorológico - AVIBAQ</h2>
+            <h2 className="text-lg sm:text-2xl font-bold text-gray-900 whitespace-nowrap flex items-center leading-tight mt-1" style={{lineHeight: 1.1, letterSpacing: 0}}>Boletim Meteorológico - AVIBAQ</h2>
           </div>
           <div className="flex items-center gap-6 text-base text-gray-600 mb-2 items-center">
             <div className="flex items-center gap-2 items-center">
               <Calendar className="w-7 h-7" />
-              <span className="text-2xl font-bold text-gray-900">{boletim.data.split('-').reverse().join('/')}</span>
+              <span className="text-base sm:text-lg font-bold text-gray-900">{boletim.data.split('-').reverse().join('/')}</span>
             </div>
-            <Badge variant="outline" className="text-base px-3 py-1">
+            <Badge variant="outline" className="text-xs sm:text-sm px-3 py-1">
               Período da {boletim.periodo === "manha" ? "Manhã" : "Tarde"}
             </Badge>
           </div>
