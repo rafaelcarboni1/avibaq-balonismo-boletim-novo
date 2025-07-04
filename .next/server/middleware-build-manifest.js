@@ -34,25 +34,10 @@ self.__BUILD_MANIFEST = {
       "static/chunks/main.js",
       "static/chunks/pages/admin/associados.js"
     ],
-    "/admin/dashboard": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/admin/dashboard.js"
-    ],
-    "/admin/login": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/admin/login.js"
-    ],
     "/associar-se": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/associar-se.js"
-    ],
-    "/membros": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/membros.js"
     ]
   },
   "ampFirstPages": []

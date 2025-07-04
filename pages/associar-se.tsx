@@ -180,80 +180,48 @@ export default function AssociarSe() {
             </p>
           </div>
 
-          {step === 1 && (
-            <form className="space-y-5" onSubmit={handleNext}>
-              <div>
-                <label className="block font-medium mb-1">Nome completo *</label>
-                <input name="nome_completo" value={form.nome_completo} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" required />
-              </div>
+          {/* Escolha do tipo de cadastro */}
+          <form className="space-y-5" onSubmit={handleNext}>
+            <div>
+              <label className="block font-medium mb-1">Tipo de cadastro *</label>
               <div className="flex gap-4">
-                <div className="flex-1">
-                  <label className="block font-medium mb-1">E-mail *</label>
-                  <input name="email" type="email" value={form.email} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" required />
-                </div>
-                <div className="flex-1">
-                  <label className="block font-medium mb-1">Telefone *</label>
-                  <input name="telefone" value={form.telefone} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" required />
-                </div>
+                {tipos.map((t) => (
+                  <label key={t.value} className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="tipo"
+                      value={t.value}
+                      checked={tipo === t.value}
+                      onChange={handleTipoChange}
+                    />
+                    {t.label}
+                  </label>
+                ))}
               </div>
-              <div>
-                <label className="block font-medium mb-1">Tipo *</label>
+            </div>
+            {/* Campos para Piloto */}
+            {tipo === "piloto" && (
+              <>
+                <div>
+                  <label className="block font-medium mb-1">Nome completo *</label>
+                  <input name="nome_completo" value={form.nome_completo} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" required />
+                </div>
+                <div>
+                  <label className="block font-medium mb-1">CPF *</label>
+                  <input name="cpf" value={form.cpf} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" required />
+                </div>
                 <div className="flex gap-4">
-                  {tipos.map((t) => (
-                    <label key={t.value} className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name="tipo"
-                        value={t.value}
-                        checked={tipo === t.value}
-                        onChange={handleTipoChange}
-                      />
-                      {t.label}
-                    </label>
-                  ))}
+                  <div className="flex-1">
+                    <label className="block font-medium mb-1">E-mail *</label>
+                    <input name="email" type="email" value={form.email} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" required />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block font-medium mb-1">Telefone *</label>
+                    <input name="telefone" value={form.telefone} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" required />
+                  </div>
                 </div>
-              </div>
-              {tipo === "piloto" && (
-                <>
-                  <div>
-                    <label className="block font-medium mb-1">CPF *</label>
-                    <input name="cpf" value={form.cpf} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" required />
-                  </div>
-                  <div>
-                    <label className="block font-medium mb-1">Observações</label>
-                    <textarea name="observacoes" value={form.observacoes} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" rows={2} />
-                  </div>
-                </>
-              )}
-              {tipo === "agencia" && (
-                <>
-                  <div>
-                    <label className="block font-medium mb-1">Nome da Empresa *</label>
-                    <input name="nome_empresa" value={form.nome_empresa} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" required />
-                  </div>
-                  <div>
-                    <label className="block font-medium mb-1">CNPJ *</label>
-                    <input name="cnpj" value={form.cnpj} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" required />
-                  </div>
-                  <div className="flex gap-4">
-                    <div className="flex-1">
-                      <label className="block font-medium mb-1">Nº de balões *</label>
-                      <input name="qtd_baloes" type="number" value={form.qtd_baloes} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" required />
-                    </div>
-                    <div className="flex-1">
-                      <label className="block font-medium mb-1">Volumes (m³)</label>
-                      <input name="volumes_baloes" value={form.volumes_baloes} onChange={handleChange} placeholder="Ex: 1200, 1800, 2200" className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block font-medium mb-1">Observações</label>
-                    <textarea name="observacoes" value={form.observacoes} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" rows={2} />
-                  </div>
-                </>
-              )}
-              {tipo === "agencia" ? (
-                <>
-                  <label className="block font-medium mt-4">Endereço da Empresa *</label>
+                <div>
+                  <label className="block font-medium mb-1">Endereço Pessoal *</label>
                   <input type="text" className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" value={endereco} onChange={e => setEndereco(e.target.value)} required />
                   <div className="flex gap-2 mt-2">
                     <input type="text" className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" placeholder="Cidade" value={cidade} onChange={e => setCidade(e.target.value)} required />
@@ -262,21 +230,8 @@ export default function AssociarSe() {
                       <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option><option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option><option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option><option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option><option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option><option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option><option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option><option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option><option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
                     </select>
                   </div>
-                </>
-              ) : tipo === "piloto" ? (
-                <>
-                  <label className="block font-medium mt-4">Endereço Pessoal *</label>
-                  <input type="text" className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" value={endereco} onChange={e => setEndereco(e.target.value)} required />
-                  <div className="flex gap-2 mt-2">
-                    <input type="text" className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" placeholder="Cidade" value={cidade} onChange={e => setCidade(e.target.value)} required />
-                    <select className="w-36 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" value={estado} onChange={e => setEstado(e.target.value)} required>
-                      <option value="">Estado</option>
-                      <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option><option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option><option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option><option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option><option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option><option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option><option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option><option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option><option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
-                    </select>
-                  </div>
-                </>
-              ) : null}
-              {tipo === "piloto" && (
+                </div>
+                {/* Selecione o(s) registro(s) que possui */}
                 <div className="mt-6">
                   <label className="block font-medium mb-2">Selecione o(s) registro(s) que possui *</label>
                   <div className="flex gap-4">
@@ -313,17 +268,73 @@ export default function AssociarSe() {
                     </div>
                   )}
                 </div>
-              )}
-              {erro && <div className="text-red-600 text-sm">{erro}</div>}
-              <button
-                type="submit"
-                className="w-full bg-primary text-white font-semibold py-2 rounded-lg mt-2 disabled:opacity-60"
-                disabled={isLoading}
-              >
-                Próximo
-              </button>
-            </form>
-          )}
+                <div>
+                  <label className="block font-medium mb-1">Observações</label>
+                  <textarea name="observacoes" value={form.observacoes} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" rows={2} />
+                </div>
+              </>
+            )}
+            {/* Campos para Agência */}
+            {tipo === "agencia" && (
+              <>
+                <div>
+                  <label className="block font-medium mb-1">Nome da Empresa *</label>
+                  <input name="nome_empresa" value={form.nome_empresa} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" required />
+                </div>
+                <div>
+                  <label className="block font-medium mb-1">CNPJ *</label>
+                  <input name="cnpj" value={form.cnpj} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" required />
+                </div>
+                <div>
+                  <label className="block font-medium mb-1">Endereço da Empresa *</label>
+                  <input type="text" className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" value={endereco} onChange={e => setEndereco(e.target.value)} required />
+                  <div className="flex gap-2 mt-2">
+                    <input type="text" className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" placeholder="Cidade" value={cidade} onChange={e => setCidade(e.target.value)} required />
+                    <select className="w-36 rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" value={estado} onChange={e => setEstado(e.target.value)} required>
+                      <option value="">Estado</option>
+                      <option value="AC">AC</option><option value="AL">AL</option><option value="AP">AP</option><option value="AM">AM</option><option value="BA">BA</option><option value="CE">CE</option><option value="DF">DF</option><option value="ES">ES</option><option value="GO">GO</option><option value="MA">MA</option><option value="MT">MT</option><option value="MS">MS</option><option value="MG">MG</option><option value="PA">PA</option><option value="PB">PB</option><option value="PR">PR</option><option value="PE">PE</option><option value="PI">PI</option><option value="RJ">RJ</option><option value="RN">RN</option><option value="RS">RS</option><option value="RO">RO</option><option value="RR">RR</option><option value="SC">SC</option><option value="SP">SP</option><option value="SE">SE</option><option value="TO">TO</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className="block font-medium mb-1">Nome do responsável *</label>
+                  <input name="nome_completo" value={form.nome_completo} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" required />
+                </div>
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <label className="block font-medium mb-1">E-mail *</label>
+                    <input name="email" type="email" value={form.email} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" required />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block font-medium mb-1">Telefone *</label>
+                    <input name="telefone" value={form.telefone} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" required />
+                  </div>
+                </div>
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <label className="block font-medium mb-1">Nº de balões *</label>
+                    <input name="qtd_baloes" type="number" value={form.qtd_baloes} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" required />
+                  </div>
+                  <div className="flex-1">
+                    <label className="block font-medium mb-1">Volumes (m³)</label>
+                    <input name="volumes_baloes" value={form.volumes_baloes} onChange={handleChange} placeholder="Ex: 1200, 1800, 2200" className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block font-medium mb-1">Observações</label>
+                  <textarea name="observacoes" value={form.observacoes} onChange={handleChange} className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition" rows={2} />
+                </div>
+              </>
+            )}
+            {erro && <div className="text-red-600 text-sm">{erro}</div>}
+            <button
+              type="submit"
+              className="w-full bg-primary text-white font-semibold py-2 rounded-lg mt-2 disabled:opacity-60"
+              disabled={isLoading}
+            >
+              Próximo
+            </button>
+          </form>
           {step === 2 && (
             <form className="space-y-5" onSubmit={handleSubmit}>
               <div className="mt-6">
