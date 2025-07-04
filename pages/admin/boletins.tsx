@@ -28,20 +28,27 @@ export default function AdminBoletinsList() {
   const { role, loading, user } = useUser();
   const [showModal, setShowModal] = useState(false);
   const [boletimSelecionado, setBoletimSelecionado] = useState<Boletim | null>(null);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const pageSize = 10;
 
   useEffect(() => {
-    fetchBoletins();
-  }, []);
+    fetchBoletins(page);
+  }, [page]);
 
-  const fetchBoletins = async () => {
+  const fetchBoletins = async (pageNum = 1) => {
     try {
-      const { data, error } = await supabase
+      const from = (pageNum - 1) * pageSize;
+      const to = from + pageSize - 1;
+      const { data, error, count } = await supabase
         .from("boletins")
-        .select("*")
-        .order("data", { ascending: false });
-
+        .select("*", { count: "exact" })
+        .order("data", { ascending: false })
+        .range(from, to);
+      console.log('Paginação:', { from, to, length: data?.length, data });
       if (error) throw error;
       setBoletins(data || []);
+      setTotal(count || 0);
     } catch (error) {
       console.error("Erro ao buscar boletins:", error);
       toast.error("Erro ao carregar boletins");
@@ -125,56 +132,78 @@ export default function AdminBoletinsList() {
             {boletins.length === 0 ? (
               <p className="text-gray-500 text-center py-8">Nenhum boletim encontrado</p>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse border border-gray-200">
-                  <thead>
-                    <tr className="bg-gray-50">
-                      <th className="border border-gray-200 px-4 py-2 text-left">Data</th>
-                      <th className="border border-gray-200 px-4 py-2 text-left">Período</th>
-                      <th className="border border-gray-200 px-4 py-2 text-left">Bandeira</th>
-                      <th className="border border-gray-200 px-4 py-2 text-left">Status</th>
-                      <th className="border border-gray-200 px-4 py-2 text-left">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {boletins.map((boletim) => (
-                      <tr key={boletim.id} className="hover:bg-gray-50">
-                        <td className="border border-gray-200 px-4 py-2">
-                          {new Date(boletim.data).toLocaleDateString("pt-BR")}
-                        </td>
-                        <td className="border border-gray-200 px-4 py-2 capitalize">
-                          {boletim.periodo}
-                        </td>
-                        <td className="border border-gray-200 px-4 py-2">
-                          <Badge className={getBandeiraColor(boletim.bandeira)}>
-                            {boletim.bandeira}
-                          </Badge>
-                        </td>
-                        <td className="border border-gray-200 px-4 py-2">
-                          {boletim.publicado ? (
-                            <span className="inline-block px-3 py-1 rounded-full bg-green-100 text-green-800 text-xs font-semibold">Publicado</span>
-                          ) : (
-                            <span className="inline-block px-3 py-1 rounded-full bg-gray-200 text-gray-700 text-xs font-semibold">Rascunho</span>
-                          )}
-                        </td>
-                        <td className="border border-gray-200 px-4 py-2">
-                          <div className="flex gap-2">
-                            <Button size="sm" variant="outline" onClick={() => handleVisualizar(boletim)}>
-                              <Eye className="w-3 h-3 mr-1" /> Visualizar
-                            </Button>
-                            <Button size="sm" variant="outline" onClick={() => router.push(`/admin/boletins/${boletim.id}/edit`)}>
-                              <Edit className="w-3 h-3 mr-1" /> Editar
-                            </Button>
-                            <Button size="sm" variant="destructive" onClick={() => handleDelete(boletim.id)}>
-                              <Trash2 className="w-3 h-3 mr-1" /> Excluir
-                            </Button>
-                          </div>
-                        </td>
+              <>
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse border border-gray-200">
+                    <thead>
+                      <tr className="bg-gray-50">
+                        <th className="border border-gray-200 px-4 py-2 text-left">Data</th>
+                        <th className="border border-gray-200 px-4 py-2 text-left">Período</th>
+                        <th className="border border-gray-200 px-4 py-2 text-left">Bandeira</th>
+                        <th className="border border-gray-200 px-4 py-2 text-left">Status</th>
+                        <th className="border border-gray-200 px-4 py-2 text-left">Ações</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {boletins.map((boletim) => (
+                        <tr key={boletim.id} className="hover:bg-gray-50">
+                          <td className="border border-gray-200 px-4 py-2">
+                            {new Date(boletim.data).toLocaleDateString("pt-BR")}
+                          </td>
+                          <td className="border border-gray-200 px-4 py-2 capitalize">
+                            {boletim.periodo}
+                          </td>
+                          <td className="border border-gray-200 px-4 py-2">
+                            <Badge className={getBandeiraColor(boletim.bandeira)}>
+                              {boletim.bandeira}
+                            </Badge>
+                          </td>
+                          <td className="border border-gray-200 px-4 py-2">
+                            {boletim.publicado ? (
+                              <span className="inline-block px-3 py-1 rounded-full bg-green-100 text-green-800 text-xs font-semibold">Publicado</span>
+                            ) : (
+                              <span className="inline-block px-3 py-1 rounded-full bg-gray-200 text-gray-700 text-xs font-semibold">Rascunho</span>
+                            )}
+                          </td>
+                          <td className="border border-gray-200 px-4 py-2">
+                            <div className="flex gap-2">
+                              <Button size="sm" variant="outline" onClick={() => handleVisualizar(boletim)}>
+                                <Eye className="w-3 h-3 mr-1" /> Visualizar
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={() => router.push(`/admin/boletins/${boletim.id}/edit`)}>
+                                <Edit className="w-3 h-3 mr-1" /> Editar
+                              </Button>
+                              <Button size="sm" variant="destructive" onClick={() => handleDelete(boletim.id)}>
+                                <Trash2 className="w-3 h-3 mr-1" /> Excluir
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+                {/* Paginação */}
+                <div className="flex justify-between items-center mt-6">
+                  <Button
+                    variant="outline"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                  >
+                    Anterior
+                  </Button>
+                  <span className="text-sm text-gray-600">
+                    Página {page} de {Math.max(1, Math.ceil(total / pageSize))}
+                  </span>
+                  <Button
+                    variant="outline"
+                    onClick={() => setPage((p) => p + 1)}
+                    disabled={page >= Math.ceil(total / pageSize)}
+                  >
+                    Próxima
+                  </Button>
+                </div>
+              </>
             )}
           </CardContent>
         </Card>
