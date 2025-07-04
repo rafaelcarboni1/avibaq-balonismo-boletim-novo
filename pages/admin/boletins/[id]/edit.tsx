@@ -6,6 +6,7 @@ import { Input } from "../../../../src/components/ui/input";
 import { Textarea } from "../../../../src/components/ui/textarea";
 import { toast } from "../../../../src/components/ui/sonner";
 import { Dialog, DialogContent } from "../../../../src/components/ui/dialog";
+import { useUser } from "@/hooks/useUser";
 
 const bandeiraToStatus = {
   verde: "VOO LIBERADO",
@@ -27,6 +28,7 @@ export default function AdminBoletimEditForm() {
   const params = useParams();
   const id = params?.id as string;
   const isEdit = Boolean(id);
+  const { user } = useUser();
   const [form, setForm] = useState({
     data: "",
     periodo: "manha",
@@ -258,6 +260,22 @@ export default function AdminBoletimEditForm() {
       toast.error(updateError.message + (updateError.details ? `: ${updateError.details}` : ""));
       setLoading(false);
       return;
+    }
+    // Log de atividade
+    try {
+      await supabase.from('logs_atividade').insert({
+        acao: `Boletim editado por ${user?.email || 'usuário desconhecido'}`,
+        detalhes: {
+          boletimId,
+          data: form.data,
+          periodo: form.periodo,
+          bandeira: form.bandeira,
+          titulo_curto: form.titulo_curto
+        },
+        usuario_id: user?.id || null
+      });
+    } catch (logError) {
+      console.error('Erro ao registrar log de atividade (edição boletim):', logError);
     }
     toast.success("Anexos salvos");
     router.push("/admin/boletins");

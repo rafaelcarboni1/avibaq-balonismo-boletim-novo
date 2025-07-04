@@ -4,4 +4,14 @@
 }
 .animate-marquee {
   animation: marquee 20s linear infinite;
+}
+
+.btn-primary {
+  @apply inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-primary text-white shadow-md font-semibold text-base tracking-wide hover:bg-primary2 hover:shadow-lg transition disabled:opacity-60;
+}
+.btn-secondary {
+  @apply inline-flex items-center justify-center px-6 py-2.5 rounded-full ring-2 ring-primary text-primary bg-white font-semibold text-base tracking-wide hover:bg-primary hover:text-white hover:shadow-lg transition disabled:opacity-60;
+}
+.input {
+  @apply w-full rounded-lg ring-1 ring-black/10 px-3 py-2 text-base focus:outline-none focus:ring-2 focus:ring-primary/60 placeholder-gray-400 bg-white;
 } 

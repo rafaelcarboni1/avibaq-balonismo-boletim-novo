@@ -84,12 +84,16 @@ export default function AdminAssociados() {
         })
         .eq("id", membro.id);
       if (error) throw error;
-      // Gravar log de atividade
-      await supabase.from('logs_atividade').insert({
+      // Gravar log de atividade com tratamento de erro explícito
+      const { error: logError } = await supabase.from('logs_atividade').insert({
         acao: `Aprovado por ${user?.email}`,
         detalhes: { membroId: membro.id, nome: membro.nome_completo },
         usuario_id: user?.id || null
       });
+      if (logError) {
+        console.error('Erro ao registrar log de atividade:', logError);
+        toast.error('Erro ao registrar log de atividade!');
+      }
       // Enviar e-mail via Resend
       try {
         await fetch('/api/send-aprovado', {

@@ -6,6 +6,7 @@ import { Input } from "../../../src/components/ui/input";
 import { Textarea } from "../../../src/components/ui/textarea";
 import { toast } from "../../../src/components/ui/sonner";
 import { Dialog, DialogContent } from "../../../src/components/ui/dialog";
+import { useUser } from "@/hooks/useUser";
 
 const bandeiraToStatus = {
   verde: "VOO LIBERADO",
@@ -24,6 +25,7 @@ export const toDbPeriodo = (value: string) =>
 
 export default function AdminBoletimForm() {
   const router = useRouter();
+  const { user } = useUser();
   const [form, setForm] = useState({
     data: "",
     periodo: "manha",
@@ -190,6 +192,22 @@ export default function AdminBoletimForm() {
       return;
     }
     boletimId = inserted.id;
+    // Log de atividade
+    try {
+      await supabase.from('logs_atividade').insert({
+        acao: `Boletim criado por ${user?.email || 'usuário desconhecido'}`,
+        detalhes: {
+          boletimId,
+          data: form.data,
+          periodo: form.periodo,
+          bandeira: form.bandeira,
+          titulo_curto: form.titulo_curto
+        },
+        usuario_id: user?.id || null
+      });
+    } catch (logError) {
+      console.error('Erro ao registrar log de atividade (criação boletim):', logError);
+    }
     // Upload dos arquivos
     let audioUrls: string[] = [];
     let fotoUrls: string[] = [];

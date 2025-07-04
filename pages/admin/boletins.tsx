@@ -25,7 +25,7 @@ type Boletim = {
 export default function AdminBoletinsList() {
   const router = useRouter();
   const [boletins, setBoletins] = useState<Boletim[]>([]);
-  const { role, loading } = useUser();
+  const { role, loading, user } = useUser();
   const [showModal, setShowModal] = useState(false);
   const [boletimSelecionado, setBoletimSelecionado] = useState<Boletim | null>(null);
 
@@ -52,9 +52,26 @@ export default function AdminBoletinsList() {
     if (!confirm("Tem certeza que deseja excluir este boletim?")) return;
 
     try {
+      // Buscar dados do boletim antes de deletar para log
+      const { data: boletim } = await supabase.from("boletins").select("*").eq("id", id).single();
       const { error } = await supabase.from("boletins").delete().eq("id", id);
       if (error) throw error;
-
+      // Log de atividade
+      try {
+        await supabase.from('logs_atividade').insert({
+          acao: `Boletim excluído por ${user?.email || 'usuário desconhecido'}`,
+          detalhes: {
+            boletimId: id,
+            data: boletim?.data,
+            periodo: boletim?.periodo,
+            bandeira: boletim?.bandeira,
+            titulo_curto: boletim?.titulo_curto
+          },
+          usuario_id: user?.id || null
+        });
+      } catch (logError) {
+        console.error('Erro ao registrar log de atividade (exclusão boletim):', logError);
+      }
       toast.success("Boletim excluído com sucesso!");
       fetchBoletins();
     } catch (error) {

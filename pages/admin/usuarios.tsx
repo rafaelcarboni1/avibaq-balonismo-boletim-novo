@@ -9,7 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "react-hot-toast";
 import { useUser } from "@/hooks/useUser";
 
-const ROLES = ["admin", "meteo", "tesouraria"];
+const ROLES = ["admin", "meteo", "tesouraria", "piloto", "agencia"];
 
 export default function UsuariosAdmin() {
   const { role } = useUser();
