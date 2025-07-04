@@ -51,6 +51,8 @@ export default function AdminAssociados() {
   const [mensalidadesPagas, setMensalidadesPagas] = useState<string[]>([]);
   const [mensalidadesPossiveis, setMensalidadesPossiveis] = useState<string[]>([]);
   const [anoMensalidade, setAnoMensalidade] = useState<number>(2025);
+  const [editMode, setEditMode] = useState(false);
+  const [editData, setEditData] = useState<Membro | null>(null);
 
   useEffect(() => {
     fetchMembros();
@@ -459,6 +461,49 @@ export default function AdminAssociados() {
     }
   }
 
+  // Função para iniciar edição
+  const handleEditar = () => {
+    setEditData(selectedMembro);
+    setEditMode(true);
+  };
+
+  // Função para cancelar edição
+  const handleCancelarEdicao = () => {
+    setEditMode(false);
+    setEditData(null);
+  };
+
+  // Função para salvar edição
+  const handleSalvarEdicao = async () => {
+    if (!editData) return;
+    try {
+      const { error } = await supabase
+        .from('membros')
+        .update({
+          nome_completo: editData.nome_completo,
+          telefone: editData.telefone,
+          nome_empresa: editData.nome_empresa,
+          cpf: editData.cpf,
+          cnpj: editData.cnpj,
+          rbac103: editData.rbac103,
+          rbac91: editData.rbac91,
+          qtd_baloes: editData.qtd_baloes,
+          volumes_baloes: editData.volumes_baloes,
+          observacoes: editData.observacoes,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', editData.id);
+      if (error) throw error;
+      toast.success('Dados do associado atualizados com sucesso!');
+      setEditMode(false);
+      setEditData(null);
+      setShowVisualizarDialog(false);
+      fetchMembros();
+    } catch (error) {
+      toast.error('Erro ao atualizar dados do associado.');
+    }
+  };
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center">Carregando...</div>;
   }
@@ -625,40 +670,146 @@ export default function AdminAssociados() {
         {showVisualizarDialog && selectedMembro && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
             <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-2xl relative">
-              <button className="absolute top-3 right-3 text-gray-400 hover:text-red-600 text-2xl" onClick={() => setShowVisualizarDialog(false)}>&times;</button>
+              <button className="absolute top-3 right-3 text-gray-400 hover:text-red-600 text-2xl" onClick={() => { setShowVisualizarDialog(false); setEditMode(false); setEditData(null); }}>&times;</button>
               <h2 className="text-2xl font-bold mb-4">Detalhes do Associado</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div><span className="font-semibold">Nome:</span> {selectedMembro.nome_completo}</div>
+                {/* Nome */}
+                <div>
+                  <span className="font-semibold">Nome:</span>
+                  {editMode ? (
+                    <input type="text" className="border rounded px-2 py-1 w-full" value={editData?.nome_completo || ''} onChange={e => setEditData({ ...editData, nome_completo: e.target.value })} />
+                  ) : (
+                    <span> {selectedMembro.nome_completo}</span>
+                  )}
+                </div>
+                {/* E-mail (não editável) */}
                 <div><span className="font-semibold">E-mail:</span> {selectedMembro.email}</div>
-                <div><span className="font-semibold">Telefone:</span> {selectedMembro.telefone}</div>
+                {/* Telefone */}
+                <div>
+                  <span className="font-semibold">Telefone:</span>
+                  {editMode ? (
+                    <input type="text" className="border rounded px-2 py-1 w-full" value={editData?.telefone || ''} onChange={e => setEditData({ ...editData, telefone: e.target.value })} />
+                  ) : (
+                    <span> {selectedMembro.telefone}</span>
+                  )}
+                </div>
+                {/* Tipo (não editável) */}
                 <div><span className="font-semibold">Tipo:</span> {selectedMembro.tipo}</div>
                 <div><span className="font-semibold">Status:</span> {selectedMembro.status}</div>
                 <div><span className="font-semibold">Pagamento Inscrição:</span> {selectedMembro.pagamento_inscricao}</div>
                 <div><span className="font-semibold">Última Mensalidade:</span> {selectedMembro.ultima_mensalidade || '-'}</div>
-                {selectedMembro.nome_empresa && <div><span className="font-semibold">Empresa:</span> {selectedMembro.nome_empresa}</div>}
-                {selectedMembro.cpf && <div><span className="font-semibold">CPF:</span> {selectedMembro.cpf}</div>}
-                {selectedMembro.cnpj && <div><span className="font-semibold">CNPJ:</span> {selectedMembro.cnpj}</div>}
-                {selectedMembro.rbac103 && <div><span className="font-semibold">RBAC 103:</span> {selectedMembro.rbac103}</div>}
-                {selectedMembro.rbac91 && <div><span className="font-semibold">RBAC 91:</span> {selectedMembro.rbac91}</div>}
-                {selectedMembro.qtd_baloes && <div><span className="font-semibold">Qtd. Balões:</span> {selectedMembro.qtd_baloes}</div>}
-                {selectedMembro.volumes_baloes && <div><span className="font-semibold">Volumes Balões:</span> {selectedMembro.volumes_baloes}</div>}
-                {selectedMembro.observacoes && <div className="md:col-span-2"><span className="font-semibold">Observações:</span> {selectedMembro.observacoes}</div>}
+                {/* Empresa */}
+                {selectedMembro.nome_empresa !== undefined && (
+                  <div>
+                    <span className="font-semibold">Empresa:</span>
+                    {editMode ? (
+                      <input type="text" className="border rounded px-2 py-1 w-full" value={editData?.nome_empresa || ''} onChange={e => setEditData({ ...editData, nome_empresa: e.target.value })} />
+                    ) : (
+                      <span> {selectedMembro.nome_empresa}</span>
+                    )}
+                  </div>
+                )}
+                {/* CPF */}
+                {selectedMembro.cpf !== undefined && (
+                  <div>
+                    <span className="font-semibold">CPF:</span>
+                    {editMode ? (
+                      <input type="text" className="border rounded px-2 py-1 w-full" value={editData?.cpf || ''} onChange={e => setEditData({ ...editData, cpf: e.target.value })} />
+                    ) : (
+                      <span> {selectedMembro.cpf}</span>
+                    )}
+                  </div>
+                )}
+                {/* CNPJ */}
+                {selectedMembro.cnpj !== undefined && (
+                  <div>
+                    <span className="font-semibold">CNPJ:</span>
+                    {editMode ? (
+                      <input type="text" className="border rounded px-2 py-1 w-full" value={editData?.cnpj || ''} onChange={e => setEditData({ ...editData, cnpj: e.target.value })} />
+                    ) : (
+                      <span> {selectedMembro.cnpj}</span>
+                    )}
+                  </div>
+                )}
+                {/* RBAC 103 */}
+                {selectedMembro.rbac103 !== undefined && (
+                  <div>
+                    <span className="font-semibold">RBAC 103:</span>
+                    {editMode ? (
+                      <input type="text" className="border rounded px-2 py-1 w-full" value={editData?.rbac103 || ''} onChange={e => setEditData({ ...editData, rbac103: e.target.value })} />
+                    ) : (
+                      <span> {selectedMembro.rbac103}</span>
+                    )}
+                  </div>
+                )}
+                {/* RBAC 91 */}
+                {selectedMembro.rbac91 !== undefined && (
+                  <div>
+                    <span className="font-semibold">RBAC 91:</span>
+                    {editMode ? (
+                      <input type="text" className="border rounded px-2 py-1 w-full" value={editData?.rbac91 || ''} onChange={e => setEditData({ ...editData, rbac91: e.target.value })} />
+                    ) : (
+                      <span> {selectedMembro.rbac91}</span>
+                    )}
+                  </div>
+                )}
+                {/* Qtd. Balões */}
+                {selectedMembro.qtd_baloes !== undefined && (
+                  <div>
+                    <span className="font-semibold">Qtd. Balões:</span>
+                    {editMode ? (
+                      <input type="number" className="border rounded px-2 py-1 w-full" value={editData?.qtd_baloes || ''} onChange={e => setEditData({ ...editData, qtd_baloes: Number(e.target.value) })} />
+                    ) : (
+                      <span> {selectedMembro.qtd_baloes}</span>
+                    )}
+                  </div>
+                )}
+                {/* Volumes Balões */}
+                {selectedMembro.volumes_baloes !== undefined && (
+                  <div>
+                    <span className="font-semibold">Volumes Balões:</span>
+                    {editMode ? (
+                      <input type="text" className="border rounded px-2 py-1 w-full" value={editData?.volumes_baloes || ''} onChange={e => setEditData({ ...editData, volumes_baloes: e.target.value })} />
+                    ) : (
+                      <span> {selectedMembro.volumes_baloes}</span>
+                    )}
+                  </div>
+                )}
+                {/* Observações */}
+                <div className="md:col-span-2">
+                  <span className="font-semibold">Observações:</span>
+                  {editMode ? (
+                    <textarea className="border rounded px-2 py-1 w-full" value={editData?.observacoes || ''} onChange={e => setEditData({ ...editData, observacoes: e.target.value })} rows={2} />
+                  ) : (
+                    <span> {selectedMembro.observacoes}</span>
+                  )}
+                </div>
               </div>
+              {/* Botões de ação */}
               <div className="flex flex-wrap gap-2 mt-4">
-                {/* Botão Aprovar em verde */}
-                {selectedMembro.status === 'pendente' && (
+                {!editMode && (
+                  <Button size="sm" variant="outline" onClick={handleEditar}>Editar</Button>
+                )}
+                {editMode && (
+                  <>
+                    <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={handleSalvarEdicao}>Salvar</Button>
+                    <Button size="sm" variant="outline" onClick={handleCancelarEdicao}>Cancelar</Button>
+                  </>
+                )}
+                {/* Botões já existentes */}
+                {!editMode && selectedMembro.status === 'pendente' && (
                   <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => { handleAprovar(selectedMembro); setShowVisualizarDialog(false); }}>Aprovar</Button>
                 )}
-                {/* Botão Recusar */}
-                {selectedMembro.status === 'pendente' && (
+                {!editMode && selectedMembro.status === 'pendente' && (
                   <Button size="sm" variant="destructive" onClick={() => { setShowRecusaDialog(true); setShowVisualizarDialog(false); }}>Recusar</Button>
                 )}
-                {/* Botão Registrar Pagamento Inscrição */}
-                <Button size="sm" variant="outline" onClick={() => { handleInscricao(selectedMembro); setShowVisualizarDialog(false); }}>Registrar Pagamento Inscrição</Button>
-                {/* Botão Registrar Pagamento Mensalidade */}
-                <Button size="sm" variant="outline" onClick={() => { handleMensalidade(selectedMembro); setShowVisualizarDialog(false); }}>Registrar Pagamento Mensalidade</Button>
-                {/* Baixar comprovante */}
-                {selectedMembro.comprovante_url && (
+                {!editMode && (
+                  <Button size="sm" variant="outline" onClick={() => { handleInscricao(selectedMembro); setShowVisualizarDialog(false); }}>Registrar Pagamento Inscrição</Button>
+                )}
+                {!editMode && (
+                  <Button size="sm" variant="outline" onClick={() => { handleMensalidade(selectedMembro); setShowVisualizarDialog(false); }}>Registrar Pagamento Mensalidade</Button>
+                )}
+                {!editMode && selectedMembro.comprovante_url && (
                   <Button size="sm" variant="outline" onClick={() => downloadComprovante(selectedMembro)}>Baixar Comprovante</Button>
                 )}
               </div>
