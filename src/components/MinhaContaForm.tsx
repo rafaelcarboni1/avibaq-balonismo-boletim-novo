@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabaseBrowserClient } from "@/lib/supabase";
+import { supabase } from "@/lib/supabase";
 import { toast } from "react-hot-toast";
 
 export default function MinhaContaForm() {
-  const supabase = supabaseBrowserClient();
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState({ nome: "", telefone: "" });
   const [loading, setLoading] = useState(true);

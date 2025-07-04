@@ -2,6 +2,7 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/": "pages/index.js",
-  "/associar-se": "pages/associar-se.js"
+  "/quem-somos": "pages/quem-somos.js",
+  "/admin/dashboard": "pages/admin/dashboard.js",
+  "/admin/associados": "pages/admin/associados.js"
 }
