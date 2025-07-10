@@ -76,30 +76,40 @@ export default function TrocarSenha() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    console.log("🔧 [DEBUG] Iniciando troca de senha...");
     setLoading(true);
 
     try {
       // Validar senha atual
       if (!user?.senha_hash) {
+        console.log("❌ [DEBUG] Erro: usuário sem senha_hash");
         toast.error("Erro: dados do usuário inválidos");
         setLoading(false);
         return;
       }
 
+      console.log("🔧 [DEBUG] Validando senha atual...");
+
       const senhaAtualValida = await bcrypt.compare(senhaAtual, user.senha_hash);
       if (!senhaAtualValida) {
+        console.log("❌ [DEBUG] Senha atual incorreta");
         toast.error("Senha atual incorreta");
         setLoading(false);
         return;
       }
 
+      console.log("✅ [DEBUG] Senha atual válida");
+
       // Validar nova senha
       const { valid, errors } = validatePassword(novaSenha);
       if (!valid) {
+        console.log("❌ [DEBUG] Nova senha inválida:", errors);
         toast.error("Nova senha inválida: " + errors.join(", "));
         setLoading(false);
         return;
       }
+
+      console.log("✅ [DEBUG] Nova senha válida");
 
       // Confirmar senhas
       if (novaSenha !== confirmarSenha) {
@@ -117,20 +127,26 @@ export default function TrocarSenha() {
       }
 
       // Hash da nova senha
+      console.log("🔧 [DEBUG] Gerando hash da nova senha...");
       const novaSenhaHash = await bcrypt.hash(novaSenha, 12);
 
       // Atualizar senha no Supabase Auth
+      console.log("🔧 [DEBUG] Atualizando senha no Supabase Auth...");
       const { error: authError } = await supabase.auth.updateUser({
         password: novaSenha
       });
 
       if (authError) {
+        console.log("❌ [DEBUG] Erro no Supabase Auth:", authError);
         toast.error("Erro ao atualizar senha na autenticação: " + authError.message);
         setLoading(false);
         return;
       }
 
+      console.log("✅ [DEBUG] Senha atualizada no Supabase Auth");
+
       // Atualizar na tabela users
+      console.log("🔧 [DEBUG] Atualizando tabela users...");
       const { error: dbError } = await supabase
         .from("users")
         .update({ 
@@ -141,23 +157,36 @@ export default function TrocarSenha() {
         .eq("id", user.id);
 
       if (dbError) {
+        console.log("❌ [DEBUG] Erro na tabela users:", dbError);
         toast.error("Erro ao atualizar dados do usuário: " + dbError.message);
         setLoading(false);
         return;
       }
 
+      console.log("✅ [DEBUG] Tabela users atualizada com sucesso");
       toast.success("Senha alterada com sucesso! Redirecionando...");
       
       // Redirecionar para dashboard após 2 segundos
       setTimeout(() => {
+        console.log("🔧 [DEBUG] Redirecionando para dashboard...");
         router.push("/admin/dashboard");
       }, 2000);
 
     } catch (err) {
+      console.log("❌ [DEBUG] Erro catch:", err);
       toast.error("Erro interno: " + (err as Error).message);
       setLoading(false);
     }
   }
+
+  // Log de debug quando componente renderiza
+  console.log("🔧 [DEBUG] Estado do componente:", { 
+    user: !!user, 
+    loading, 
+    senhaAtual: senhaAtual.length > 0,
+    novaSenha: novaSenha.length > 0,
+    confirmarSenha: confirmarSenha.length > 0
+  });
 
   if (!user) {
     return (
@@ -229,9 +258,27 @@ export default function TrocarSenha() {
               </ul>
             </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Alterando..." : "Alterar Senha"}
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={loading}
+              onClick={() => console.log("🔧 [DEBUG] Botão clicado")}
+            >
+              {loading ? (
+                <>
+                  <span className="animate-spin mr-2">⏳</span>
+                  Alterando senha...
+                </>
+              ) : (
+                "Alterar Senha"
+              )}
             </Button>
+            
+            {loading && (
+              <div className="text-center text-sm text-blue-600 mt-2">
+                ⚙️ Processando alteração de senha...
+              </div>
+            )}
           </form>
         </CardContent>
       </Card>

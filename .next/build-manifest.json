@@ -5,8 +5,8 @@
   "devFiles": [],
   "ampDevFiles": [],
   "lowPriorityFiles": [
-    "static/GPErCQdJDzAOs-B52ebwb/_buildManifest.js",
-    "static/GPErCQdJDzAOs-B52ebwb/_ssgManifest.js"
+    "static/GPZk4-aha-bZU53GeysJ4/_buildManifest.js",
+    "static/GPZk4-aha-bZU53GeysJ4/_ssgManifest.js"
   ],
   "rootMainFiles": [],
   "pages": {
@@ -32,7 +32,7 @@
       "static/chunks/webpack-007b04d05f4467f1.js",
       "static/chunks/framework-64ad27b21261a9ce.js",
       "static/chunks/main-b72093f7aa2e45f9.js",
-      "static/css/13e0cb257ab9a7bb.css",
+      "static/css/fbd8525ce181d668.css",
       "static/chunks/pages/_app-51f8bdb761b9ee5f.js"
     ],
     "/_error": [
@@ -111,8 +111,8 @@
       "static/chunks/main-b72093f7aa2e45f9.js",
       "static/chunks/844-81af0aae88e14645.js",
       "static/chunks/332-ed9fde30d658dc96.js",
-      "static/chunks/958-470087dd503b966a.js",
-      "static/chunks/pages/admin/definir-senha-68fb42da85fadad9.js"
+      "static/chunks/958-fecf63514bfdaf98.js",
+      "static/chunks/pages/admin/definir-senha-879a38b7c1f04e67.js"
     ],
     "/admin/login": [
       "static/chunks/webpack-007b04d05f4467f1.js",
@@ -146,8 +146,8 @@
       "static/chunks/main-b72093f7aa2e45f9.js",
       "static/chunks/844-81af0aae88e14645.js",
       "static/chunks/332-ed9fde30d658dc96.js",
-      "static/chunks/958-470087dd503b966a.js",
-      "static/chunks/pages/admin/trocar-senha-f8242cf25c7209fa.js"
+      "static/chunks/958-fecf63514bfdaf98.js",
+      "static/chunks/pages/admin/trocar-senha-899d4dbb5e194f4a.js"
     ],
     "/admin/usuarios": [
       "static/chunks/webpack-007b04d05f4467f1.js",
@@ -156,9 +156,9 @@
       "static/chunks/844-81af0aae88e14645.js",
       "static/chunks/332-ed9fde30d658dc96.js",
       "static/chunks/664-5cb2f1d05b670f12.js",
-      "static/chunks/958-470087dd503b966a.js",
+      "static/chunks/958-fecf63514bfdaf98.js",
       "static/chunks/478-95d6cabfab0fbfb5.js",
-      "static/chunks/pages/admin/usuarios-f50f42748fe13739.js"
+      "static/chunks/pages/admin/usuarios-3483577a37f5b4bd.js"
     ],
     "/associar-se": [
       "static/chunks/webpack-007b04d05f4467f1.js",
@@ -166,8 +166,8 @@
       "static/chunks/main-b72093f7aa2e45f9.js",
       "static/chunks/844-81af0aae88e14645.js",
       "static/chunks/332-ed9fde30d658dc96.js",
-      "static/chunks/958-470087dd503b966a.js",
-      "static/chunks/pages/associar-se-0d222d9440cfbdf7.js"
+      "static/chunks/958-fecf63514bfdaf98.js",
+      "static/chunks/pages/associar-se-0db55e86a45e2b95.js"
     ],
     "/descadastrar": [
       "static/chunks/webpack-007b04d05f4467f1.js",
@@ -175,7 +175,7 @@
       "static/chunks/main-b72093f7aa2e45f9.js",
       "static/chunks/844-81af0aae88e14645.js",
       "static/chunks/332-ed9fde30d658dc96.js",
-      "static/chunks/pages/descadastrar-02ad86b8954d7937.js"
+      "static/chunks/pages/descadastrar-3a871fb05514261f.js"
     ],
     "/historico": [
       "static/chunks/webpack-007b04d05f4467f1.js",

@@ -87,38 +87,48 @@ export default function AdminSetPassword() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("🔧 [DEBUG] Iniciando redefinição de senha...");
     setError("");
     
     // Validar senha forte
     const { valid, errors } = validatePassword(password);
     if (!valid) {
+      console.log("❌ [DEBUG] Senha inválida:", errors);
       setError("Senha inválida: " + errors.join(", "));
       return;
     }
     
     if (password !== confirmPassword) {
+      console.log("❌ [DEBUG] Senhas não coincidem");
       setError("As senhas não coincidem.");
       return;
     }
 
+    console.log("✅ [DEBUG] Validações passou, iniciando atualização...");
     setLoading(true);
     
     try {
       // Atualizar senha no Supabase Auth
+      console.log("🔧 [DEBUG] Atualizando senha no Supabase Auth...");
       const { error: authError } = await supabase.auth.updateUser({
         password: password
       });
 
       if (authError) {
+        console.log("❌ [DEBUG] Erro no Supabase Auth:", authError);
         setError("Erro ao atualizar senha na autenticação: " + authError.message);
         setLoading(false);
         return;
       }
 
+      console.log("✅ [DEBUG] Senha atualizada no Supabase Auth");
+
       // Hash da nova senha para salvar na tabela users
+      console.log("🔧 [DEBUG] Gerando hash da nova senha...");
       const senhaHash = await bcrypt.hash(password, 12);
 
       // Atualizar senha na tabela users
+      console.log("🔧 [DEBUG] Atualizando tabela users com email:", userEmail);
       const { error: dbError } = await supabase
         .from("users")
         .update({
@@ -129,10 +139,13 @@ export default function AdminSetPassword() {
         .eq("email", userEmail);
 
       if (dbError) {
+        console.log("❌ [DEBUG] Erro na tabela users:", dbError);
         setError("Erro ao atualizar dados do usuário: " + dbError.message);
         setLoading(false);
         return;
       }
+
+      console.log("✅ [DEBUG] Tabela users atualizada com sucesso");
 
       toast.success("Senha redefinida com sucesso!");
       setSuccess(true);
