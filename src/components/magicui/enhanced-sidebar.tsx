@@ -44,6 +44,12 @@ const navLinks: NavigationItem[] = [
   { href: "/admin/minha-conta", label: "Minha Conta", icon: UserCircleIcon },
 ];
 
+// Variants para animações otimizadas
+const menuItemVariants = {
+  collapsed: { opacity: 0, width: 0 },
+  expanded: { opacity: 1, width: "auto" }
+};
+
 // Otimizado: transições mais rápidas e menos propriedades animadas
 
 export default function EnhancedSidebar({ 

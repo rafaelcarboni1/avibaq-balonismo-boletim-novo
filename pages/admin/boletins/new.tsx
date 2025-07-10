@@ -9,7 +9,7 @@ import { Badge } from "../../../src/components/ui/badge";
 import { toast } from "../../../src/components/ui/sonner";
 import { Dialog, DialogContent } from "../../../src/components/ui/dialog";
 import { motion } from "framer-motion";
-import { DocumentTextIcon, Plus, Mic, MicOff, Upload, Image, X, ArrowLeft } from "lucide-react";
+import { FileText, Plus, Mic, MicOff, Upload, Image, X, ArrowLeft } from "lucide-react";
 import { useUser } from "@/hooks/useUser";
 
 const bandeiraToStatus = {
@@ -322,7 +322,7 @@ export default function AdminBoletimForm() {
       breadcrumbs={[
         { label: "Dashboard", href: "/admin/dashboard" },
         { label: "Boletins", href: "/admin/boletins" },
-        { label: "Novo", icon: DocumentTextIcon }
+        { label: "Novo", icon: FileText }
       ]}
       headerActions={
         <Button variant="outline" onClick={() => router.push("/admin/boletins")}>

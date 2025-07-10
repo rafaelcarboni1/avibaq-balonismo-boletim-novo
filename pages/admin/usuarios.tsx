@@ -425,8 +425,8 @@ export default function UsuariosAdmin() {
                   Fechar
                 </Button>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )}
 
         {/* Modal Novo/Editar Usuário */}

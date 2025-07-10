@@ -891,7 +891,6 @@ export default function AdminAssociados() {
             </Tabs>
           </motion.div>
         </div>
-      </EnhancedDashboardLayout>
 
         {/* Dialog de Recusa */}
         <Dialog open={showRecusaDialog} onOpenChange={setShowRecusaDialog}>
@@ -1198,7 +1197,7 @@ export default function AdminAssociados() {
             </div>
           </div>
         )}
-      </div>
+      </EnhancedDashboardLayout>
     </RequireAdmin>
   );
 } 

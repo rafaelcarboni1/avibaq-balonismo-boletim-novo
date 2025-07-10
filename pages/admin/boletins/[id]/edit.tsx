@@ -10,7 +10,7 @@ import { Badge } from "../../../../src/components/ui/badge";
 import { toast } from "../../../../src/components/ui/sonner";
 import { Dialog, DialogContent } from "../../../../src/components/ui/dialog";
 import { motion } from "framer-motion";
-import { DocumentTextIcon, Save, X, Upload, Mic, Image, ArrowLeft } from "lucide-react";
+import { FileText, Save, X, Upload, Mic, Image, ArrowLeft } from "lucide-react";
 import { useUser } from "@/hooks/useUser";
 
 const bandeiraToStatus = {
@@ -307,12 +307,12 @@ export default function AdminBoletimEditForm() {
         breadcrumbs={[
           { label: "Dashboard", href: "/admin/dashboard" },
           { label: "Boletins", href: "/admin/boletins" },
-          { label: "Editar", icon: DocumentTextIcon }
+          { label: "Editar", icon: FileText }
         ]}
       >
         <div className="max-w-4xl mx-auto">
           <div className="bg-white rounded-2xl p-8 border border-gray-200/50">
-            <LoadingSkeleton variant="form" />
+            <LoadingSkeleton variant="card" />
           </div>
         </div>
       </EnhancedDashboardLayout>
@@ -325,7 +325,7 @@ export default function AdminBoletimEditForm() {
       breadcrumbs={[
         { label: "Dashboard", href: "/admin/dashboard" },
         { label: "Boletins", href: "/admin/boletins" },
-        { label: "Editar", icon: DocumentTextIcon }
+        { label: "Editar", icon: FileText }
       ]}
       headerActions={
         <Button variant="outline" onClick={() => router.push("/admin/boletins")}>
@@ -344,7 +344,7 @@ export default function AdminBoletimEditForm() {
           <div className="p-8">
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <DocumentTextIcon className="h-8 w-8 text-blue-600" />
+                <FileText className="h-8 w-8 text-blue-600" />
               </div>
               <h1 className="text-2xl font-bold text-gray-900 mb-2">Editar Boletim Meteorológico</h1>
               <p className="text-gray-600">Atualize as informações do boletim meteorológico</p>

@@ -5,7 +5,7 @@ import { Button } from "../../src/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../src/components/ui/card";
 import { Badge } from "../../src/components/ui/badge";
 import { toast } from "../../src/components/ui/sonner";
-import { Plus, Edit, Trash2, Users, Eye, DocumentTextIcon } from "lucide-react";
+import { Plus, Edit, Trash2, Users, Eye, FileText } from "lucide-react";
 import RequireAdmin from "../../src/components/RequireAdmin";
 import { useUser } from "@/hooks/useUser";
 import EnhancedDashboardLayout from "@/components/magicui/enhanced-dashboard-layout";
@@ -111,7 +111,7 @@ export default function AdminBoletinsList() {
 
   if (loading) {
     return (
-      <EnhancedDashboardLayout title="Boletins" breadcrumbs={[{ label: "Boletins", icon: DocumentTextIcon }]}>
+      <EnhancedDashboardLayout title="Boletins" breadcrumbs={[{ label: "Boletins", icon: FileText }]}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="bg-white rounded-2xl p-6 border border-gray-200/50">
@@ -133,7 +133,7 @@ export default function AdminBoletinsList() {
         title="Gerenciar Boletins"
         breadcrumbs={[
           { label: "Dashboard", href: "/admin/dashboard" },
-          { label: "Boletins", icon: DocumentTextIcon }
+          { label: "Boletins", icon: FileText }
         ]}
         headerActions={
           <div className="flex gap-3">
@@ -153,7 +153,7 @@ export default function AdminBoletinsList() {
             <EnhancedKpiCard 
               title="Total de Boletins"
               value={total}
-              icon={DocumentTextIcon}
+              icon={FileText}
               color="blue"
               trend="neutral"
               trendValue="Total registrado"
@@ -207,7 +207,7 @@ export default function AdminBoletinsList() {
             <div className="p-6">
               {boletins.length === 0 ? (
                 <div className="text-center py-12">
-                  <DocumentTextIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                   <p className="text-gray-500 text-lg">Nenhum boletim encontrado</p>
                   <p className="text-gray-400 text-sm mt-2">Crie seu primeiro boletim meteorológico</p>
                 </div>
