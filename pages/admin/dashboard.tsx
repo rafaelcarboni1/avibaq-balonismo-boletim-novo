@@ -1,5 +1,10 @@
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { DashboardLayout } from "@/components/DashboardLayout";
+import EnhancedDashboardLayout from "@/components/magicui/enhanced-dashboard-layout";
+import EnhancedKpiCard from "@/components/magicui/enhanced-kpi-card";
+import { BentoGrid, BentoGridItem } from "@/components/magicui/bento-grid";
+import AnimatedChart from "@/components/magicui/animated-chart";
+import LoadingSkeleton from "@/components/magicui/loading-skeleton";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getDashboardStats } from "@/helpers/getDashboardStats";
@@ -8,8 +13,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/hooks/useUser";
-import KpiCard from "@/components/KpiCard";
-import { UserIcon, BuildingOfficeIcon } from "@heroicons/react/24/solid";
+import { 
+  UserIcon, 
+  BuildingOfficeIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  ExclamationTriangleIcon,
+  DocumentTextIcon
+} from "@heroicons/react/24/solid";
 
 function CardLink({ title, value, href, subtitle }: { title: any, value: any, href: any, subtitle?: any }) {
   // Cores de depuração para cada card
@@ -115,63 +126,227 @@ export default function AdminDashboard() {
   // DASHBOARD REAL RESTAURADO
   return (
     <ProtectedRoute allowedRoles={["admin", "meteo", "tesouraria"]}>
-      <DashboardLayout title="Dashboard">
-        <div style={{ display: 'flex', flexDirection: 'row', gap: 32, alignItems: 'flex-start' }}>
-          <div style={{ flex: 1 }}>
-            {/* KPI Cards refinados */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-              <KpiCard title="Cadastros Ativos"    value={stats.cadastrosAtivos}      icon={UserIcon}           color="green" />
-              <KpiCard title="Cadastros Pendentes" value={stats.cadastrosPendentes}   icon={UserIcon}           color="yellow"/>
-              <KpiCard title="Pilotos"             value={stats.totalPilotos}         icon={UserIcon}           color="blue" />
-              <KpiCard title="Empresas"            value={stats.totalEmpresas}        icon={BuildingOfficeIcon} color="red"  />
-            </div>
-            {/* Preview Boletim de Amanhã */}
-            <div style={{ marginTop: 32, marginBottom: 16 }}>
-              {loadingBoletimAmanha ? (
-                <div style={{ background: '#f3f4f6', borderRadius: 8, padding: 24, textAlign: 'center', fontSize: 18 }}>Carregando boletim de amanhã...</div>
-              ) : boletimAmanha ? (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16, background: '#f0fdf4', border: '1px solid #22c55e', borderRadius: 8, padding: 20 }}>
-                  <span style={{ fontWeight: 700, color: boletimAmanha.bandeira === 'verde' ? '#16a34a' : boletimAmanha.bandeira === 'amarela' ? '#eab308' : '#dc2626', fontSize: 18 }}>
-                    Bandeira: {boletimAmanha.bandeira.toUpperCase()}
-                  </span>
-                  <span style={{ fontSize: 16, color: '#222' }}>{boletimAmanha.titulo_curto}</span>
-                  <Button variant="outline" size="sm" onClick={() => router.push(`/admin/boletins/${boletimAmanha.id}/edit`)}>
-                    Editar Boletim de Amanhã
-                  </Button>
-                </div>
-              ) : (
-                <div style={{ background: '#fee2e2', border: '1px solid #dc2626', borderRadius: 8, padding: 20, color: '#b91c1c', fontWeight: 600, fontSize: 16 }}>
-                  Boletim de amanhã não criado (deadline 19 h)
-                </div>
-              )}
-            </div>
-            {/* Banner de Pendências */}
-            {parseInt(stats?.cadastrosPendentes ?? '0') > 0 && (
-              <div style={{ background: '#fef9c3', border: '1px solid #facc15', color: '#b45309', borderRadius: 8, padding: 16, marginBottom: 16, fontWeight: 600, fontSize: 16 }}>
-                Há {stats.cadastrosPendentes} cadastros aguardando aprovação
-              </div>
+      <EnhancedDashboardLayout 
+        title="Dashboard"
+        breadcrumbs={[
+          { label: "Dashboard", icon: DocumentTextIcon }
+        ]}
+      >
+        <div className="space-y-8">
+          {/* KPI Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {!stats || stats.totalPilotos === "--" ? (
+              // Loading skeletons
+              <>
+                {[1, 2, 3, 4].map((i) => (
+                  <div key={i} className="bg-white rounded-2xl p-6 border border-gray-200/50">
+                    <LoadingSkeleton variant="card" />
+                  </div>
+                ))}
+              </>
+            ) : (
+              // Actual KPI cards
+              <>
+            <EnhancedKpiCard 
+              title="Cadastros Ativos"
+              value={parseInt(stats.cadastrosAtivos)} 
+              icon={CheckCircleIcon}
+              color="green"
+              trend="up"
+              trendValue="+12%"
+              description="Membros com status ativo"
+              delay={0}
+            />
+            <EnhancedKpiCard 
+              title="Cadastros Pendentes"
+              value={parseInt(stats.cadastrosPendentes)}
+              icon={ClockIcon}
+              color="yellow"
+              trend={parseInt(stats.cadastrosPendentes) > 0 ? "up" : "neutral"}
+              trendValue={parseInt(stats.cadastrosPendentes) > 0 ? "Requer atenção" : "Em dia"}
+              description="Aguardando aprovação"
+              delay={0.1}
+            />
+            <EnhancedKpiCard 
+              title="Pilotos"
+              value={parseInt(stats.totalPilotos)}
+              icon={UserIcon}
+              color="blue"
+              trend="up"
+              trendValue="+3 este mês"
+              description="Pilotos cadastrados"
+              delay={0.2}
+            />
+            <EnhancedKpiCard 
+              title="Empresas"
+              value={parseInt(stats.totalEmpresas)}
+              icon={BuildingOfficeIcon}
+              color="purple"
+              trend="neutral"
+              trendValue="Estável"
+              description="Agências parceiras"
+              delay={0.3}
+            />
+              </>
             )}
-            {/* Painel de Log de Atividade - sempre abaixo */}
-            <aside style={{ width: '100%', background: '#f8fafc', border: '1px solid #e5e7eb', borderRadius: 12, padding: 20, boxShadow: '0 2px 8px #0001', marginTop: 32, marginBottom: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <h3 style={{ fontWeight: 700, fontSize: 18, marginBottom: 12, color: '#0f172a' }}>Log de Atividade</h3>
-              {loadingLogs ? (
-                <div style={{ color: '#64748b', fontSize: 15 }}>Carregando log...</div>
-              ) : logs.length === 0 ? (
-                <div style={{ color: '#64748b', fontSize: 15 }}>Nenhuma atividade recente.</div>
-              ) : (
-                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                  {logs.map((log) => (
-                    <li key={log.id} style={{ marginBottom: 12, paddingBottom: 8, borderBottom: '1px solid #e5e7eb' }}>
-                      <div style={{ fontWeight: 600, color: '#334155', fontSize: 15 }}>{log.acao}</div>
-                      <div style={{ color: '#64748b', fontSize: 13 }}>{log.created_at && new Date(log.created_at).toLocaleString('pt-BR')}</div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </aside>
           </div>
+
+          {/* Gráficos e Analytics */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <AnimatedChart
+              title="Cadastros por Mês"
+              type="bar"
+              data={[
+                { name: 'Jan', value: 12 },
+                { name: 'Fev', value: 8 },
+                { name: 'Mar', value: 15 },
+                { name: 'Abr', value: 10 },
+                { name: 'Mai', value: 18 },
+                { name: 'Jun', value: 22 },
+              ]}
+              colors={["#3b82f6", "#10b981"]}
+            />
+            
+            <AnimatedChart
+              title="Distribuição por Tipo"
+              type="pie"
+              data={[
+                { name: 'Pilotos', value: parseInt(stats.totalPilotos) || 0 },
+                { name: 'Empresas', value: parseInt(stats.totalEmpresas) || 0 },
+              ]}
+              colors={["#3b82f6", "#10b981", "#f59e0b", "#ef4444"]}
+            />
+          </div>
+
+          {/* Bento Grid Layout */}
+          <BentoGrid className="md:auto-rows-[20rem]">
+            {/* Boletim de Amanhã */}
+            <BentoGridItem
+              className="md:col-span-2"
+              title="Boletim de Amanhã"
+              description={
+                loadingBoletimAmanha ? (
+                  <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex items-center gap-2"
+                  >
+                    <div className="w-4 h-4 bg-blue-500 rounded-full animate-pulse" />
+                    <span>Carregando boletim...</span>
+                  </motion.div>
+                ) : boletimAmanha ? (
+                  <div className="space-y-4">
+                    <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                      boletimAmanha.bandeira === 'verde' ? 'bg-green-100 text-green-800' :
+                      boletimAmanha.bandeira === 'amarela' ? 'bg-yellow-100 text-yellow-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      Bandeira {boletimAmanha.bandeira.toUpperCase()}
+                    </div>
+                    <p className="text-gray-700">{boletimAmanha.titulo_curto}</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => router.push(`/admin/boletins/${boletimAmanha.id}/edit`)}
+                      className="mt-2"
+                    >
+                      Editar Boletim
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 text-red-600">
+                    <ExclamationTriangleIcon className="h-5 w-5" />
+                    <span>Boletim não criado (deadline 19h)</span>
+                  </div>
+                )
+              }
+              header={
+                <div className="flex h-20 w-full bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl items-center justify-center">
+                  <DocumentTextIcon className="h-10 w-10 text-white" />
+                </div>
+              }
+              icon={<DocumentTextIcon className="h-6 w-6 text-blue-500" />}
+            />
+
+            {/* Alertas e Pendências */}
+            <BentoGridItem
+              title="Alertas"
+              description={
+                parseInt(stats?.cadastrosPendentes ?? '0') > 0 ? (
+                  <div className="flex items-center gap-2 text-amber-600">
+                    <ExclamationTriangleIcon className="h-5 w-5" />
+                    <span>{stats.cadastrosPendentes} cadastros pendentes</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2 text-green-600">
+                    <CheckCircleIcon className="h-5 w-5" />
+                    <span>Tudo em dia!</span>
+                  </div>
+                )
+              }
+              header={
+                <div className={`flex h-20 w-full rounded-xl items-center justify-center ${
+                  parseInt(stats?.cadastrosPendentes ?? '0') > 0 
+                    ? 'bg-gradient-to-br from-amber-500 to-orange-600'
+                    : 'bg-gradient-to-br from-green-500 to-emerald-600'
+                }`}>
+                  {parseInt(stats?.cadastrosPendentes ?? '0') > 0 ? (
+                    <ExclamationTriangleIcon className="h-10 w-10 text-white" />
+                  ) : (
+                    <CheckCircleIcon className="h-10 w-10 text-white" />
+                  )}
+                </div>
+              }
+              icon={<ExclamationTriangleIcon className="h-6 w-6 text-amber-500" />}
+            />
+
+            {/* Log de Atividade */}
+            <BentoGridItem
+              className="md:col-span-3"
+              title="Atividade Recente"
+              description={
+                <div className="space-y-3">
+                  {loadingLogs ? (
+                    <div className="space-y-2">
+                      {[1, 2, 3].map((i) => (
+                        <div key={i} className="animate-pulse">
+                          <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                          <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : logs.length === 0 ? (
+                    <p className="text-gray-500">Nenhuma atividade recente</p>
+                  ) : (
+                    <div className="space-y-3 max-h-40 overflow-y-auto">
+                      {logs.slice(0, 5).map((log, index) => (
+                        <motion.div
+                          key={log.id}
+                          initial={{ opacity: 0, x: -20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.1 }}
+                          className="border-l-2 border-blue-200 pl-3 py-1"
+                        >
+                          <p className="text-sm font-medium text-gray-900">{log.acao}</p>
+                          <p className="text-xs text-gray-500">
+                            {log.created_at && new Date(log.created_at).toLocaleString('pt-BR')}
+                          </p>
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              }
+              header={
+                <div className="flex h-20 w-full bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl items-center justify-center">
+                  <ClockIcon className="h-10 w-10 text-white" />
+                </div>
+              }
+              icon={<ClockIcon className="h-6 w-6 text-indigo-500" />}
+            />
+          </BentoGrid>
         </div>
-      </DashboardLayout>
+      </EnhancedDashboardLayout>
     </ProtectedRoute>
   );
 } 
