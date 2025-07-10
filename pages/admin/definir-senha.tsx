@@ -18,8 +18,35 @@ export default function AdminSetPassword() {
   const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
-    // Verificar se o usuário está autenticado e tem sessão de redefinição
-    const checkSession = async () => {
+    // Processar tokens de recovery da URL
+    const handleAuthCallback = async () => {
+      // Verificar se há hash fragments na URL (tokens do Supabase)
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const accessToken = hashParams.get('access_token');
+      const refreshToken = hashParams.get('refresh_token');
+      const type = hashParams.get('type');
+
+      if (accessToken && type === 'recovery') {
+        // Estabelecer sessão com os tokens de recovery
+        const { data, error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken || ''
+        });
+
+        if (error) {
+          setError("Erro ao processar link de redefinição: " + error.message);
+          return;
+        }
+
+        if (data.session?.user) {
+          setUserEmail(data.session.user.email || "");
+          // Limpar URL dos tokens por segurança
+          window.history.replaceState({}, document.title, window.location.pathname);
+          return;
+        }
+      }
+
+      // Se não há tokens na URL, verificar sessão existente
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         setError("Link inválido ou expirado. Solicite um novo link de redefinição.");
@@ -27,7 +54,8 @@ export default function AdminSetPassword() {
       }
       setUserEmail(session.user?.email || "");
     };
-    checkSession();
+
+    handleAuthCallback();
   }, []);
 
   // Função de validação de senha forte

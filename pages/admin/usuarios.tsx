@@ -27,10 +27,10 @@ export default function UsuariosAdmin() {
     fetchUsuarios();
   }, []);
 
-  // Gerar senha temporária segura
+  // Gerar senha temporária segura (símbolos URL-safe)
   function generateTemporaryPassword(): string {
     const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789';
-    const symbols = '!@#$';
+    const symbols = '!@*+'; // Símbolos mais seguros para URL
     let password = '';
     
     // 2 maiúsculas + 2 minúsculas + 2 números + 1 símbolo + 1 extra
@@ -87,7 +87,10 @@ export default function UsuariosAdmin() {
         // 1. Criar usuário no Supabase Auth primeiro
         const { data: authUser, error: authError } = await supabase.auth.signUp({
           email: form.email,
-          password: tempPassword
+          password: tempPassword,
+          options: {
+            emailRedirectTo: undefined // Não enviar email de confirmação
+          }
         });
         
         if (authError) {
@@ -117,6 +120,10 @@ export default function UsuariosAdmin() {
           toast.error("Erro ao criar usuário na base de dados: " + dbError.message);
           toast.error("IMPORTANTE: Usuário foi criado no sistema de autenticação mas não na base de dados. Contate o administrador do sistema.");
         } else {
+          // Debug: verificar status do usuário criado
+          console.log("Usuário criado no Auth:", authUser.user);
+          console.log("Status de confirmação:", authUser.user?.email_confirmed_at);
+          
           toast.success("Usuário criado com sucesso");
           setGeneratedPassword(tempPassword);
           setShowPasswordModal(true);
@@ -220,6 +227,14 @@ export default function UsuariosAdmin() {
                 <p className="text-sm text-gray-600">
                   Uma senha temporária foi gerada para o usuário. Copie e repasse com segurança:
                 </p>
+                <div className="bg-blue-50 border border-blue-200 p-3 rounded text-sm">
+                  <p className="text-blue-800 font-medium">💡 Instruções de uso:</p>
+                  <ul className="mt-1 space-y-1 text-blue-700 text-xs">
+                    <li>• Use esta senha exatamente como mostrada (copie para evitar erros)</li>
+                    <li>• Se o login falhar, tente usar "Esqueci minha senha" em vez disso</li>
+                    <li>• A senha deve ser alterada no primeiro login</li>
+                  </ul>
+                </div>
                 <div className="bg-gray-100 p-4 rounded border">
                   <label className="block text-sm font-medium mb-2">Senha Temporária:</label>
                   <div className="flex items-center gap-2">

@@ -5,8 +5,8 @@
   "devFiles": [],
   "ampDevFiles": [],
   "lowPriorityFiles": [
-    "static/XZDGH3XWQPRZ0vOuguH_z/_buildManifest.js",
-    "static/XZDGH3XWQPRZ0vOuguH_z/_ssgManifest.js"
+    "static/GPErCQdJDzAOs-B52ebwb/_buildManifest.js",
+    "static/GPErCQdJDzAOs-B52ebwb/_ssgManifest.js"
   ],
   "rootMainFiles": [],
   "pages": {
@@ -111,8 +111,8 @@
       "static/chunks/main-b72093f7aa2e45f9.js",
       "static/chunks/844-81af0aae88e14645.js",
       "static/chunks/332-ed9fde30d658dc96.js",
-      "static/chunks/958-fecf63514bfdaf98.js",
-      "static/chunks/pages/admin/definir-senha-4ea046a3540100dc.js"
+      "static/chunks/958-470087dd503b966a.js",
+      "static/chunks/pages/admin/definir-senha-68fb42da85fadad9.js"
     ],
     "/admin/login": [
       "static/chunks/webpack-007b04d05f4467f1.js",
@@ -146,8 +146,8 @@
       "static/chunks/main-b72093f7aa2e45f9.js",
       "static/chunks/844-81af0aae88e14645.js",
       "static/chunks/332-ed9fde30d658dc96.js",
-      "static/chunks/958-fecf63514bfdaf98.js",
-      "static/chunks/pages/admin/trocar-senha-30ebcf38fda10ffe.js"
+      "static/chunks/958-470087dd503b966a.js",
+      "static/chunks/pages/admin/trocar-senha-f8242cf25c7209fa.js"
     ],
     "/admin/usuarios": [
       "static/chunks/webpack-007b04d05f4467f1.js",
@@ -156,9 +156,9 @@
       "static/chunks/844-81af0aae88e14645.js",
       "static/chunks/332-ed9fde30d658dc96.js",
       "static/chunks/664-5cb2f1d05b670f12.js",
-      "static/chunks/958-fecf63514bfdaf98.js",
+      "static/chunks/958-470087dd503b966a.js",
       "static/chunks/478-95d6cabfab0fbfb5.js",
-      "static/chunks/pages/admin/usuarios-cc043ccc25e8fefd.js"
+      "static/chunks/pages/admin/usuarios-f50f42748fe13739.js"
     ],
     "/associar-se": [
       "static/chunks/webpack-007b04d05f4467f1.js",
@@ -166,8 +166,8 @@
       "static/chunks/main-b72093f7aa2e45f9.js",
       "static/chunks/844-81af0aae88e14645.js",
       "static/chunks/332-ed9fde30d658dc96.js",
-      "static/chunks/958-fecf63514bfdaf98.js",
-      "static/chunks/pages/associar-se-0db55e86a45e2b95.js"
+      "static/chunks/958-470087dd503b966a.js",
+      "static/chunks/pages/associar-se-0d222d9440cfbdf7.js"
     ],
     "/descadastrar": [
       "static/chunks/webpack-007b04d05f4467f1.js",
@@ -175,7 +175,7 @@
       "static/chunks/main-b72093f7aa2e45f9.js",
       "static/chunks/844-81af0aae88e14645.js",
       "static/chunks/332-ed9fde30d658dc96.js",
-      "static/chunks/pages/descadastrar-3a871fb05514261f.js"
+      "static/chunks/pages/descadastrar-02ad86b8954d7937.js"
     ],
     "/historico": [
       "static/chunks/webpack-007b04d05f4467f1.js",
