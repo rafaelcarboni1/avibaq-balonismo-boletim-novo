@@ -90,7 +90,8 @@ export default function UsuariosAdmin() {
           email: form.email, 
           role: form.role,
           senha_hash: senhaHash,
-          ativo: true
+          ativo: true,
+          primeira_senha: true
         });
         
         if (error) {

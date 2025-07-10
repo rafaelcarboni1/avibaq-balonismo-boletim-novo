@@ -27,10 +27,10 @@ export default function AdminLogin() {
       setLoading(false);
       return;
     }
-    // Verifica se o e-mail está na tabela users com role permitida OU na usuarios_admin (legado)
+    // Verifica se o e-mail está na tabela users com role permitida
     const { data: userData, error: userError } = await supabase
       .from("users")
-      .select("role")
+      .select("role, primeira_senha")
       .eq("email", email)
       .single();
     const allowedRoles = ["admin", "meteo", "tesouraria"];
@@ -40,8 +40,15 @@ export default function AdminLogin() {
       setLoading(false);
       return;
     }
+    
     setLoading(false);
-    router.push("/admin/dashboard");
+    
+    // Se é primeira senha (temporária), redirecionar para troca de senha
+    if (userData.primeira_senha) {
+      router.push("/admin/trocar-senha");
+    } else {
+      router.push("/admin/dashboard");
+    }
   };
 
   const handleResetPassword = async (e: React.FormEvent) => {
