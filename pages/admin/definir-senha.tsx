@@ -4,6 +4,8 @@ import { supabase } from "../../src/integrations/supabase/client";
 import { Card, CardContent, CardHeader } from "../../src/components/ui/card";
 import { Button } from "../../src/components/ui/button";
 import { Input } from "../../src/components/ui/input";
+import { toast } from "react-hot-toast";
+import bcrypt from "bcryptjs";
 
 export default function AdminSetPassword() {
   const router = useRouter();
@@ -13,6 +15,7 @@ export default function AdminSetPassword() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
     // Verificar se o usuário está autenticado e tem sessão de redefinição
@@ -22,16 +25,46 @@ export default function AdminSetPassword() {
         setError("Link inválido ou expirado. Solicite um novo link de redefinição.");
         return;
       }
+      setUserEmail(session.user?.email || "");
     };
     checkSession();
   }, []);
+
+  // Função de validação de senha forte
+  function validatePassword(password: string): { valid: boolean; errors: string[] } {
+    const errors: string[] = [];
+    
+    if (password.length < 8) {
+      errors.push("Mínimo 8 caracteres");
+    }
+    
+    if (!/[A-Z]/.test(password)) {
+      errors.push("Pelo menos 1 letra maiúscula");
+    }
+    
+    if (!/[a-z]/.test(password)) {
+      errors.push("Pelo menos 1 letra minúscula");
+    }
+    
+    if (!/[0-9]/.test(password)) {
+      errors.push("Pelo menos 1 número");
+    }
+    
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      errors.push("Pelo menos 1 símbolo (!@#$%^&*...)");
+    }
+
+    return { valid: errors.length === 0, errors };
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     
-    if (password.length < 6) {
-      setError("A senha deve ter pelo menos 6 caracteres.");
+    // Validar senha forte
+    const { valid, errors } = validatePassword(password);
+    if (!valid) {
+      setError("Senha inválida: " + errors.join(", "));
       return;
     }
     
@@ -43,16 +76,37 @@ export default function AdminSetPassword() {
     setLoading(true);
     
     try {
-      const { error } = await supabase.auth.updateUser({
+      // Atualizar senha no Supabase Auth
+      const { error: authError } = await supabase.auth.updateUser({
         password: password
       });
 
-      if (error) {
-        setError("Erro ao atualizar senha: " + error.message);
+      if (authError) {
+        setError("Erro ao atualizar senha na autenticação: " + authError.message);
         setLoading(false);
         return;
       }
 
+      // Hash da nova senha para salvar na tabela users
+      const senhaHash = await bcrypt.hash(password, 12);
+
+      // Atualizar senha na tabela users
+      const { error: dbError } = await supabase
+        .from("users")
+        .update({
+          senha_hash: senhaHash,
+          primeira_senha: false,
+          updated_at: new Date().toISOString()
+        })
+        .eq("email", userEmail);
+
+      if (dbError) {
+        setError("Erro ao atualizar dados do usuário: " + dbError.message);
+        setLoading(false);
+        return;
+      }
+
+      toast.success("Senha redefinida com sucesso!");
       setSuccess(true);
       setTimeout(() => {
         router.push("/admin/login");
@@ -86,8 +140,9 @@ export default function AdminSetPassword() {
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   required
-                  minLength={6}
+                  minLength={8}
                   autoFocus
+                  placeholder="Mín. 8 chars, maiúsc., minúsc., núm., símbolo"
                 />
               </div>
               <div>
@@ -98,8 +153,20 @@ export default function AdminSetPassword() {
                   value={confirmPassword}
                   onChange={e => setConfirmPassword(e.target.value)}
                   required
-                  minLength={6}
+                  minLength={8}
+                  placeholder="Digite a senha novamente"
                 />
+              </div>
+              
+              <div className="bg-blue-50 border border-blue-200 p-3 rounded text-sm">
+                <strong>📋 Requisitos da senha:</strong>
+                <ul className="mt-1 space-y-1 text-blue-800">
+                  <li>• Mínimo 8 caracteres</li>
+                  <li>• Pelo menos 1 maiúscula (A-Z)</li>
+                  <li>• Pelo menos 1 minúscula (a-z)</li>
+                  <li>• Pelo menos 1 número (0-9)</li>
+                  <li>• Pelo menos 1 símbolo (!@#$%...)</li>
+                </ul>
               </div>
               {error && <div className="text-red-600 text-sm">{error}</div>}
               <Button type="submit" className="w-full" disabled={loading}>

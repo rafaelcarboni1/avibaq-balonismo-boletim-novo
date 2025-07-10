@@ -1,8 +1,1 @@
-{
-  "/_app": "pages/_app.js",
-  "/_error": "pages/_error.js",
-  "/_document": "pages/_document.js",
-  "/membros": "pages/membros.js",
-  "/admin/login": "pages/admin/login.js",
-  "/": "pages/index.js"
-}
+{"/_app":"pages/_app.js","/acessibilidade":"pages/acessibilidade.html","/404":"pages/404.html","/admin/associados":"pages/admin/associados.html","/admin/boletins":"pages/admin/boletins.html","/admin/cadastrar-admin":"pages/admin/cadastrar-admin.html","/admin/dashboard":"pages/admin/dashboard.html","/admin/definir-senha":"pages/admin/definir-senha.html","/_error":"pages/_error.js","/admin/login":"pages/admin/login.html","/admin/minha-conta":"pages/admin/minha-conta.html","/admin":"pages/admin.html","/admin/permissoes":"pages/admin/permissoes.html","/admin/trocar-senha":"pages/admin/trocar-senha.html","/admin/usuarios":"pages/admin/usuarios.html","/api/send-aprovado":"pages/api/send-aprovado.js","/api/test-send-boletim":"pages/api/test-send-boletim.js","/associar-se":"pages/associar-se.html","/descadastrar":"pages/descadastrar.html","/historico":"pages/historico.html","/":"pages/index.html","/inscricao-recebida":"pages/inscricao-recebida.html","/login":"pages/login.html","/membros":"pages/membros.html","/notfound":"pages/notfound.html","/politica-privacidade":"pages/politica-privacidade.html","/quem-somos":"pages/quem-somos.html","/admin/boletins/[id]/edit":"pages/admin/boletins/[id]/edit.html","/admin/boletins/new":"pages/admin/boletins/new.html","/_document":"pages/_document.js","/api/join":"pages/api/join.js"}
