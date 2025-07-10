@@ -84,25 +84,23 @@ export default function EnhancedKpiCard({
   
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ 
-        duration: 0.6, 
-        delay,
-        type: "spring",
-        stiffness: 100,
-        damping: 20
+        duration: 0.3, 
+        delay: delay * 0.5
       }}
       whileHover={{ 
-        scale: 1.02,
-        boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+        scale: 1.01,
+        transition: { duration: 0.2 }
       }}
+      style={{ willChange: 'transform, opacity' }}
       className={cn(
-        "relative overflow-hidden bg-gradient-to-br border backdrop-blur-sm transition-all duration-300",
+        "relative overflow-hidden bg-gradient-to-br border backdrop-blur-sm transition-all duration-200",
         "rounded-2xl p-6 cursor-pointer group",
         colors.bg,
         colors.border,
-        "hover:shadow-xl",
+        "hover:shadow-lg",
         colors.glow,
         className,
       )}
@@ -113,13 +111,13 @@ export default function EnhancedKpiCard({
       {/* Floating icon */}
       <div className="flex items-start justify-between mb-4">
         <motion.div
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ delay: delay + 0.2, duration: 0.5 }}
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: delay * 0.3, duration: 0.2 }}
           className={cn(
-            "p-3 rounded-xl shadow-lg transition-all duration-300",
+            "p-3 rounded-xl shadow-lg transition-all duration-200",
             colors.icon,
-            "group-hover:scale-110 group-hover:rotate-6"
+            "group-hover:scale-105"
           )}
         >
           <Icon className="h-6 w-6" />

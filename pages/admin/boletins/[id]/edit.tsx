@@ -1,11 +1,16 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { supabase } from "../../../../src/integrations/supabase/client";
+import EnhancedDashboardLayout from "../../../../src/components/magicui/enhanced-dashboard-layout";
+import LoadingSkeleton from "../../../../src/components/magicui/loading-skeleton";
 import { Button } from "../../../../src/components/ui/button";
 import { Input } from "../../../../src/components/ui/input";
 import { Textarea } from "../../../../src/components/ui/textarea";
+import { Badge } from "../../../../src/components/ui/badge";
 import { toast } from "../../../../src/components/ui/sonner";
 import { Dialog, DialogContent } from "../../../../src/components/ui/dialog";
+import { motion } from "framer-motion";
+import { DocumentTextIcon, Save, X, Upload, Mic, Image, ArrowLeft } from "lucide-react";
 import { useUser } from "@/hooks/useUser";
 
 const bandeiraToStatus = {
@@ -46,9 +51,11 @@ export default function AdminBoletimEditForm() {
   const [audiosToDelete, setAudiosToDelete] = useState<string[]>([]);
   const [fotosToDelete, setFotosToDelete] = useState<string[]>([]);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [pageLoading, setPageLoading] = useState(true);
 
   useEffect(() => {
     if (isEdit) {
+      setPageLoading(true);
       supabase.from("boletins").select("*", { count: "exact" }).eq("id", id).single().then(({ data }) => {
         if (data) {
           setForm({
@@ -61,7 +68,10 @@ export default function AdminBoletimEditForm() {
           setSavedAudios(data['audios_urls'] || []);
           setSavedFotos(data['fotos_urls'] || []);
         }
+        setPageLoading(false);
       });
+    } else {
+      setPageLoading(false);
     }
   }, [id, isEdit]);
 
@@ -221,7 +231,7 @@ export default function AdminBoletimEditForm() {
       atualizado_em: new Date().toISOString(),
       publicado: true,
     };
-    console.log('Payload update principal:', updatePrincipalPayload);
+    // console.log('Payload update principal:', updatePrincipalPayload);
     const { data: updated, error } = await supabase.from("boletins").update(updatePrincipalPayload).eq("id", id).select("id").single();
     if (error) {
       console.error("Erro detalhado Supabase:", error);
@@ -249,7 +259,7 @@ export default function AdminBoletimEditForm() {
       audios_urls: Array.isArray(audioUrls) ? audioUrls : [],
       fotos_urls: Array.isArray(fotoUrls) ? fotoUrls : [],
     };
-    console.log('Payload update boletim:', updatePayload);
+    // console.log('Payload update boletim:', updatePayload);
     const { data: updateData, error: updateError } = await supabase
       .from("boletins")
       .update(updatePayload)
@@ -281,105 +291,312 @@ export default function AdminBoletimEditForm() {
     router.push("/admin/boletins");
   }
 
+  const getBandeiraColor = (bandeira: string) => {
+    switch (bandeira) {
+      case "verde": return "bg-green-100 text-green-800";
+      case "amarela": return "bg-yellow-100 text-yellow-800";
+      case "vermelha": return "bg-red-100 text-red-800";
+      default: return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  if (pageLoading) {
+    return (
+      <EnhancedDashboardLayout 
+        title="Editar Boletim" 
+        breadcrumbs={[
+          { label: "Dashboard", href: "/admin/dashboard" },
+          { label: "Boletins", href: "/admin/boletins" },
+          { label: "Editar", icon: DocumentTextIcon }
+        ]}
+      >
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-white rounded-2xl p-8 border border-gray-200/50">
+            <LoadingSkeleton variant="form" />
+          </div>
+        </div>
+      </EnhancedDashboardLayout>
+    );
+  }
+
   return (
-    <div className="max-w-xl mx-auto py-10">
-      <h1 className="text-2xl font-bold mb-6">Editar Boletim</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block mb-1 font-medium">Data do Voo</label>
-          <Input type="date" name="data" value={form.data} onChange={handleChange} required />
-        </div>
-        <div>
-          <label className="block mb-1 font-medium">Período</label>
-          <select name="periodo" value={form.periodo} onChange={handleChange} className="w-full border rounded px-3 py-2">
-            <option value="manha">Manhã</option>
-            <option value="tarde">Tarde</option>
-          </select>
-        </div>
-        <div>
-          <label className="block mb-1 font-medium">Bandeira</label>
-          <select name="bandeira" value={form.bandeira} onChange={handleChange} className="w-full border rounded px-3 py-2">
-            <option value="verde">Verde</option>
-            <option value="amarela">Amarela</option>
-            <option value="vermelha">Vermelha</option>
-          </select>
-        </div>
-        <div>
-          <label className="block mb-1 font-medium">Status Resumido</label>
-          <Input name="titulo_curto" value={form.titulo_curto} readOnly required />
-        </div>
-        <div>
-          <label className="block mb-1 font-medium">Motivo</label>
-          <Textarea name="motivo" value={form.motivo} onChange={handleChange} required rows={4} />
-        </div>
-        <div>
-          <label className="block mb-1 font-medium">Áudios (máx 5, até 10MB cada)</label>
-          <input
-            ref={audioInputRef}
-            type="file"
-            accept="audio/*"
-            onChange={handleAddAudio}
-            multiple
-            disabled={audioFiles.length >= 5}
-          />
-          <ul className="mt-2 space-y-1">
-            {audioFiles.map((file, idx) => (
-              <li key={idx} className="flex items-center gap-2">
-                <span>🎤 {file.name} ({(file.size/1024/1024).toFixed(1)}MB)</span>
-                <button type="button" className="text-red-600" onClick={() => handleRemoveAudio(idx)}>Remover</button>
-              </li>
-            ))}
-          </ul>
-          {audioFiles.length < 5 && (
-            <button type="button" className="mt-2 text-blue-600 underline" onClick={() => audioInputRef.current?.click()}>Adicionar áudio</button>
-          )}
-        </div>
-        <div>
-          <label className="block mb-1 font-medium">Fotos (máx 4, até 1MB cada)</label>
-          <input
-            ref={fotoInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleAddFotos}
-            multiple
-            disabled={fotoFiles.length >= 4}
-          />
-          <div className="flex gap-2 mt-2">
-            {fotoFiles.map((file, idx) => (
-              <div key={idx} className="relative">
-                <img
-                  src={URL.createObjectURL(file)}
-                  alt={file.name}
-                  className="w-20 h-20 object-cover rounded border cursor-pointer"
-                  onClick={() => setLightboxUrl(URL.createObjectURL(file))}
+    <EnhancedDashboardLayout 
+      title="Editar Boletim"
+      breadcrumbs={[
+        { label: "Dashboard", href: "/admin/dashboard" },
+        { label: "Boletins", href: "/admin/boletins" },
+        { label: "Editar", icon: DocumentTextIcon }
+      ]}
+      headerActions={
+        <Button variant="outline" onClick={() => router.push("/admin/boletins")}>
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Voltar aos Boletins
+        </Button>
+      }
+    >
+      <div className="max-w-4xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+          className="bg-white/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 shadow-lg"
+        >
+          <div className="p-8">
+            <div className="text-center mb-8">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <DocumentTextIcon className="h-8 w-8 text-blue-600" />
+              </div>
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">Editar Boletim Meteorológico</h1>
+              <p className="text-gray-600">Atualize as informações do boletim meteorológico</p>
+              <div className="mt-4">
+                <Badge className={getBandeiraColor(form.bandeira)}>
+                  Bandeira {form.bandeira.toUpperCase()}
+                </Badge>
+              </div>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Data do Voo</label>
+                  <Input 
+                    type="date" 
+                    name="data" 
+                    value={form.data} 
+                    onChange={handleChange} 
+                    required 
+                    className="w-full focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Período</label>
+                  <select 
+                    name="periodo" 
+                    value={form.periodo} 
+                    onChange={handleChange} 
+                    className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="manha">☀️ Manhã</option>
+                    <option value="tarde">🌇 Tarde</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Bandeira</label>
+                  <div className="relative">
+                    <select 
+                      name="bandeira" 
+                      value={form.bandeira} 
+                      onChange={handleChange} 
+                      className="w-full border border-gray-300 rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none pr-12"
+                    >
+                      <option value="verde">🟢 Verde</option>
+                      <option value="amarela">🟡 Amarela</option>
+                      <option value="vermelha">🔴 Vermelha</option>
+                    </select>
+                    <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2">
+                      {form.bandeira === "verde" && <span className="inline-block w-3 h-3 rounded-full bg-green-500" />}
+                      {form.bandeira === "amarela" && <span className="inline-block w-3 h-3 rounded-full bg-yellow-400" />}
+                      {form.bandeira === "vermelha" && <span className="inline-block w-3 h-3 rounded-full bg-red-500" />}
+                    </span>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-2">Status Resumido</label>
+                  <Input 
+                    name="titulo_curto" 
+                    value={form.titulo_curto} 
+                    onChange={handleChange}
+                    required 
+                    className="w-full focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">Motivo</label>
+                <Textarea 
+                  name="motivo" 
+                  value={form.motivo} 
+                  onChange={handleChange} 
+                  required 
+                  rows={4} 
+                  className="w-full focus:ring-2 focus:ring-blue-500"
+                  placeholder="Descreva o motivo do status do voo..."
                 />
-                <button type="button" className="absolute top-0 right-0 bg-white text-red-600 rounded-full px-1" onClick={() => handleRemoveFoto(idx)}>x</button>
               </div>
-            ))}
-          </div>
-        </div>
-        <div>
-          <label className="block mb-1 font-medium">Áudios já salvos</label>
-          <ul className="mt-2 space-y-1">
-            {savedAudios.map((url, idx) => (
-              <li key={url} className="flex items-center gap-2">
-                <audio controls src={url} className="w-40" />
-                <button type="button" className="text-red-600" onClick={() => handleRemoveSavedAudio(idx)}>Remover</button>
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div>
-          <label className="block mb-1 font-medium">Fotos já salvas</label>
-          <div className="flex gap-2 mt-2">
-            {savedFotos.map((url, idx) => (
-              <div key={url} className="relative">
-                <img src={url} alt="Foto do boletim" loading="lazy" className="w-20 h-20 object-cover rounded border cursor-pointer" onClick={() => setLightboxUrl(url)} />
-                <button type="button" className="absolute top-0 right-0 bg-white text-red-600 rounded-full px-1" onClick={() => handleRemoveSavedFoto(idx)}>x</button>
+              {/* Seção de Áudios */}
+              <div className="border-t border-gray-200 pt-8">
+                <div className="flex items-center gap-2 mb-4">
+                  <Mic className="h-5 w-5 text-blue-600" />
+                  <label className="text-sm font-semibold text-gray-700">Áudios</label>
+                  <Badge variant="secondary" className="text-xs">
+                    máx 5, até 10MB cada
+                  </Badge>
+                </div>
+                
+                <div className="mb-4">
+                  <input
+                    ref={audioInputRef}
+                    type="file"
+                    accept="audio/*"
+                    onChange={handleAddAudio}
+                    multiple
+                    disabled={audioFiles.length >= 5}
+                    className="hidden"
+                  />
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => audioInputRef.current?.click()}
+                    disabled={audioFiles.length >= 5}
+                    className="w-full sm:w-auto"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Adicionar Áudio
+                  </Button>
+                </div>
+                
+                {audioFiles.length > 0 && (
+                  <div className="space-y-3 mb-4">
+                    <h4 className="text-sm font-medium text-gray-700">Novos áudios:</h4>
+                    {audioFiles.map((file, idx) => (
+                      <div key={idx} className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
+                        <div className="flex items-center gap-2">
+                          <Mic className="h-4 w-4 text-blue-600" />
+                          <span className="text-sm font-medium">{file.name}</span>
+                          <Badge variant="secondary" className="text-xs">
+                            {(file.size/1024/1024).toFixed(1)}MB
+                          </Badge>
+                        </div>
+                        <Button 
+                          type="button" 
+                          size="sm" 
+                          variant="destructive" 
+                          onClick={() => handleRemoveAudio(idx)}
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
-            ))}
-          </div>
-        </div>
+              {/* Seção de Fotos */}
+              <div className="border-t border-gray-200 pt-8">
+                <div className="flex items-center gap-2 mb-4">
+                  <Image className="h-5 w-5 text-blue-600" />
+                  <label className="text-sm font-semibold text-gray-700">Fotos</label>
+                  <Badge variant="secondary" className="text-xs">
+                    máx 4, até 1MB cada
+                  </Badge>
+                </div>
+                
+                <div className="mb-4">
+                  <input
+                    ref={fotoInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAddFotos}
+                    multiple
+                    disabled={fotoFiles.length >= 4}
+                    className="hidden"
+                  />
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => fotoInputRef.current?.click()}
+                    disabled={fotoFiles.length >= 4}
+                    className="w-full sm:w-auto"
+                  >
+                    <Upload className="w-4 h-4 mr-2" />
+                    Adicionar Fotos
+                  </Button>
+                </div>
+                
+                {fotoFiles.length > 0 && (
+                  <div className="mb-4">
+                    <h4 className="text-sm font-medium text-gray-700 mb-3">Novas fotos:</h4>
+                    <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
+                      {fotoFiles.map((file, idx) => (
+                        <div key={idx} className="relative group">
+                          <img
+                            src={URL.createObjectURL(file)}
+                            alt={file.name}
+                            className="w-full aspect-square object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity"
+                            onClick={() => setLightboxUrl(URL.createObjectURL(file))}
+                          />
+                          <Button 
+                            type="button" 
+                            size="sm" 
+                            variant="destructive" 
+                            className="absolute -top-2 -right-2 w-6 h-6 rounded-full p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => handleRemoveFoto(idx)}
+                          >
+                            <X className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              {/* Áudios salvos */}
+              {savedAudios.length > 0 && (
+                <div className="border-t border-gray-200 pt-8">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                    <Mic className="h-4 w-4 text-green-600" />
+                    Áudios já salvos
+                  </h4>
+                  <div className="space-y-3">
+                    {savedAudios.map((url, idx) => (
+                      <div key={url} className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                        <audio controls src={url} className="flex-1" />
+                        <Button 
+                          type="button" 
+                          size="sm" 
+                          variant="destructive" 
+                          onClick={() => handleRemoveSavedAudio(idx)}
+                          className="ml-3"
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {/* Fotos salvas */}
+              {savedFotos.length > 0 && (
+                <div className="border-t border-gray-200 pt-8">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-4 flex items-center gap-2">
+                    <Image className="h-4 w-4 text-green-600" />
+                    Fotos já salvas
+                  </h4>
+                  <div className="grid grid-cols-4 sm:grid-cols-6 gap-3">
+                    {savedFotos.map((url, idx) => (
+                      <div key={url} className="relative group">
+                        <img 
+                          src={url} 
+                          alt="Foto do boletim" 
+                          loading="lazy" 
+                          className="w-full aspect-square object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity" 
+                          onClick={() => setLightboxUrl(url)} 
+                        />
+                        <Button 
+                          type="button" 
+                          size="sm" 
+                          variant="destructive" 
+                          className="absolute -top-2 -right-2 w-6 h-6 rounded-full p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => handleRemoveSavedFoto(idx)}
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
         {lightboxUrl && (
           <Dialog open={!!lightboxUrl} onOpenChange={() => setLightboxUrl(null)}>
             <DialogContent className="flex flex-col items-center justify-center bg-black/90 p-4">
@@ -399,11 +616,37 @@ export default function AdminBoletimEditForm() {
             </DialogContent>
           </Dialog>
         )}
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="outline" onClick={() => router.push("/admin/boletins")}>Cancelar</Button>
-          <Button type="submit" {...(loading ? { disabled: true } : {})}>{isEdit ? "Salvar Alterações" : "Criar Boletim"}</Button>
-        </div>
-      </form>
-    </div>
+              <div className="flex flex-col sm:flex-row justify-end gap-4 pt-8 border-t border-gray-200">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => router.push("/admin/boletins")}
+                  className="w-full sm:w-auto"
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={loading}
+                  className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                      Salvando...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4 mr-2" />
+                      Salvar Alterações
+                    </>
+                  )}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </motion.div>
+      </div>
+    </EnhancedDashboardLayout>
   );
 } 

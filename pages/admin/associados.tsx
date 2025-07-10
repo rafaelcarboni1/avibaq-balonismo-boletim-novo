@@ -8,10 +8,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../src/components/u
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../src/components/ui/dialog";
 import { Textarea } from "../../src/components/ui/textarea";
 import { toast } from "../../src/components/ui/sonner";
-import { CheckCircle, XCircle, Download, Calendar, User, Building, ChevronLeft, ChevronRight } from "lucide-react";
+import { CheckCircle, XCircle, Download, Calendar, User, Building, ChevronLeft, ChevronRight, Users } from "lucide-react";
 import RequireAdmin from "../../src/components/RequireAdmin";
 import { useUser } from "../../src/hooks/useUser";
 import { Resend } from 'resend';
+import EnhancedDashboardLayout from "@/components/magicui/enhanced-dashboard-layout";
+import EnhancedKpiCard from "@/components/magicui/enhanced-kpi-card";
+import LoadingSkeleton from "@/components/magicui/loading-skeleton";
+import { StaggerContainer, StaggerItem } from "@/components/magicui/smooth-transitions";
+import { motion } from "framer-motion";
 
 type Membro = {
   id: string;
@@ -509,7 +514,20 @@ export default function AdminAssociados() {
   };
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Carregando...</div>;
+    return (
+      <EnhancedDashboardLayout title="Associados" breadcrumbs={[{ label: "Associados", icon: Users }]}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-white rounded-2xl p-6 border border-gray-200/50">
+              <LoadingSkeleton variant="card" />
+            </div>
+          ))}
+        </div>
+        <div className="bg-white rounded-2xl p-6 border border-gray-200/50">
+          <LoadingSkeleton variant="table" />
+        </div>
+      </EnhancedDashboardLayout>
+    );
   }
 
   if (role !== 'admin' && role !== 'tesouraria') {
@@ -518,70 +536,362 @@ export default function AdminAssociados() {
 
   return (
     <RequireAdmin>
-      <div className="container mx-auto py-8 px-4">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Gerenciar Associados</h1>
-          <Button onClick={() => router.push("/admin/dashboard")}>Voltar ao Dashboard</Button>
+      <EnhancedDashboardLayout 
+        title="Gerenciar Associados"
+        breadcrumbs={[
+          { label: "Dashboard", href: "/admin/dashboard" },
+          { label: "Associados", icon: Users }
+        ]}
+        headerActions={
+          <Button onClick={() => router.push("/admin/dashboard")} variant="outline">
+            Voltar ao Dashboard
+          </Button>
+        }
+      >
+        <div className="space-y-8">
+          {/* KPI Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <EnhancedKpiCard 
+              title="Total de Membros"
+              value={membros.length}
+              icon={Users}
+              color="blue"
+              trend="up"
+              trendValue={`+${membros.filter(m => new Date(m.created_at).getMonth() === new Date().getMonth()).length} este mês`}
+              description="Total de associados"
+              delay={0}
+            />
+            <EnhancedKpiCard 
+              title="Pendentes"
+              value={membrosPendentes.length}
+              icon={CheckCircle}
+              color="yellow"
+              trend={membrosPendentes.length > 0 ? "up" : "neutral"}
+              trendValue={membrosPendentes.length > 0 ? "Requer atenção" : "Em dia"}
+              description="Aguardando aprovação"
+              delay={0.05}
+            />
+            <EnhancedKpiCard 
+              title="Ativos"
+              value={membrosAtivos.length}
+              icon={User}
+              color="green"
+              trend="up"
+              trendValue="Membros ativos"
+              description="Com status ativo"
+              delay={0.1}
+            />
+            <EnhancedKpiCard 
+              title="Empresas"
+              value={membros.filter(m => m.tipo === 'agencia').length}
+              icon={Building}
+              color="purple"
+              trend="neutral"
+              trendValue="Agências"
+              description="Empresas parceiras"
+              delay={0.15}
+            />
+          </div>
+
+          {/* Tabs com design moderno */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+          >
+            <Tabs defaultValue="pendentes" className="w-full">
+              <TabsList className="grid w-full grid-cols-3 bg-gray-100/50 p-1 rounded-xl">
+                <TabsTrigger 
+                  value="pendentes" 
+                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all duration-200"
+                >
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4" />
+                    Pendentes ({membrosPendentes.length})
+                  </div>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="ativos"
+                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all duration-200"
+                >
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    Ativos ({membrosAtivos.length})
+                  </div>
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="recusados"
+                  className="data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg transition-all duration-200"
+                >
+                  <div className="flex items-center gap-2">
+                    <XCircle className="h-4 w-4" />
+                    Recusados ({membrosRecusados.length})
+                  </div>
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="pendentes" className="mt-6">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-white/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 shadow-lg"
+                >
+                  <div className="p-6 border-b border-gray-200/50">
+                    <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-yellow-500" />
+                      Associados Pendentes
+                    </h3>
+                    <p className="text-gray-600 mt-1">Aguardando aprovação da administração</p>
+                  </div>
+                  
+                  <div className="p-6">
+                    {membrosPendentes.length === 0 ? (
+                      <div className="text-center py-12">
+                        <CheckCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-500 text-lg">Nenhum associado pendente</p>
+                        <p className="text-gray-400 text-sm mt-2">Todos os cadastros foram processados</p>
+                      </div>
+                    ) : (
+                      <StaggerContainer>
+                        {membrosPendentes.map((membro, index) => (
+                          <StaggerItem key={membro.id}>
+                            <motion.div
+                              whileHover={{ scale: 1.01 }}
+                              className="bg-gradient-to-r from-white to-yellow-50/30 rounded-xl border border-yellow-200/50 p-6 shadow-sm hover:shadow-md transition-all duration-200 mb-4"
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-4">
+                                  <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                                    {membro.tipo === 'piloto' ? 
+                                      <User className="h-6 w-6 text-yellow-600" /> : 
+                                      <Building className="h-6 w-6 text-yellow-600" />
+                                    }
+                                  </div>
+                                  <div>
+                                    <h4 className="font-semibold text-gray-900">{membro.nome_completo}</h4>
+                                    <p className="text-sm text-gray-600">{membro.email}</p>
+                                    <div className="flex items-center gap-2 mt-1">
+                                      <Badge variant="outline" className="capitalize">
+                                        {membro.tipo}
+                                      </Badge>
+                                      <Badge variant="secondary">
+                                        {new Date(membro.created_at).toLocaleDateString('pt-BR')}
+                                      </Badge>
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                <div className="flex space-x-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      setSelectedMembro(membro);
+                                      setShowVisualizarDialog(true);
+                                    }}
+                                  >
+                                    Visualizar
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleAprovar(membro)}
+                                    className="bg-green-600 hover:bg-green-700"
+                                  >
+                                    <CheckCircle className="w-4 h-4 mr-1" />
+                                    Aprovar
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="destructive"
+                                    onClick={() => {
+                                      setSelectedMembro(membro);
+                                      setShowRecusaDialog(true);
+                                    }}
+                                  >
+                                    <XCircle className="w-4 h-4 mr-1" />
+                                    Recusar
+                                  </Button>
+                                </div>
+                              </div>
+                            </motion.div>
+                          </StaggerItem>
+                        ))}
+                      </StaggerContainer>
+                    )}
+                  </div>
+                </motion.div>
+              </TabsContent>
+
+              <TabsContent value="ativos" className="mt-6">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-white/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 shadow-lg"
+                >
+                  <div className="p-6 border-b border-gray-200/50">
+                    <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                      <User className="h-5 w-5 text-green-500" />
+                      Associados Ativos
+                    </h3>
+                    <p className="text-gray-600 mt-1">Membros aprovados e com status ativo</p>
+                  </div>
+                  
+                  <div className="p-6">
+                    {membrosAtivos.length === 0 ? (
+                      <div className="text-center py-12">
+                        <User className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-500 text-lg">Nenhum associado ativo</p>
+                      </div>
+                    ) : (
+                      <StaggerContainer>
+                        {membrosAtivos.map((membro, index) => {
+                          const statusMensalidade = getStatusMensalidade(membro);
+                          return (
+                            <StaggerItem key={membro.id}>
+                              <motion.div
+                                whileHover={{ scale: 1.01 }}
+                                className="bg-gradient-to-r from-white to-green-50/30 rounded-xl border border-green-200/50 p-6 shadow-sm hover:shadow-md transition-all duration-200 mb-4"
+                              >
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center space-x-4">
+                                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                      {membro.tipo === 'piloto' ? 
+                                        <User className="h-6 w-6 text-green-600" /> : 
+                                        <Building className="h-6 w-6 text-green-600" />
+                                      }
+                                    </div>
+                                    <div>
+                                      <h4 className="font-semibold text-gray-900">{membro.nome_completo}</h4>
+                                      <p className="text-sm text-gray-600">{membro.email}</p>
+                                      <div className="flex items-center gap-2 mt-1">
+                                        <Badge variant="outline" className="capitalize">
+                                          {membro.tipo}
+                                        </Badge>
+                                        <Badge variant={membro.pagamento_inscricao === "ok" ? "default" : "destructive"} className={membro.pagamento_inscricao === "ok" ? "bg-green-100 text-green-800" : ""}>
+                                          {membro.pagamento_inscricao === "ok" ? "Inscrição Paga" : "Inscrição Pendente"}
+                                        </Badge>
+                                        <Badge variant={statusMensalidade.status === "em_dia" ? "default" : "destructive"} className={statusMensalidade.status === "em_dia" ? "bg-green-100 text-green-800" : ""}>
+                                          {statusMensalidade.label}
+                                        </Badge>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="flex space-x-2">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => {
+                                        setSelectedMembro(membro);
+                                        setShowVisualizarDialog(true);
+                                      }}
+                                    >
+                                      Visualizar
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => {
+                                        setSelectedMembro(membro);
+                                        setShowPagamentoDialog(true);
+                                      }}
+                                    >
+                                      <Calendar className="w-4 h-4 mr-1" />
+                                      Registrar Pagamento
+                                    </Button>
+                                  </div>
+                                </div>
+                              </motion.div>
+                            </StaggerItem>
+                          );
+                        })}
+                      </StaggerContainer>
+                    )}
+                  </div>
+                </motion.div>
+              </TabsContent>
+
+              <TabsContent value="recusados" className="mt-6">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-white/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 shadow-lg"
+                >
+                  <div className="p-6 border-b border-gray-200/50">
+                    <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                      <XCircle className="h-5 w-5 text-red-500" />
+                      Associados Recusados
+                    </h3>
+                    <p className="text-gray-600 mt-1">Cadastros que foram recusados</p>
+                  </div>
+                  
+                  <div className="p-6">
+                    {membrosRecusados.length === 0 ? (
+                      <div className="text-center py-12">
+                        <XCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                        <p className="text-gray-500 text-lg">Nenhum associado recusado</p>
+                      </div>
+                    ) : (
+                      <StaggerContainer>
+                        {membrosRecusados.map((membro, index) => (
+                          <StaggerItem key={membro.id}>
+                            <motion.div
+                              whileHover={{ scale: 1.01 }}
+                              className="bg-gradient-to-r from-white to-red-50/30 rounded-xl border border-red-200/50 p-6 shadow-sm hover:shadow-md transition-all duration-200 mb-4"
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-4">
+                                  <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                                    {membro.tipo === 'piloto' ? 
+                                      <User className="h-6 w-6 text-red-600" /> : 
+                                      <Building className="h-6 w-6 text-red-600" />
+                                    }
+                                  </div>
+                                  <div>
+                                    <h4 className="font-semibold text-gray-900">{membro.nome_completo}</h4>
+                                    <p className="text-sm text-gray-600">{membro.email}</p>
+                                    <div className="flex items-center gap-2 mt-1">
+                                      <Badge variant="outline" className="capitalize">
+                                        {membro.tipo}
+                                      </Badge>
+                                      <Badge variant="destructive">
+                                        Recusado
+                                      </Badge>
+                                      <Badge variant="secondary">
+                                        {new Date(membro.created_at).toLocaleDateString('pt-BR')}
+                                      </Badge>
+                                    </div>
+                                  </div>
+                                </div>
+                                
+                                <div className="flex space-x-2">
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      setSelectedMembro(membro);
+                                      setShowVisualizarDialog(true);
+                                    }}
+                                  >
+                                    Visualizar
+                                  </Button>
+                                </div>
+                              </div>
+                            </motion.div>
+                          </StaggerItem>
+                        ))}
+                      </StaggerContainer>
+                    )}
+                  </div>
+                </motion.div>
+              </TabsContent>
+            </Tabs>
+          </motion.div>
         </div>
-
-        <Tabs defaultValue="pendentes" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="pendentes">
-              Pendentes ({membrosPendentes.length})
-            </TabsTrigger>
-            <TabsTrigger value="ativos">
-              Ativos ({membrosAtivos.length})
-            </TabsTrigger>
-            <TabsTrigger value="recusados">
-              Recusados ({membrosRecusados.length})
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="pendentes" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Associados Pendentes</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {membrosPendentes.length === 0 ? (
-                  <p className="text-gray-500 text-center py-8">Nenhum associado pendente</p>
-                ) : (
-                  renderMembrosTable(membrosPendentes)
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="ativos" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Associados Ativos</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {membrosAtivos.length === 0 ? (
-                  <p className="text-gray-500 text-center py-8">Nenhum associado ativo</p>
-                ) : (
-                  renderMembrosTable(membrosAtivos)
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="recusados" className="mt-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Associados Recusados</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {membrosRecusados.length === 0 ? (
-                  <p className="text-gray-500 text-center py-8">Nenhum associado recusado</p>
-                ) : (
-                  renderMembrosTable(membrosRecusados)
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+      </EnhancedDashboardLayout>
 
         {/* Dialog de Recusa */}
         <Dialog open={showRecusaDialog} onOpenChange={setShowRecusaDialog}>

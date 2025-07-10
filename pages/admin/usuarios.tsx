@@ -1,13 +1,18 @@
 import { useEffect, useState } from "react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { DashboardLayout } from "@/components/DashboardLayout";
+import EnhancedDashboardLayout from "@/components/magicui/enhanced-dashboard-layout";
+import EnhancedKpiCard from "@/components/magicui/enhanced-kpi-card";
+import LoadingSkeleton from "@/components/magicui/loading-skeleton";
+import { StaggerContainer, StaggerItem } from "@/components/magicui/smooth-transitions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Select } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "react-hot-toast";
+import { toast } from "@/components/ui/sonner";
 import { useUser } from "@/hooks/useUser";
+import { motion } from "framer-motion";
+import { Users, UserPlus, Edit, Trash2, Key, UserCheck, UserCog, Building } from "lucide-react";
 import bcrypt from "bcryptjs";
 
 const ROLES = ["admin", "meteo", "tesouraria", "piloto", "agencia"];
@@ -120,9 +125,9 @@ export default function UsuariosAdmin() {
           toast.error("Erro ao criar usuário na base de dados: " + dbError.message);
           toast.error("IMPORTANTE: Usuário foi criado no sistema de autenticação mas não na base de dados. Contate o administrador do sistema.");
         } else {
-          // Debug: verificar status do usuário criado
-          console.log("Usuário criado no Auth:", authUser.user);
-          console.log("Status de confirmação:", authUser.user?.email_confirmed_at);
+          // Performance: Remove debug logs in production
+          // console.log("Usuário criado no Auth:", authUser.user);
+          // console.log("Status de confirmação:", authUser.user?.email_confirmed_at);
           
           toast.success("Usuário criado com sucesso");
           setGeneratedPassword(tempPassword);
@@ -167,62 +172,215 @@ export default function UsuariosAdmin() {
     fetchUsuarios();
   }
 
+  const getRoleStats = () => {
+    return {
+      admin: usuarios.filter(u => u.role === 'admin').length,
+      meteo: usuarios.filter(u => u.role === 'meteo').length,
+      tesouraria: usuarios.filter(u => u.role === 'tesouraria').length,
+      others: usuarios.filter(u => !['admin', 'meteo', 'tesouraria'].includes(u.role)).length
+    };
+  };
+
+  const getRoleIcon = (role: string) => {
+    switch (role) {
+      case 'admin': return UserCog;
+      case 'meteo': return UserCheck;
+      case 'tesouraria': return Building;
+      default: return Users;
+    }
+  };
+
+  const getRoleColor = (role: string) => {
+    switch (role) {
+      case 'admin': return 'bg-red-100 text-red-800';
+      case 'meteo': return 'bg-blue-100 text-blue-800';
+      case 'tesouraria': return 'bg-green-100 text-green-800';
+      case 'piloto': return 'bg-purple-100 text-purple-800';
+      case 'agencia': return 'bg-orange-100 text-orange-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  if (loading) {
+    return (
+      <EnhancedDashboardLayout title="Usuários" breadcrumbs={[{ label: "Usuários", icon: Users }]}>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-white rounded-2xl p-6 border border-gray-200/50">
+              <LoadingSkeleton variant="card" />
+            </div>
+          ))}
+        </div>
+        <div className="bg-white rounded-2xl p-6 border border-gray-200/50">
+          <LoadingSkeleton variant="table" />
+        </div>
+      </EnhancedDashboardLayout>
+    );
+  }
+
   if (role !== 'admin') {
     return <div className="max-w-2xl mx-auto mt-16 text-center text-lg text-red-600 font-semibold">Acesso restrito a administradores.</div>;
   }
 
+  const roleStats = getRoleStats();
+
   return (
     <ProtectedRoute allowedRoles={["admin"]}>
-      <DashboardLayout title="Usuários do Sistema">
-        <div className="max-w-4xl mx-auto mt-8">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-bold">Usuários do Sistema</h1>
-            <Button onClick={openNovo}>+ Novo Usuário</Button>
+      <EnhancedDashboardLayout 
+        title="Gerenciar Usuários"
+        breadcrumbs={[
+          { label: "Dashboard", href: "/admin/dashboard" },
+          { label: "Usuários", icon: Users }
+        ]}
+        headerActions={
+          <Button onClick={openNovo} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
+            <UserPlus className="w-4 h-4 mr-2" />
+            Novo Usuário
+          </Button>
+        }
+      >
+        <div className="space-y-8">
+          {/* KPI Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <EnhancedKpiCard 
+              title="Total de Usuários"
+              value={usuarios.length}
+              icon={Users}
+              color="blue"
+              trend="up"
+              trendValue={`+${usuarios.filter(u => new Date(u.created_at).getMonth() === new Date().getMonth()).length} este mês`}
+              description="Usuários cadastrados"
+              delay={0}
+            />
+            <EnhancedKpiCard 
+              title="Administradores"
+              value={roleStats.admin}
+              icon={UserCog}
+              color="red"
+              trend="neutral"
+              trendValue="Acesso total"
+              description="Usuários admin"
+              delay={0.05}
+            />
+            <EnhancedKpiCard 
+              title="Meteorologia"
+              value={roleStats.meteo}
+              icon={UserCheck}
+              color="green"
+              trend="neutral"
+              trendValue="Boletins"
+              description="Usuários meteo"
+              delay={0.1}
+            />
+            <EnhancedKpiCard 
+              title="Tesouraria"
+              value={roleStats.tesouraria}
+              icon={Building}
+              color="purple"
+              trend="neutral"
+              trendValue="Finanças"
+              description="Usuários tesouraria"
+              delay={0.15}
+            />
           </div>
-          <Card>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="min-w-full text-sm border">
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="px-3 py-2 text-left">ID</th>
-                      <th className="px-3 py-2 text-left">Nome</th>
-                      <th className="px-3 py-2 text-left">E-mail</th>
-                      <th className="px-3 py-2 text-left">Role</th>
-                      <th className="px-3 py-2 text-left">Criado em</th>
-                      <th className="px-3 py-2 text-left">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {loading ? (
-                      <tr><td colSpan={6} className="text-center py-6">Carregando...</td></tr>
-                    ) : usuarios.length === 0 ? (
-                      <tr><td colSpan={6} className="text-center py-6">Nenhum usuário encontrado</td></tr>
-                    ) : usuarios.map(u => (
-                      <tr key={u.id} className="border-b">
-                        <td className="px-3 py-2 font-mono text-xs">{u.id}</td>
-                        <td className="px-3 py-2">{u.nome}</td>
-                        <td className="px-3 py-2">{u.email}</td>
-                        <td className="px-3 py-2 capitalize">{u.role}</td>
-                        <td className="px-3 py-2">{u.created_at ? new Date(u.created_at).toLocaleString('pt-BR') : '-'}</td>
-                        <td className="px-3 py-2 flex gap-2">
-                          <Button size="sm" variant="outline" onClick={() => openEditar(u)}>Editar</Button>
-                          <Button size="sm" variant="destructive" onClick={() => handleDeletar(u.id)}>Deletar</Button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
+
+          {/* Lista de Usuários */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+            className="bg-white/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 shadow-lg"
+          >
+            <div className="p-6 border-b border-gray-200/50">
+              <h2 className="text-xl font-semibold text-gray-900">Usuários do Sistema</h2>
+              <p className="text-gray-600 mt-1">Gerencie usuários e permissões de acesso</p>
+            </div>
+            
+            <div className="p-6">
+              {usuarios.length === 0 ? (
+                <div className="text-center py-12">
+                  <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-500 text-lg">Nenhum usuário encontrado</p>
+                  <p className="text-gray-400 text-sm mt-2">Crie seu primeiro usuário</p>
+                </div>
+              ) : (
+                <StaggerContainer className="space-y-4">
+                  {usuarios.map((usuario, index) => {
+                    const RoleIcon = getRoleIcon(usuario.role);
+                    return (
+                      <StaggerItem key={usuario.id}>
+                        <motion.div
+                          whileHover={{ scale: 1.01 }}
+                          className="bg-gradient-to-r from-white to-gray-50/50 rounded-xl border border-gray-200/50 p-6 shadow-sm hover:shadow-md transition-all duration-200"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-4">
+                              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                <RoleIcon className="h-6 w-6 text-blue-600" />
+                              </div>
+                              <div>
+                                <h4 className="font-semibold text-gray-900">{usuario.nome}</h4>
+                                <p className="text-sm text-gray-600">{usuario.email}</p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <Badge className={getRoleColor(usuario.role)}>
+                                    {usuario.role.toUpperCase()}
+                                  </Badge>
+                                  <Badge variant="secondary">
+                                    {usuario.created_at ? new Date(usuario.created_at).toLocaleDateString('pt-BR') : 'Data não disponível'}
+                                  </Badge>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="flex space-x-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => openEditar(usuario)}
+                              >
+                                <Edit className="w-4 h-4 mr-1" />
+                                Editar
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => handleDeletar(usuario.id)}
+                              >
+                                <Trash2 className="w-4 h-4 mr-1" />
+                                Deletar
+                              </Button>
+                            </div>
+                          </div>
+                        </motion.div>
+                      </StaggerItem>
+                    );
+                  })}
+                </StaggerContainer>
+              )}
+            </div>
+          </motion.div>
         </div>
         
         {/* Modal Senha Temporária */}
         {showPasswordModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
-              <h2 className="text-xl font-bold mb-4 text-green-600">✅ Usuário Criado com Sucesso!</h2>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4"
+            >
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Key className="h-8 w-8 text-green-600" />
+                </div>
+                <h2 className="text-xl font-bold text-green-600">Usuário Criado com Sucesso!</h2>
+              </div>
               <div className="space-y-4">
                 <p className="text-sm text-gray-600">
                   Uma senha temporária foi gerada para o usuário. Copie e repasse com segurança:
@@ -273,9 +431,24 @@ export default function UsuariosAdmin() {
 
         {/* Modal Novo/Editar Usuário */}
         {showModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-            <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
-              <h2 className="text-xl font-bold mb-4">{modalMode === 'novo' ? 'Novo Usuário' : 'Editar Usuário'}</h2>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md mx-4"
+            >
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  {modalMode === 'novo' ? <UserPlus className="h-8 w-8 text-blue-600" /> : <Edit className="h-8 w-8 text-blue-600" />}
+                </div>
+                <h2 className="text-xl font-bold text-gray-900">{modalMode === 'novo' ? 'Novo Usuário' : 'Editar Usuário'}</h2>
+              </div>
               <form onSubmit={handleSalvar} className="space-y-4">
                 <div>
                   <label className="block mb-1 font-medium">Nome</label>
@@ -296,10 +469,10 @@ export default function UsuariosAdmin() {
                   <Button type="submit" disabled={saving}>{saving ? 'Salvando...' : 'Salvar'}</Button>
                 </div>
               </form>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )}
-      </DashboardLayout>
+      </EnhancedDashboardLayout>
     </ProtectedRoute>
   );
 } 

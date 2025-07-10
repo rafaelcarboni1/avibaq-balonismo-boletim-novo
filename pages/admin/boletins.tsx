@@ -5,9 +5,15 @@ import { Button } from "../../src/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../src/components/ui/card";
 import { Badge } from "../../src/components/ui/badge";
 import { toast } from "../../src/components/ui/sonner";
-import { Plus, Edit, Trash2, Users, Eye } from "lucide-react";
+import { Plus, Edit, Trash2, Users, Eye, DocumentTextIcon } from "lucide-react";
 import RequireAdmin from "../../src/components/RequireAdmin";
 import { useUser } from "@/hooks/useUser";
+import EnhancedDashboardLayout from "@/components/magicui/enhanced-dashboard-layout";
+import { BentoGrid, BentoGridItem } from "@/components/magicui/bento-grid";
+import EnhancedKpiCard from "@/components/magicui/enhanced-kpi-card";
+import LoadingSkeleton from "@/components/magicui/loading-skeleton";
+import { StaggerContainer, StaggerItem } from "@/components/magicui/smooth-transitions";
+import { motion } from "framer-motion";
 
 type Boletim = {
   id: string;
@@ -40,13 +46,14 @@ export default function AdminBoletinsList() {
     try {
       const from = (pageNum - 1) * pageSize;
       const to = from + pageSize - 1;
-      console.log('DEBUG PAGINAÇÃO', { pageNum, from, to, pageSize });
+      // Performance: Remove debug logs in production
+      // console.log('DEBUG PAGINAÇÃO', { pageNum, from, to, pageSize });
       const { data, error, count } = await supabase
         .from("boletins")
         .select("*", { count: "exact" })
         .order("data", { ascending: false })
         .range(from, to);
-      console.log('RESULTADO SUPABASE', { data, count });
+      // console.log('RESULTADO SUPABASE', { data, count });
       if (error) throw error;
       setBoletins(data || []);
       setTotal(count || 0);
@@ -103,153 +110,222 @@ export default function AdminBoletinsList() {
   };
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">Carregando...</div>;
+    return (
+      <EnhancedDashboardLayout title="Boletins" breadcrumbs={[{ label: "Boletins", icon: DocumentTextIcon }]}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="bg-white rounded-2xl p-6 border border-gray-200/50">
+              <LoadingSkeleton variant="card" />
+            </div>
+          ))}
+        </div>
+      </EnhancedDashboardLayout>
+    );
   }
+  
   if (role !== 'admin' && role !== 'tesouraria' && role !== 'meteo') {
     return <div className="max-w-2xl mx-auto mt-16 text-center text-lg text-red-600 font-semibold">Acesso restrito a administradores, tesouraria e meteorologia.</div>;
   }
 
   return (
     <RequireAdmin>
-      <div className="container mx-auto py-8 px-4">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold">Gerenciar Boletins</h1>
-          <div className="flex gap-2">
+      <EnhancedDashboardLayout 
+        title="Gerenciar Boletins"
+        breadcrumbs={[
+          { label: "Dashboard", href: "/admin/dashboard" },
+          { label: "Boletins", icon: DocumentTextIcon }
+        ]}
+        headerActions={
+          <div className="flex gap-3">
             <Button onClick={() => router.push("/admin/dashboard")} variant="outline">
               Voltar ao Dashboard
             </Button>
-            <Button onClick={() => router.push("/admin/boletins/new")}>
+            <Button onClick={() => router.push("/admin/boletins/new")} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
               <Plus className="w-4 h-4 mr-2" />
               Novo Boletim
             </Button>
           </div>
-        </div>
+        }
+      >
+        <div className="space-y-8">
+          {/* KPI Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <EnhancedKpiCard 
+              title="Total de Boletins"
+              value={total}
+              icon={DocumentTextIcon}
+              color="blue"
+              trend="neutral"
+              trendValue="Total registrado"
+              description="Boletins meteorológicos"
+              delay={0}
+            />
+            <EnhancedKpiCard 
+              title="Publicados"
+              value={boletins.filter(b => b.publicado).length}
+              icon={Eye}
+              color="green"
+              trend="up"
+              trendValue="Ativos"
+              description="Visíveis publicamente"
+              delay={0.05}
+            />
+            <EnhancedKpiCard 
+              title="Rascunhos"
+              value={boletins.filter(b => !b.publicado).length}
+              icon={Edit}
+              color="yellow"
+              trend="neutral"
+              trendValue="Pendentes"
+              description="Aguardando publicação"
+              delay={0.1}
+            />
+            <EnhancedKpiCard 
+              title="Este Mês"
+              value={boletins.filter(b => new Date(b.created_at).getMonth() === new Date().getMonth()).length}
+              icon={Plus}
+              color="purple"
+              trend="up"
+              trendValue="Recentes"
+              description="Criados recentemente"
+              delay={0.15}
+            />
+          </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Boletins Meteorológicos</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {boletins.length === 0 ? (
-              <p className="text-gray-500 text-center py-8">Nenhum boletim encontrado</p>
-            ) : (
-              <>
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse border border-gray-200">
-                    <thead>
-                      <tr className="bg-gray-50">
-                        <th className="border border-gray-200 px-4 py-2 text-left">Data</th>
-                        <th className="border border-gray-200 px-4 py-2 text-left">Período</th>
-                        <th className="border border-gray-200 px-4 py-2 text-left">Bandeira</th>
-                        <th className="border border-gray-200 px-4 py-2 text-left">Status</th>
-                        <th className="border border-gray-200 px-4 py-2 text-left">Ações</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {boletins.map((boletim) => (
-                        <tr key={boletim.id} className="hover:bg-gray-50">
-                          <td className="border border-gray-200 px-4 py-2">
-                            {boletim.data ? (() => { const [ano, mes, dia] = boletim.data.split('-'); return `${dia}/${mes}/${ano}`; })() : ''}
-                          </td>
-                          <td className="border border-gray-200 px-4 py-2 capitalize">
-                            {boletim.periodo}
-                          </td>
-                          <td className="border border-gray-200 px-4 py-2">
+          {/* Lista de Boletins */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.2 }}
+            className="bg-white/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 shadow-lg"
+          >
+            <div className="p-6 border-b border-gray-200/50">
+              <h2 className="text-xl font-semibold text-gray-900">Boletins Meteorológicos</h2>
+              <p className="text-gray-600 mt-1">Gerencie todos os boletins meteorológicos</p>
+            </div>
+            
+            <div className="p-6">
+              {boletins.length === 0 ? (
+                <div className="text-center py-12">
+                  <DocumentTextIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <p className="text-gray-500 text-lg">Nenhum boletim encontrado</p>
+                  <p className="text-gray-400 text-sm mt-2">Crie seu primeiro boletim meteorológico</p>
+                </div>
+              ) : (
+                <StaggerContainer className="space-y-4">
+                  {boletins.map((boletim, index) => (
+                    <StaggerItem key={boletim.id}>
+                      <motion.div
+                        whileHover={{ scale: 1.01 }}
+                        className="bg-gradient-to-r from-white to-gray-50/50 rounded-xl border border-gray-200/50 p-6 shadow-sm hover:shadow-md transition-all duration-200"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4">
+                            <div className={`w-3 h-3 rounded-full ${getBandeiraColor(boletim.bandeira).replace('bg-', 'bg-').replace(' text-', ' ').split(' ')[0]}`} />
+                            <div>
+                              <h3 className="font-semibold text-gray-900">{boletim.titulo_curto}</h3>
+                              <p className="text-sm text-gray-600">{new Date(boletim.data).toLocaleDateString('pt-BR')} - {boletim.periodo}</p>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center space-x-3">
                             <Badge className={getBandeiraColor(boletim.bandeira)}>
-                              {boletim.bandeira}
+                              {boletim.bandeira.toUpperCase()}
                             </Badge>
-                          </td>
-                          <td className="border border-gray-200 px-4 py-2">
-                            {boletim.publicado ? (
-                              <span className="inline-block px-3 py-1 rounded-full bg-green-100 text-green-800 text-xs font-semibold">Publicado</span>
-                            ) : (
-                              <span className="inline-block px-3 py-1 rounded-full bg-gray-200 text-gray-700 text-xs font-semibold">Rascunho</span>
-                            )}
-                          </td>
-                          <td className="border border-gray-200 px-4 py-2">
-                            <div className="flex gap-2">
-                              <Button size="sm" variant="outline" onClick={() => handleVisualizar(boletim)}>
-                                <Eye className="w-3 h-3 mr-1" /> Visualizar
+                            <Badge variant={boletim.publicado ? "default" : "secondary"}>
+                              {boletim.publicado ? "Publicado" : "Rascunho"}
+                            </Badge>
+                            
+                            <div className="flex space-x-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => router.push(`/admin/boletins/${boletim.id}/edit`)}
+                              >
+                                <Edit className="w-4 h-4" />
                               </Button>
-                              <Button size="sm" variant="outline" onClick={() => router.push(`/admin/boletins/${boletim.id}/edit`)}>
-                                <Edit className="w-3 h-3 mr-1" /> Editar
-                              </Button>
-                              <Button size="sm" variant="destructive" onClick={() => handleDelete(boletim.id)}>
-                                <Trash2 className="w-3 h-3 mr-1" /> Excluir
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setBoletimSelecionado(boletim);
+                                  setShowModal(true);
+                                }}
+                                className="text-red-600 hover:text-red-700"
+                              >
+                                <Trash2 className="w-4 h-4" />
                               </Button>
                             </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-                {/* Paginação */}
-                <div className="flex justify-between items-center mt-6">
-                  <Button
-                    variant="outline"
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={page === 1}
-                  >
-                    Anterior
-                  </Button>
-                  <span className="text-sm text-gray-600">
-                    Página {page} de {Math.max(1, Math.ceil(total / pageSize))}
-                  </span>
-                  <Button
-                    variant="outline"
-                    onClick={() => setPage((p) => p + 1)}
-                    disabled={page >= Math.ceil(total / pageSize)}
-                  >
-                    Próxima
-                  </Button>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Modal de Visualização do Boletim */}
-        {showModal && boletimSelecionado && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-            <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-2xl relative">
-              <button className="absolute top-3 right-3 text-gray-400 hover:text-red-600 text-2xl" onClick={() => setShowModal(false)}>&times;</button>
-              <h2 className="text-2xl font-bold mb-4">Detalhes do Boletim</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                <div><span className="font-semibold">Data:</span> {new Date(boletimSelecionado.data).toLocaleDateString("pt-BR")}</div>
-                <div><span className="font-semibold">Período:</span> {boletimSelecionado.periodo}</div>
-                <div><span className="font-semibold">Bandeira:</span> {boletimSelecionado.bandeira}</div>
-                <div><span className="font-semibold">Status:</span> {boletimSelecionado.publicado ? "Publicado" : "Rascunho"}</div>
-                <div className="md:col-span-2"><span className="font-semibold">Motivo:</span> {boletimSelecionado.motivo}</div>
-                <div className="md:col-span-2"><span className="font-semibold">Status Resumido:</span> {boletimSelecionado.titulo_curto}</div>
-              </div>
-              {/* Anexos */}
-              {boletimSelecionado.audios_urls && boletimSelecionado.audios_urls.length > 0 && (
-                <div className="mb-4">
-                  <div className="font-semibold mb-2">Áudios:</div>
-                  <ul className="flex flex-wrap gap-2">
-                    {boletimSelecionado.audios_urls.map((url: string, idx: number) => (
-                      <li key={url} className="flex items-center gap-2">
-                        <audio controls src={url} className="w-40" />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    </StaggerItem>
+                  ))}
+                </StaggerContainer>
               )}
-              {boletimSelecionado.fotos_urls && boletimSelecionado.fotos_urls.length > 0 && (
-                <div className="mb-4">
-                  <div className="font-semibold mb-2">Fotos:</div>
-                  <div className="flex flex-wrap gap-2">
-                    {boletimSelecionado.fotos_urls.map((url: string, idx: number) => (
-                      <img key={url} src={url} alt={`Foto ${idx + 1}`} className="w-32 h-32 object-cover rounded border" />
-                    ))}
+              
+              {/* Paginação */}
+              {total > pageSize && (
+                <div className="flex justify-between items-center mt-8 pt-6 border-t border-gray-200/50">
+                  <div className="text-sm text-gray-600">
+                    Mostrando {((page - 1) * pageSize) + 1} a {Math.min(page * pageSize, total)} de {total} boletins
+                  </div>
+                  <div className="flex space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPage(p => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                    >
+                      Anterior
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPage(p => p + 1)}
+                      disabled={page * pageSize >= total}
+                    >
+                      Próximo
+                    </Button>
                   </div>
                 </div>
               )}
             </div>
-          </div>
+          </motion.div>
+        </div>
+        {/* Modal de Confirmação de Exclusão */}
+        {showModal && boletimSelecionado && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4"
+            >
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Confirmar Exclusão</h3>
+              <p className="text-gray-600 mb-6">
+                Tem certeza que deseja excluir o boletim "{boletimSelecionado.titulo_curto}"? Esta ação não pode ser desfeita.
+              </p>
+              <div className="flex gap-3 justify-end">
+                <Button variant="outline" onClick={() => setShowModal(false)}>
+                  Cancelar
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  onClick={() => handleDelete(boletimSelecionado.id)}
+                >
+                  Excluir
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
-      </div>
+      </EnhancedDashboardLayout>
     </RequireAdmin>
   );
 } 

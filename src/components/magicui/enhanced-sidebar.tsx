@@ -44,29 +44,7 @@ const navLinks: NavigationItem[] = [
   { href: "/admin/minha-conta", label: "Minha Conta", icon: UserCircleIcon },
 ];
 
-const sidebarVariants = {
-  expanded: {
-    width: 280,
-    transition: { duration: 0.3, ease: "easeInOut" }
-  },
-  collapsed: {
-    width: 80,
-    transition: { duration: 0.3, ease: "easeInOut" }
-  }
-};
-
-const menuItemVariants = {
-  expanded: {
-    opacity: 1,
-    x: 0,
-    transition: { duration: 0.2, delay: 0.1 }
-  },
-  collapsed: {
-    opacity: 0,
-    x: -20,
-    transition: { duration: 0.2 }
-  }
-};
+// Otimizado: transições mais rápidas e menos propriedades animadas
 
 export default function EnhancedSidebar({ 
   user, 
@@ -166,9 +144,10 @@ export default function EnhancedSidebar({
           return (
             <motion.div
               key={link.href}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1, duration: 0.3 }}
+              transition={{ delay: index * 0.05, duration: 0.2 }}
+              style={{ willChange: 'transform, opacity' }}
             >
               <Link
                 href={link.href}
@@ -199,10 +178,10 @@ export default function EnhancedSidebar({
                   <AnimatePresence>
                     {(!isCollapsed || isMobile) && (
                       <motion.span
-                        variants={menuItemVariants}
-                        initial="collapsed"
-                        animate="expanded"
-                        exit="collapsed"
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -10 }}
+                        transition={{ duration: 0.15 }}
                         className="text-sm font-medium"
                       >
                         {link.label}

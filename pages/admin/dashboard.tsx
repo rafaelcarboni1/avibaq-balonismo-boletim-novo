@@ -115,8 +115,8 @@ export default function AdminDashboard() {
     }
   }
 
-  // LOG DE DEPURAÇÃO
-  console.log("DASHBOARD RENDER", { stats, boletimAmanha, loadingBoletimAmanha });
+  // Performance: Remove debug logs in production
+  // console.log("DASHBOARD RENDER", { stats, boletimAmanha, loadingBoletimAmanha });
   if (!stats || typeof stats !== 'object') {
     return <div style={{ color: 'red', padding: 32 }}>Erro: stats inválido</div>;
   }
@@ -165,7 +165,7 @@ export default function AdminDashboard() {
               trend={parseInt(stats.cadastrosPendentes) > 0 ? "up" : "neutral"}
               trendValue={parseInt(stats.cadastrosPendentes) > 0 ? "Requer atenção" : "Em dia"}
               description="Aguardando aprovação"
-              delay={0.1}
+              delay={0.05}
             />
             <EnhancedKpiCard 
               title="Pilotos"
@@ -175,7 +175,7 @@ export default function AdminDashboard() {
               trend="up"
               trendValue="+3 este mês"
               description="Pilotos cadastrados"
-              delay={0.2}
+              delay={0.1}
             />
             <EnhancedKpiCard 
               title="Empresas"
@@ -185,7 +185,7 @@ export default function AdminDashboard() {
               trend="neutral"
               trendValue="Estável"
               description="Agências parceiras"
-              delay={0.3}
+              delay={0.15}
             />
               </>
             )}
