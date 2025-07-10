@@ -84,8 +84,26 @@ export default function UsuariosAdmin() {
         // Hash da senha com bcrypt (fator 12 conforme regras do projeto)
         const senhaHash = await bcrypt.hash(tempPassword, 12);
         
-        // Inserir usuário com senha_hash
-        const { error } = await supabase.from("users").insert({ 
+        // 1. Criar usuário no Supabase Auth primeiro
+        const { data: authUser, error: authError } = await supabase.auth.signUp({
+          email: form.email,
+          password: tempPassword
+        });
+        
+        if (authError) {
+          toast.error("Erro ao criar usuário no sistema de autenticação: " + authError.message);
+          setSaving(false);
+          return;
+        }
+        
+        if (!authUser.user) {
+          toast.error("Erro: usuário não foi criado no sistema de autenticação");
+          setSaving(false);
+          return;
+        }
+        
+        // 2. Inserir usuário na tabela users
+        const { error: dbError } = await supabase.from("users").insert({ 
           nome: form.nome, 
           email: form.email, 
           role: form.role,
@@ -94,15 +112,17 @@ export default function UsuariosAdmin() {
           primeira_senha: true
         });
         
-        if (error) {
-          toast.error("Erro ao criar usuário: " + error.message);
+        if (dbError) {
+          // Se falhar ao inserir na tabela, mostrar erro (não é possível deletar do Auth sem service role)
+          toast.error("Erro ao criar usuário na base de dados: " + dbError.message);
+          toast.error("IMPORTANTE: Usuário foi criado no sistema de autenticação mas não na base de dados. Contate o administrador do sistema.");
         } else {
           toast.success("Usuário criado com sucesso");
           setGeneratedPassword(tempPassword);
           setShowPasswordModal(true);
         }
       } catch (err) {
-        toast.error("Erro ao processar senha");
+        toast.error("Erro ao processar senha: " + (err as Error).message);
       }
     } else {
       const { error } = await supabase.from("users").update({ 
@@ -122,9 +142,21 @@ export default function UsuariosAdmin() {
 
   async function handleDeletar(id: string) {
     if (!window.confirm("Tem certeza que deseja deletar este usuário?")) return;
-    const { error } = await supabase.from("users").delete().eq("id", id);
-    if (error) toast.error("Erro ao deletar usuário");
-    else toast.success("Usuário deletado");
+    
+    try {
+      // Deletar da tabela users (sem deletar do Auth pois requer service role)
+      const { error: dbError } = await supabase.from("users").delete().eq("id", id);
+      
+      if (dbError) {
+        toast.error("Erro ao deletar usuário: " + dbError.message);
+      } else {
+        toast.success("Usuário removido da base de dados");
+        toast.error("AVISO: O usuário ainda pode existir no sistema de autenticação. Para remoção completa, contate o administrador do sistema.");
+      }
+    } catch (err) {
+      toast.error("Erro ao processar exclusão: " + (err as Error).message);
+    }
+    
     fetchUsuarios();
   }
 
