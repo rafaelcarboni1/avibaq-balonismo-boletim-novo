@@ -318,7 +318,7 @@ export default function EnhancedSidebar({
         className={cn(
           "transition-all duration-300 ease-in-out min-h-screen",
           isCollapsed ? "lg:ml-20" : "lg:ml-[280px]",
-          "p-6 bg-gradient-to-br from-gray-50 to-gray-100/50"
+          "px-4 py-6 sm:px-6 lg:px-8 bg-gradient-to-br from-gray-50 to-gray-100/50"
         )}
       >
         {children}

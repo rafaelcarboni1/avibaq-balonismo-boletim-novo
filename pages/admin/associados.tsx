@@ -660,29 +660,29 @@ export default function AdminAssociados() {
                               whileHover={{ scale: 1.01 }}
                               className="bg-gradient-to-r from-white to-yellow-50/30 rounded-xl border border-yellow-200/50 p-6 shadow-sm hover:shadow-md transition-all duration-200 mb-4"
                             >
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center space-x-4">
-                                  <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div className="flex items-center space-x-4 min-w-0 flex-1">
+                                  <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
                                     {membro.tipo === 'piloto' ? 
                                       <User className="h-6 w-6 text-yellow-600" /> : 
                                       <Building className="h-6 w-6 text-yellow-600" />
                                     }
                                   </div>
-                                  <div>
-                                    <h4 className="font-semibold text-gray-900">{membro.nome_completo}</h4>
-                                    <p className="text-sm text-gray-600">{membro.email}</p>
-                                    <div className="flex items-center gap-2 mt-1">
-                                      <Badge variant="outline" className="capitalize">
+                                  <div className="min-w-0 flex-1">
+                                    <h4 className="font-semibold text-gray-900 truncate">{membro.nome_completo}</h4>
+                                    <p className="text-sm text-gray-600 truncate">{membro.email}</p>
+                                    <div className="flex flex-wrap items-center gap-2 mt-1">
+                                      <Badge variant="outline" className="capitalize text-xs">
                                         {membro.tipo}
                                       </Badge>
-                                      <Badge variant="secondary">
+                                      <Badge variant="secondary" className="text-xs">
                                         {new Date(membro.created_at).toLocaleDateString('pt-BR')}
                                       </Badge>
                                     </div>
                                   </div>
                                 </div>
                                 
-                                <div className="flex space-x-2">
+                                <div className="flex flex-wrap gap-2 sm:flex-nowrap">
                                   <Button
                                     size="sm"
                                     variant="outline"
@@ -690,15 +690,16 @@ export default function AdminAssociados() {
                                       setSelectedMembro(membro);
                                       setShowVisualizarDialog(true);
                                     }}
+                                    className="text-xs px-2"
                                   >
                                     Visualizar
                                   </Button>
                                   <Button
                                     size="sm"
                                     onClick={() => handleAprovar(membro)}
-                                    className="bg-green-600 hover:bg-green-700"
+                                    className="bg-green-600 hover:bg-green-700 text-xs px-2"
                                   >
-                                    <CheckCircle className="w-4 h-4 mr-1" />
+                                    <CheckCircle className="w-3 h-3 mr-1" />
                                     Aprovar
                                   </Button>
                                   <Button
@@ -708,8 +709,9 @@ export default function AdminAssociados() {
                                       setSelectedMembro(membro);
                                       setShowRecusaDialog(true);
                                     }}
+                                    className="text-xs px-2"
                                   >
-                                    <XCircle className="w-4 h-4 mr-1" />
+                                    <XCircle className="w-3 h-3 mr-1" />
                                     Recusar
                                   </Button>
                                 </div>

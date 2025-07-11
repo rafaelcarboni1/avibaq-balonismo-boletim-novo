@@ -313,40 +313,42 @@ export default function UsuariosAdmin() {
                           whileHover={{ scale: 1.01 }}
                           className="bg-gradient-to-r from-white to-gray-50/50 rounded-xl border border-gray-200/50 p-6 shadow-sm hover:shadow-md transition-all duration-200"
                         >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-4">
-                              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div className="flex items-center space-x-4 min-w-0 flex-1">
+                              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
                                 <RoleIcon className="h-6 w-6 text-blue-600" />
                               </div>
-                              <div>
-                                <h4 className="font-semibold text-gray-900">{usuario.nome}</h4>
-                                <p className="text-sm text-gray-600">{usuario.email}</p>
-                                <div className="flex items-center gap-2 mt-1">
-                                  <Badge className={getRoleColor(usuario.role)}>
+                              <div className="min-w-0 flex-1">
+                                <h4 className="font-semibold text-gray-900 truncate">{usuario.nome}</h4>
+                                <p className="text-sm text-gray-600 truncate">{usuario.email}</p>
+                                <div className="flex flex-wrap items-center gap-2 mt-1">
+                                  <Badge className={`${getRoleColor(usuario.role)} text-xs`}>
                                     {usuario.role.toUpperCase()}
                                   </Badge>
-                                  <Badge variant="secondary">
+                                  <Badge variant="secondary" className="text-xs">
                                     {usuario.created_at ? new Date(usuario.created_at).toLocaleDateString('pt-BR') : 'Data não disponível'}
                                   </Badge>
                                 </div>
                               </div>
                             </div>
                             
-                            <div className="flex space-x-2">
+                            <div className="flex flex-wrap gap-2 sm:flex-nowrap">
                               <Button
                                 size="sm"
                                 variant="outline"
                                 onClick={() => openEditar(usuario)}
+                                className="text-xs px-2"
                               >
-                                <Edit className="w-4 h-4 mr-1" />
+                                <Edit className="w-3 h-3 mr-1" />
                                 Editar
                               </Button>
                               <Button
                                 size="sm"
                                 variant="destructive"
                                 onClick={() => handleDeletar(usuario.id)}
+                                className="text-xs px-2"
                               >
-                                <Trash2 className="w-4 h-4 mr-1" />
+                                <Trash2 className="w-3 h-3 mr-1" />
                                 Deletar
                               </Button>
                             </div>

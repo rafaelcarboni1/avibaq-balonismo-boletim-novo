@@ -71,7 +71,7 @@ export default function EnhancedDashboardLayout({
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100/50">
       {/* Enhanced Sidebar */}
       <EnhancedSidebar user={user} role={role} nome={nome}>
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto px-0">
           {/* Header */}
           {(title || breadcrumbs.length > 0 || headerActions) && (
             <motion.header
