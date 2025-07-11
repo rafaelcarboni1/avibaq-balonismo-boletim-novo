@@ -1,6 +1,7 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/router";
+import { InstallBadge } from "../magicui/install-prompt";
 
 export const Header = () => {
   const router = useRouter();
@@ -16,11 +17,14 @@ export const Header = () => {
               <p className="text-sm text-gray-600">Associação de Pilotos e Empresas de Balonismo</p>
             </div>
           </div>
-          <nav className="hidden md:flex space-x-6">
-            <Button variant="ghost" className="hover:text-primary" onClick={() => router.push("/")}>Início</Button>
-            <Button variant="ghost" className="hover:text-primary" onClick={() => router.push("/historico")}>Histórico</Button>
-            <Button variant="ghost" className="hover:text-primary" onClick={() => router.push("/quem-somos")}>Quem Somos</Button>
-            <Button variant="outline" className="hover:text-primary" onClick={() => router.push("/admin/login")}>Área Admin</Button>
+          <nav className="flex items-center space-x-6">
+            <div className="hidden md:flex space-x-6">
+              <Button variant="ghost" className="hover:text-primary" onClick={() => router.push("/")}>Início</Button>
+              <Button variant="ghost" className="hover:text-primary" onClick={() => router.push("/historico")}>Histórico</Button>
+              <Button variant="ghost" className="hover:text-primary" onClick={() => router.push("/quem-somos")}>Quem Somos</Button>
+              <Button variant="outline" className="hover:text-primary" onClick={() => router.push("/admin/login")}>Área Admin</Button>
+            </div>
+            <InstallBadge />
           </nav>
         </div>
       </div>

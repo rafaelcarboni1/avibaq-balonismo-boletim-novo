@@ -3,6 +3,7 @@ import { useUser } from "@/hooks/useUser";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { UserCircleIcon, HomeIcon, DocumentTextIcon, UsersIcon, Cog6ToothIcon, ArrowLeftOnRectangleIcon, KeyIcon } from "@heroicons/react/24/outline";
+import { InstallBadge } from "./magicui/install-prompt";
 
 const navLinks = [
   { href: "/admin/dashboard", label: "Dashboard", icon: HomeIcon },
@@ -38,8 +39,9 @@ export function DashboardLayout({ children, title }) {
         </div>
         {/* Centro: Breadcrumb/título (opcional) */}
         {title && <div className="hidden md:block text-lg font-medium text-gray-700">{title}</div>}
-        {/* Direita: Saudação + Avatar */}
+        {/* Direita: Install Badge + Saudação + Avatar */}
         <div className="flex items-center gap-3 relative">
+          <InstallBadge className="hidden sm:flex" />
           <span className="text-sm text-gray-600">Bem-vindo, {userName}</span>
           <button className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center border border-gray-300 hover:ring-2 hover:ring-primary transition" onClick={() => setAvatarOpen(v => !v)}>
             <UserCircleIcon className="w-7 h-7 text-primary" />

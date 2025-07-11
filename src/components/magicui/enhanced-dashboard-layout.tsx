@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useUser } from "../../hooks/useUser";
 import EnhancedSidebar from "./enhanced-sidebar";
 import AnimatedBreadcrumbs from "./animated-breadcrumbs";
+import { InstallPrompt } from "./install-prompt";
 import { cn } from "../../lib/utils";
 import { designTokens } from "../../lib/design-tokens";
 
@@ -74,6 +75,11 @@ export default function EnhancedDashboardLayout({
       {/* Enhanced Sidebar */}
       <EnhancedSidebar user={user} role={role} nome={nome}>
         <div className="max-w-7xl mx-auto px-0">
+          {/* PWA Install Prompt */}
+          <div className="mb-4">
+            <InstallPrompt />
+          </div>
+          
           {/* Header */}
           {(title || breadcrumbs.length > 0 || headerActions) && (
             <motion.header
