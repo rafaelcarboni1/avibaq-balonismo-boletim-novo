@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "../integrations/supabase/client";
 
 export function useUser() {
@@ -26,15 +26,15 @@ export function useUser() {
         }
       }
       setLoading(false);
+      console.log('[useUser] Estado final configurado');
     };
     fetchUser();
   }, []);
 
-  useEffect(() => {
-    console.log('[useUser] Estado final:', { user, role, nome, loading });
-  }, [user, role, nome, loading]);
+  // Retorna user com role anexado para compatibilidade - memoizado para evitar re-renders
+  const userWithRole = useMemo(() => {
+    return user ? { ...user, role } : null;
+  }, [user, role]);
 
-  // Retorna user com role anexado para compatibilidade
-  const userWithRole = user ? { ...user, role } : null;
   return { user: userWithRole, role, nome, loading };
 } 
