@@ -7,30 +7,36 @@ import LoadingSkeleton from "@/components/magicui/loading-skeleton";
 import { StaggerContainer, StaggerItem } from "@/components/magicui/smooth-transitions";
 import { BentoGrid, BentoGridItem } from "@/components/magicui/bento-grid";
 import AnimatedChart from "@/components/magicui/animated-chart";
+import { PermissionTabs, PermissionMatrix, ModuleManager, AuditLogViewer } from "@/components/magicui/advanced-permissions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/sonner";
 import { motion } from "framer-motion";
-import { Shield, ShieldCheck, Settings, Users, CheckCircle, XCircle, KeyIcon } from "lucide-react";
+import { Shield, ShieldCheck, Settings, Users, CheckCircle, XCircle, KeyIcon, History, FileText, Eye, Download, Clock, AlertTriangle } from "lucide-react";
 import { useUser } from "@/hooks/useUser";
 
 export default function PermissoesAdmin() {
-  const { role } = useUser();
+  const { role, user } = useUser();
   const [permissoes, setPermissoes] = useState<any[]>([]);
+  const [modules, setModules] = useState<any[]>([]);
+  const [auditLogs, setAuditLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [selectedRole, setSelectedRole] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<'permissions' | 'modules' | 'audit'>('permissions');
 
   useEffect(() => {
     fetchPermissoes();
+    fetchModules();
+    fetchAuditLogs();
   }, []);
 
   async function fetchPermissoes() {
     setLoading(true);
     const { data, error } = await supabase
       .from("permissoes")
-      .select("id, role, recurso, acao, permitido")
+      .select("id, role, recurso, acao, permitido, nivel_acesso, restricoes, data_criacao, data_atualizacao")
       .order("role", { ascending: true })
       .order("recurso", { ascending: true })
       .order("acao", { ascending: true });
@@ -43,6 +49,108 @@ export default function PermissoesAdmin() {
     }
     setLoading(false);
     setDirty(false);
+  }
+
+  async function fetchModules() {
+    const mockModules = [
+      {
+        id: '1',
+        nome: 'Gestão de Voos',
+        descricao: 'Módulo para planejamento e execução de voos',
+        categoria: 'core',
+        ativo: true,
+        critico: true,
+        versao: '2.1.0',
+        atualizado_em: new Date().toISOString()
+      },
+      {
+        id: '2', 
+        nome: 'Sistema de Permissões',
+        descricao: 'Controle de acesso e permissões',
+        categoria: 'admin',
+        ativo: true,
+        critico: true,
+        versao: '1.5.0',
+        atualizado_em: new Date().toISOString()
+      },
+      {
+        id: '3',
+        nome: 'Relatórios Avançados',
+        descricao: 'Geração de relatórios e analytics',
+        categoria: 'admin',
+        ativo: true,
+        critico: false,
+        versao: '1.2.0',
+        atualizado_em: new Date().toISOString()
+      },
+      {
+        id: '4',
+        nome: 'Notificações Push',
+        descricao: 'Sistema de notificações em tempo real',
+        categoria: 'core',
+        ativo: false,
+        critico: false,
+        versao: '0.9.0',
+        atualizado_em: new Date().toISOString()
+      },
+      {
+        id: '5',
+        nome: 'Dashboard Piloto',
+        descricao: 'Interface específica para pilotos',
+        categoria: 'piloto',
+        ativo: true,
+        critico: false,
+        versao: '2.0.0',
+        atualizado_em: new Date().toISOString()
+      },
+      {
+        id: '6',
+        nome: 'Portal Agência',
+        descricao: 'Funcionalidades para agências',
+        categoria: 'agencia',
+        ativo: true,
+        critico: false,
+        versao: '1.8.0',
+        atualizado_em: new Date().toISOString()
+      }
+    ];
+    setModules(mockModules);
+  }
+
+  async function fetchAuditLogs() {
+    const mockAuditLogs = [
+      {
+        id: '1',
+        data_acao: new Date().toISOString(),
+        usuario_id: user?.id || 'admin',
+        usuario: { nome: user?.name || 'Admin' },
+        acao: 'update_permission',
+        recurso: 'voos.create',
+        detalhes: 'Permissão concedida para role admin',
+        ip_origem: '127.0.0.1'
+      },
+      {
+        id: '2',
+        data_acao: new Date(Date.now() - 3600000).toISOString(),
+        usuario_id: user?.id || 'admin',
+        usuario: { nome: user?.name || 'Admin' },
+        acao: 'toggle_module',
+        recurso: 'module.notifications',
+        detalhes: 'Módulo de notificações desativado',
+        ip_origem: '127.0.0.1'
+      },
+      {
+        id: '3',
+        data_acao: new Date(Date.now() - 7200000).toISOString(),
+        usuario_id: 'user123',
+        usuario: { nome: 'João Silva' },
+        acao: 'login',
+        recurso: 'auth.login',
+        detalhes: 'Login realizado com sucesso',
+        ip_origem: '192.168.1.100'
+      }
+    ];
+    setAuditLogs(mockAuditLogs);
   }
 
   // Agrupar por role > recurso > ação
@@ -66,18 +174,70 @@ export default function PermissoesAdmin() {
   async function handleSalvar() {
     setSaving(true);
     let erro = false;
+    
+    // Log de auditoria para cada mudança
     for (const perm of permissoes) {
-      const { error } = await supabase.from("permissoes").update({ permitido: perm.permitido, atualizado_em: new Date().toISOString() }).eq("id", perm.id);
-      if (error) erro = true;
+      const { error } = await supabase
+        .from("permissoes")
+        .update({ 
+          permitido: perm.permitido, 
+          atualizado_em: new Date().toISOString(),
+          atualizado_por: user?.id
+        })
+        .eq("id", perm.id);
+      
+      if (error) {
+        erro = true;
+      } else {
+        // Registrar log de auditoria
+        await logAuditAction({
+          acao: 'update_permission',
+          recurso: `${perm.recurso}.${perm.acao}`,
+          detalhes: `Permissão ${perm.permitido ? 'concedida' : 'revogada'} para role ${perm.role}`,
+          usuario_id: user?.id
+        });
+      }
     }
+    
     setSaving(false);
     setDirty(false);
+    
     if (erro) {
       toast.error("Erro ao salvar permissões!");
     } else {
       toast.success("Permissões salvas com sucesso!");
       fetchPermissoes();
+      fetchAuditLogs();
     }
+  }
+
+  async function logAuditAction(actionData: any) {
+    // Simular log - em produção salvaria no banco
+    const newLog = {
+      id: Date.now().toString(),
+      ...actionData,
+      data_acao: new Date().toISOString(),
+      ip_origem: '127.0.0.1',
+      user_agent: navigator.userAgent
+    };
+    
+    setAuditLogs(logs => [newLog, ...logs]);
+  }
+
+  async function handleToggleModule(moduleId: string, enabled: boolean) {
+    const updatedModules = modules.map(m => 
+      m.id === moduleId ? { ...m, ativo: enabled, atualizado_em: new Date().toISOString() } : m
+    );
+    setModules(updatedModules);
+    
+    await logAuditAction({
+      acao: 'toggle_module',
+      recurso: `module.${moduleId}`,
+      detalhes: `Módulo ${enabled ? 'ativado' : 'desativado'}`,
+      usuario_id: user?.id
+    });
+    
+    toast.success(`Módulo ${enabled ? 'ativado' : 'desativado'} com sucesso!`);
   }
 
   const getPermissionStats = () => {
@@ -156,8 +316,12 @@ export default function PermissoesAdmin() {
         }
       >
         <div className="space-y-8">
-          {/* KPI Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Navigation Tabs */}
+          <PermissionTabs activeTab={activeTab} onTabChange={setActiveTab} />
+
+          {/* KPI Cards baseados na aba ativa */}
+          {activeTab === 'permissions' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <EnhancedKpiCard 
               title="Total de Permissões"
               value={stats.totalPermissions}
@@ -198,186 +362,212 @@ export default function PermissoesAdmin() {
               description="Funções de usuário"
               delay={0.15}
             />
-          </div>
-
-          {/* Gráfico de Permissões */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <AnimatedChart
-              title="Permissões por Role"
-              type="pie"
-              data={roles.map(role => ({
-                name: role.charAt(0).toUpperCase() + role.slice(1),
-                value: stats.permissionsByRole[role] || 0
-              }))}
-              colors={["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"]}
-            />
-            
-            <AnimatedChart
-              title="Status das Permissões"
-              type="bar"
-              data={[
-                { name: 'Permitidas', value: stats.allowedPermissions },
-                { name: 'Negadas', value: stats.deniedPermissions },
-                { name: 'Total', value: stats.totalPermissions },
-              ]}
-              colors={["#10b981", "#ef4444", "#3b82f6"]}
-            />
-          </div>
-
-          {/* Bento Grid Layout */}
-          <BentoGrid className="md:auto-rows-[20rem] mb-8">
-            {/* Seletor de Roles */}
-            <BentoGridItem
-              className="md:col-span-2"
-              title="Selecionar Função (Role)"
-              description={
-                <div className="space-y-4">
-                  <p className="text-gray-600">Escolha a função para configurar as permissões específicas</p>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-                    {roles.map(r => {
-                      const RoleIcon = getRoleIcon(r);
-                      return (
-                        <Button
-                          key={r}
-                          variant={selectedRole === r ? "default" : "outline"}
-                          onClick={() => setSelectedRole(r)}
-                          className={`flex items-center gap-2 h-auto py-2 text-xs ${
-                            selectedRole === r ? 'bg-gradient-to-r from-blue-600 to-purple-600' : ''
-                          }`}
-                          size="sm"
-                        >
-                          <RoleIcon className="w-3 h-3" />
-                          <span className="capitalize">{r}</span>
-                          <Badge variant="secondary" className="ml-auto text-xs">
-                            {stats.permissionsByRole[r] || 0}
-                          </Badge>
-                        </Button>
-                      );
-                    })}
-                  </div>
-                </div>
-              }
-              header={
-                <div className="flex h-20 w-full bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl items-center justify-center">
-                  <Shield className="h-10 w-10 text-white" />
-                </div>
-              }
-              icon={<Shield className="h-6 w-6 text-blue-500" />}
-            />
-
-            {/* Estatísticas da Role Selecionada */}
-            <BentoGridItem
-              title="Role Ativa"
-              description={
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    {getRoleIcon(selectedRole) && (
-                      React.createElement(getRoleIcon(selectedRole), { className: "h-5 w-5 text-blue-600" })
-                    )}
-                    <span className="font-semibold capitalize text-blue-600">{selectedRole}</span>
-                  </div>
-                  <p className="text-sm text-gray-600">
-                    {stats.permissionsByRole[selectedRole] || 0} permissões ativas
-                  </p>
-                  <div className="mt-3">
-                    <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      (stats.permissionsByRole[selectedRole] || 0) > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                    }`}>
-                      {(stats.permissionsByRole[selectedRole] || 0) > 0 ? 'Ativa' : 'Sem permissões'}
-                    </div>
-                  </div>
-                </div>
-              }
-              header={
-                <div className="flex h-20 w-full bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl items-center justify-center">
-                  <Users className="h-10 w-10 text-white" />
-                </div>
-              }
-              icon={<Users className="h-6 w-6 text-green-500" />}
-            />
-          </BentoGrid>
-
-          {/* Tabela de Permissões */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.2 }}
-            className="bg-white/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 shadow-lg"
-          >
-            <div className="p-6 border-b border-gray-200/50">
-              <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                {getRoleIcon(selectedRole) && (
-                  React.createElement(getRoleIcon(selectedRole), { className: "h-5 w-5 text-blue-600" })
-                )}
-                Permissões para: <span className="capitalize text-blue-600">{selectedRole}</span>
-              </h2>
-              <p className="text-gray-600 mt-1">Configure as permissões para esta função</p>
             </div>
-            
-            <div className="p-6">
-              <div className="overflow-x-auto">
-                <table className="min-w-full">
-                  <thead>
-                    <tr className="border-b border-gray-200">
-                      <th className="text-left py-3 px-4 font-semibold text-gray-900">Recurso</th>
-                      {acoes.map(acao => (
-                        <th key={acao} className="text-center py-3 px-4 font-semibold text-gray-900 capitalize">
-                          {acao}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <StaggerContainer>
-                      {recursos.map((recurso, index) => (
-                        <StaggerItem key={recurso}>
-                          <motion.tr 
-                            whileHover={{ backgroundColor: 'rgba(59, 130, 246, 0.05)' }}
-                            className="border-b border-gray-100 transition-colors"
-                          >
-                            <td className="py-4 px-4">
-                              <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 bg-blue-500 rounded-full" />
-                                <span className="font-medium text-gray-900 capitalize">{recurso}</span>
-                              </div>
-                            </td>
-                            {acoes.map(acao => {
-                              const perm = getPermissao(recurso, acao);
-                              return (
-                                <td key={acao} className="py-4 px-4 text-center">
-                                  {perm ? (
-                                    <label className="inline-flex items-center cursor-pointer">
-                                      <input
-                                        type="checkbox"
-                                        checked={!!perm.permitido}
-                                        onChange={e => handleTogglePermissao(perm.id, e.target.checked)}
-                                        className="sr-only"
-                                      />
-                                      <div className={`relative w-6 h-6 rounded-md border-2 transition-all duration-200 ${
-                                        perm.permitido 
-                                          ? 'bg-green-500 border-green-500' 
-                                          : 'bg-gray-100 border-gray-300 hover:border-gray-400'
-                                      }`}>
-                                        {perm.permitido && (
-                                          <CheckCircle className="w-4 h-4 text-white absolute top-0.5 left-0.5" />
-                                        )}
-                                      </div>
-                                    </label>
-                                  ) : (
-                                    <div className="w-6 h-6 rounded-md bg-gray-200 border-2 border-gray-300 mx-auto opacity-50" />
-                                  )}
-                                </td>
-                              );
-                            })}
-                          </motion.tr>
-                        </StaggerItem>
-                      ))}
-                    </StaggerContainer>
-                  </tbody>
-                </table>
-              </div>
+          )}
+
+          {activeTab === 'modules' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <EnhancedKpiCard 
+                title="Módulos Ativos"
+                value={modules.filter(m => m.ativo).length}
+                icon={CheckCircle}
+                color="green"
+                trend="neutral"
+                trendValue="Funcionais"
+                description="Módulos habilitados"
+                delay={0}
+              />
+              <EnhancedKpiCard 
+                title="Módulos Inativos"
+                value={modules.filter(m => !m.ativo).length}
+                icon={XCircle}
+                color="red"
+                trend="neutral"
+                trendValue="Desabilitados"
+                description="Módulos desativados"
+                delay={0.05}
+              />
+              <EnhancedKpiCard 
+                title="Total de Módulos"
+                value={modules.length}
+                icon={Settings}
+                color="blue"
+                trend="neutral"
+                trendValue="Sistema"
+                description="Módulos do sistema"
+                delay={0.1}
+              />
+              <EnhancedKpiCard 
+                title="Módulos Críticos"
+                value={modules.filter(m => m.critico).length}
+                icon={AlertTriangle}
+                color="yellow"
+                trend="neutral"
+                trendValue="Essenciais"
+                description="Módulos críticos"
+                delay={0.15}
+              />
             </div>
-          </motion.div>
+          )}
+
+          {activeTab === 'audit' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <EnhancedKpiCard 
+                title="Ações Hoje"
+                value={auditLogs.filter(log => 
+                  new Date(log.data_acao).toDateString() === new Date().toDateString()
+                ).length}
+                icon={Clock}
+                color="blue"
+                trend="neutral"
+                trendValue="Hoje"
+                description="Ações registradas"
+                delay={0}
+              />
+              <EnhancedKpiCard 
+                title="Total de Logs"
+                value={auditLogs.length}
+                icon={FileText}
+                color="purple"
+                trend="neutral"
+                trendValue="Histórico"
+                description="Registros de auditoria"
+                delay={0.05}
+              />
+              <EnhancedKpiCard 
+                title="Usuários Ativos"
+                value={new Set(auditLogs.map(log => log.usuario_id)).size}
+                icon={Users}
+                color="green"
+                trend="neutral"
+                trendValue="Únicos"
+                description="Usuários com atividade"
+                delay={0.1}
+              />
+              <EnhancedKpiCard 
+                title="Alterações Permissões"
+                value={auditLogs.filter(log => log.acao.includes('permission')).length}
+                icon={Shield}
+                color="yellow"
+                trend="neutral"
+                trendValue="Históricas"
+                description="Mudanças de permissões"
+                delay={0.15}
+              />
+            </div>
+          )}
+
+          {/* Gráficos baseados na aba ativa */}
+          {activeTab === 'permissions' && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              <AnimatedChart
+                title="Permissões por Role"
+                type="pie"
+                data={roles.map(role => ({
+                  name: role.charAt(0).toUpperCase() + role.slice(1),
+                  value: stats.permissionsByRole[role] || 0
+                }))}
+                colors={["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"]}
+              />
+              
+              <AnimatedChart
+                title="Status das Permissões"
+                type="bar"
+                data={[
+                  { name: 'Permitidas', value: stats.allowedPermissions },
+                  { name: 'Negadas', value: stats.deniedPermissions },
+                  { name: 'Total', value: stats.totalPermissions },
+                ]}
+                colors={["#10b981", "#ef4444", "#3b82f6"]}
+              />
+            </div>
+          )}
+
+          {activeTab === 'modules' && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              <AnimatedChart
+                title="Status dos Módulos"
+                type="pie"
+                data={[
+                  { name: 'Ativos', value: modules.filter(m => m.ativo).length },
+                  { name: 'Inativos', value: modules.filter(m => !m.ativo).length }
+                ]}
+                colors={["#10b981", "#ef4444"]}
+              />
+              
+              <AnimatedChart
+                title="Módulos por Categoria"
+                type="bar"
+                data={[
+                  { name: 'Core', value: modules.filter(m => m.categoria === 'core').length },
+                  { name: 'Admin', value: modules.filter(m => m.categoria === 'admin').length },
+                  { name: 'Piloto', value: modules.filter(m => m.categoria === 'piloto').length },
+                  { name: 'Agência', value: modules.filter(m => m.categoria === 'agencia').length }
+                ]}
+                colors={["#3b82f6", "#8b5cf6", "#10b981", "#f59e0b"]}
+              />
+            </div>
+          )}
+
+          {activeTab === 'audit' && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              <AnimatedChart
+                title="Ações por Tipo"
+                type="pie"
+                data={[
+                  { name: 'Login', value: auditLogs.filter(log => log.acao === 'login').length },
+                  { name: 'Permissões', value: auditLogs.filter(log => log.acao.includes('permission')).length },
+                  { name: 'Módulos', value: auditLogs.filter(log => log.acao.includes('module')).length },
+                  { name: 'Outros', value: auditLogs.filter(log => !['login'].includes(log.acao) && !log.acao.includes('permission') && !log.acao.includes('module')).length }
+                ]}
+                colors={["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6"]}
+              />
+              
+              <AnimatedChart
+                title="Atividade por Dia (Últimos 7 dias)"
+                type="bar"
+                data={Array.from({ length: 7 }, (_, i) => {
+                  const date = new Date();
+                  date.setDate(date.getDate() - i);
+                  const dateStr = date.toDateString();
+                  return {
+                    name: date.toLocaleDateString('pt-BR', { weekday: 'short' }),
+                    value: auditLogs.filter(log => 
+                      new Date(log.data_acao).toDateString() === dateStr
+                    ).length
+                  };
+                }).reverse()}
+                colors={["#3b82f6"]}
+              />
+            </div>
+          )}
+
+          {/* Conteúdo específico de cada aba */}
+          {activeTab === 'permissions' && (
+            <PermissionMatrix 
+              permissions={permissoes}
+              selectedRole={selectedRole}
+              roles={roles}
+              recursos={recursos}
+              acoes={acoes}
+              onToggle={handleTogglePermissao}
+              onRoleChange={setSelectedRole}
+            />
+          )}
+
+          {activeTab === 'modules' && (
+            <ModuleManager 
+              modules={modules}
+              onToggle={handleToggleModule}
+            />
+          )}
+
+          {activeTab === 'audit' && (
+            <AuditLogViewer 
+              logs={auditLogs}
+            />
+          )}
+
         </div>
       </EnhancedDashboardLayout>
     </ProtectedRoute>
