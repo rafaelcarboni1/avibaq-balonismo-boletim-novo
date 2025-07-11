@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { useInView, useMotionValue, useSpring } from "framer-motion";
 
-import { cn } from "@/lib/utils";
+import { cn } from "../../lib/utils";
 
 export default function NumberTicker({
   value,
@@ -57,3 +57,5 @@ export default function NumberTicker({
     />
   );
 }
+
+export { NumberTicker };

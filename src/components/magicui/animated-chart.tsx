@@ -203,3 +203,5 @@ export default function AnimatedChart({
     </motion.div>
   );
 }
+
+export { AnimatedChart };

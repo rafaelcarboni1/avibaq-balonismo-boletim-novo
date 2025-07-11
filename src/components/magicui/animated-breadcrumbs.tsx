@@ -3,7 +3,7 @@
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { ChevronRightIcon, HomeIcon } from "@heroicons/react/24/outline";
-import { cn } from "@/lib/utils";
+import { cn } from "../../lib/utils";
 
 interface BreadcrumbItem {
   label: string;

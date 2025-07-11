@@ -139,12 +139,12 @@ export default function PlanejamentoAgencia() {
         return;
       }
 
-      const pilotosFormatados = data?.map(v => ({
-        id: v.membros.id,
-        nome: v.membros.nome,
-        email: v.membros.email,
-        user_id: v.membros.user_id
-      })) || [];
+      const pilotosFormatados = data?.map((v: any) => ({
+        id: v.membros?.id,
+        nome: v.membros?.nome,
+        email: v.membros?.email,
+        user_id: v.membros?.user_id
+      })).filter((p: any) => p.id) || [];
 
       setPilotos(pilotosFormatados);
     } catch (error) {
@@ -186,9 +186,9 @@ export default function PlanejamentoAgencia() {
         return;
       }
 
-      const baloesFormatados = data?.map(b => ({
+      const baloesFormatados = data?.map((b: any) => ({
         ...b,
-        proprietario_nome: b.membros.nome
+        proprietario_nome: b.membros?.nome
       })) || [];
 
       setBaloes(baloesFormatados);

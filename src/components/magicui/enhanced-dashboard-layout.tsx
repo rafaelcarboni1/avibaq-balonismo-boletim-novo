@@ -1,11 +1,11 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useUser } from "@/hooks/useUser";
+import { useUser } from "../../hooks/useUser";
 import EnhancedSidebar from "./enhanced-sidebar";
 import AnimatedBreadcrumbs from "./animated-breadcrumbs";
-import { cn } from "@/lib/utils";
-import { designTokens } from "@/lib/design-tokens";
+import { cn } from "../../lib/utils";
+import { designTokens } from "../../lib/design-tokens";
 
 interface BreadcrumbItem {
   label: string;
@@ -19,6 +19,7 @@ interface EnhancedDashboardLayoutProps {
   breadcrumbs?: BreadcrumbItem[];
   className?: string;
   headerActions?: React.ReactNode;
+  loading?: boolean;
 }
 
 const pageVariants = {
@@ -63,7 +64,8 @@ export default function EnhancedDashboardLayout({
   title,
   breadcrumbs = [],
   className,
-  headerActions
+  headerActions,
+  loading = false
 }: EnhancedDashboardLayoutProps) {
   const { user, role, nome } = useUser();
 
@@ -132,7 +134,13 @@ export default function EnhancedDashboardLayout({
             
             {/* Content wrapper */}
             <div className="relative">
-              {children}
+              {loading ? (
+                <div className="flex items-center justify-center min-h-[400px]">
+                  <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                </div>
+              ) : (
+                children
+              )}
             </div>
           </motion.main>
         </div>
@@ -140,3 +148,5 @@ export default function EnhancedDashboardLayout({
     </div>
   );
 }
+
+export { EnhancedDashboardLayout };
