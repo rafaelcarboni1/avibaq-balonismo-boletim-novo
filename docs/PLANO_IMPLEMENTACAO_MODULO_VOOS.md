@@ -311,17 +311,17 @@ CREATE INDEX idx_offline_sincronizado ON dados_offline(sincronizado);
 - Componente `ChecklistWizard` ✅
 - Sistema de validação avançado ✅
 
-### Fase 6: Formulário Pós-voo + Anexos
+### Fase 6: Formulário Pós-voo + Anexos ✅
 **Duração estimada: 4-5 dias**
-- [ ] Formulário de dados pós-voo
-- [ ] Upload de track-logs, fotos, PDFs
-- [ ] Integração com Supabase Storage
-- [ ] Preview de anexos
+- [x] Formulário de dados pós-voo
+- [x] Upload de track-logs, fotos, PDFs
+- [x] Integração com Supabase Storage
+- [x] Preview de anexos
 
 **Entregáveis:**
-- `/piloto/pos-voo/[id].tsx`
-- Sistema de upload robusto
-- Gestão de anexos
+- `/piloto/pos-voo/[id].tsx` ✅
+- Sistema de upload robusto ✅
+- Gestão de anexos ✅
 
 ### Fase 7: Modo PWA Off-line e Sincronização
 **Duração estimada: 7-8 dias**
