@@ -161,6 +161,33 @@ const Home = () => {
           </Card>
         </section>
 
+        {/* Área dos Membros */}
+        <section className="grid md:grid-cols-2 gap-6 mb-12">
+          <Card className="text-center">
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold mb-2">Área do Piloto</h3>
+              <p className="text-gray-600 text-sm mb-4">
+                Gerencie seus balões, planeje voos e acesse funcionalidades exclusivas
+              </p>
+              <a href="/piloto/login" className="text-blue-600 hover:underline">
+                Login Piloto →
+              </a>
+            </CardContent>
+          </Card>
+
+          <Card className="text-center">
+            <CardContent className="p-6">
+              <h3 className="text-lg font-semibold mb-2">Área da Agência</h3>
+              <p className="text-gray-600 text-sm mb-4">
+                Gerencie sua equipe de pilotos e planeje operações de voo
+              </p>
+              <a href="/agencia/login" className="text-blue-600 hover:underline">
+                Login Agência →
+              </a>
+            </CardContent>
+          </Card>
+        </section>
+
         {/* Formulário de Cadastro */}
         <section className="mb-12">
           <div className="text-center mb-8">
