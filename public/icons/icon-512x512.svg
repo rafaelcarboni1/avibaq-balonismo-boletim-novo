@@ -1,0 +1,19 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="256" cy="256" r="252" fill="#2563eb" stroke="#1d4ed8" stroke-width="8"/>
+  <g transform="translate(256, 256)">
+    <!-- Hot air balloon -->
+    <ellipse cx="0" cy="-85.33333333333333" rx="85.33333333333333" ry="102.4" fill="#ef4444"/>
+    <ellipse cx="0" cy="-85.33333333333333" rx="64" ry="85.33333333333333" fill="#dc2626"/>
+    <ellipse cx="0" cy="-85.33333333333333" rx="42.666666666666664" ry="64" fill="#b91c1c"/>
+    
+    <!-- Basket -->
+    <rect x="-21.333333333333332" y="42.666666666666664" width="42.666666666666664" height="21.333333333333332" rx="2" fill="#92400e"/>
+    
+    <!-- Ropes -->
+    <line x1="-64" y1="-21.333333333333332" x2="-21.333333333333332" y2="42.666666666666664" stroke="#374151" stroke-width="2"/>
+    <line x1="64" y1="-21.333333333333332" x2="21.333333333333332" y2="42.666666666666664" stroke="#374151" stroke-width="2"/>
+    
+    <!-- Text A -->
+    <text x="0" y="128" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="32" font-weight="bold">A</text>
+  </g>
+</svg>

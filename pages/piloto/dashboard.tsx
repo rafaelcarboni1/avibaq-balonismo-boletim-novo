@@ -5,6 +5,7 @@ import { EnhancedDashboardLayout } from '../../src/components/magicui/enhanced-d
 import { MagicCard } from '../../src/components/magicui/magic-card';
 import { BentoGrid, BentoGridItem } from '../../src/components/magicui/bento-grid';
 import { NumberTicker } from '../../src/components/magicui/number-ticker';
+import { OfflineIndicator } from '../../src/components/magicui/offline-indicator';
 import { supabase } from '../../src/integrations/supabase/client';
 import { useUser } from '../../src/hooks/useUser';
 import { useToast } from '../../src/hooks/use-toast';
@@ -170,6 +171,9 @@ export default function PilotoDashboard() {
   return (
     <EnhancedDashboardLayout title="Dashboard do Piloto">
       <div className="space-y-8">
+        {/* Indicador offline */}
+        <OfflineIndicator showDetails={true} />
+        
         {/* Estatísticas principais */}
         <BentoGrid className="grid-cols-2 lg:grid-cols-4 gap-6">
           <BentoGridItem className="bg-gradient-to-br from-blue-50 to-blue-100">
