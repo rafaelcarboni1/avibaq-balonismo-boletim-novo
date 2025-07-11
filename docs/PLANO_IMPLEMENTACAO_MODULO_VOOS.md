@@ -286,30 +286,30 @@ CREATE INDEX idx_offline_sincronizado ON dados_offline(sincronizado);
 - `/piloto/convites.tsx`
 - Sistema completo de vínculos
 
-### Fase 4: Formulário Dia-1 (Planejamento)
+### Fase 4: Formulário Dia-1 (Planejamento) ✅
 **Duração estimada: 5-6 dias**
-- [ ] Formulário de criação de voo
-- [ ] Seletor múltiplo de balões
-- [ ] Validações de business rules
-- [ ] Preview do planejamento
+- [x] Formulário de criação de voo
+- [x] Seletor múltiplo de balões
+- [x] Validações de business rules
+- [x] Preview do planejamento
 
 **Entregáveis:**
-- `/piloto/planejamento.tsx`
-- `/agencia/planejamento.tsx`
-- Componente `BalaoSelector`
-- Validações de negócio
+- `/piloto/planejamento.tsx` ✅
+- `/agencia/planejamento.tsx` ✅
+- Componente `BalaoSelector` ✅
+- Validações de negócio ✅
 
-### Fase 5: Wizard dos Três Blocos de Checklist
+### Fase 5: Wizard dos Três Blocos de Checklist ✅
 **Duração estimada: 6-7 dias**
-- [ ] Wizard com 3 etapas (blocos)
-- [ ] Validação obrigatória de motivos
-- [ ] Persistência automática
-- [ ] UI/UX otimizada para mobile
+- [x] Wizard com 3 etapas (blocos)
+- [x] Validação obrigatória de motivos
+- [x] Persistência automática
+- [x] UI/UX otimizada para mobile
 
 **Entregáveis:**
-- `/piloto/checklist/[id].tsx`
-- Componente `ChecklistWizard`
-- Sistema de validação avançado
+- `/piloto/checklist/[id].tsx` ✅
+- Componente `ChecklistWizard` ✅
+- Sistema de validação avançado ✅
 
 ### Fase 6: Formulário Pós-voo + Anexos
 **Duração estimada: 4-5 dias**

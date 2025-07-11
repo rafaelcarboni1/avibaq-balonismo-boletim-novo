@@ -1,1 +1,8 @@
-{"/_app":"pages/_app.js","/404":"pages/404.html","/_error":"pages/_error.js","/admin/boletins":"pages/admin/boletins.html","/acessibilidade":"pages/acessibilidade.html","/admin/associados":"pages/admin/associados.html","/admin/definir-senha":"pages/admin/definir-senha.html","/admin/cadastrar-admin":"pages/admin/cadastrar-admin.html","/admin":"pages/admin.html","/admin/dashboard":"pages/admin/dashboard.html","/admin/usuarios":"pages/admin/usuarios.html","/admin/login":"pages/admin/login.html","/admin/minha-conta":"pages/admin/minha-conta.html","/admin/permissoes":"pages/admin/permissoes.html","/admin/trocar-senha":"pages/admin/trocar-senha.html","/api/test-send-boletim":"pages/api/test-send-boletim.js","/api/send-aprovado":"pages/api/send-aprovado.js","/associar-se":"pages/associar-se.html","/historico":"pages/historico.html","/descadastrar":"pages/descadastrar.html","/inscricao-recebida":"pages/inscricao-recebida.html","/login":"pages/login.html","/membros":"pages/membros.html","/":"pages/index.html","/api/join":"pages/api/join.js","/_document":"pages/_document.js","/admin/boletins/[id]/edit":"pages/admin/boletins/[id]/edit.html","/politica-privacidade":"pages/politica-privacidade.html","/notfound":"pages/notfound.html","/quem-somos":"pages/quem-somos.html","/admin/boletins/new":"pages/admin/boletins/new.html"}
+{
+  "/_app": "pages/_app.js",
+  "/_document": "pages/_document.js",
+  "/_error": "pages/_error.js",
+  "/404": "pages/404.js",
+  "/admin/permissoes": "pages/admin/permissoes.js",
+  "/admin/dashboard": "pages/admin/dashboard.js"
+}
