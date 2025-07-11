@@ -2,9 +2,17 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import { toast } from "react-hot-toast";
-import Link from "next/link";
-import { ArrowLeftIcon } from '@heroicons/react/24/outline';
+import EnhancedDashboardLayout from "@/components/magicui/enhanced-dashboard-layout";
+import EnhancedKpiCard from "@/components/magicui/enhanced-kpi-card";
+import { BentoGrid, BentoGridItem } from "@/components/magicui/bento-grid";
+import AnimatedChart from "@/components/magicui/animated-chart";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "@/components/ui/sonner";
+import { motion } from "framer-motion";
+import { User, Shield, Save, Key, LogOut, Camera, ArrowLeft, UserCheck } from "lucide-react";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 export default function MinhaContaForm() {
   const [user, setUser] = useState<any>(null);
@@ -87,99 +95,465 @@ export default function MinhaContaForm() {
     location.href = "/login";
   }
 
-  if (loading) return <p className="text-center py-10">Carregando…</p>;
+  if (loading) {
+    return (
+      <ProtectedRoute>
+        <EnhancedDashboardLayout title="Minha Conta" breadcrumbs={[{ label: "Minha Conta", icon: User }]}>
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white rounded-2xl p-8 border border-gray-200/50">
+              <div className="text-center py-12">
+                <div className="w-8 h-8 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                <p className="text-gray-600">Carregando informações da conta...</p>
+              </div>
+            </div>
+          </div>
+        </EnhancedDashboardLayout>
+      </ProtectedRoute>
+    );
+  }
 
   return (
-    <div className="max-w-xl w-full px-4 mx-auto bg-gradient-to-br from-white via-slate-50 to-slate-100 rounded-2xl shadow-xl ring-1 ring-black/5 px-8 py-14 space-y-8 sm:space-y-10">
-      <header className="flex items-center justify-between mb-2">
-        <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Minha Conta</h1>
-        <Link href="/admin/dashboard" className="btn-secondary flex items-center gap-2 !px-5 !py-2 text-base">
-          <ArrowLeftIcon className="w-5 h-5" /> Voltar
-        </Link>
-      </header>
-      <hr className="border-gray-100 mb-2" />
-
-      {/* PERFIL */}
-      <section>
-        <h2 className="text-lg font-semibold text-gray-800 mb-4">Perfil</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-          <label className="block font-medium mb-1 text-gray-700">
-            Nome completo
-            <input
-              className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition"
-              value={profile.nome}
-              onChange={(e) => setProfile({ ...profile, nome: e.target.value })}
-              placeholder="Digite seu nome completo"
-              disabled={loading}
+    <ProtectedRoute>
+      <EnhancedDashboardLayout 
+        title="Minha Conta"
+        breadcrumbs={[
+          { label: "Dashboard", href: "/admin/dashboard" },
+          { label: "Minha Conta", icon: User }
+        ]}
+        headerActions={
+          <Button variant="outline" onClick={() => window.location.href = "/admin/dashboard"}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Voltar ao Dashboard
+          </Button>
+        }
+      >
+        <div className="max-w-6xl mx-auto space-y-8">
+          {/* KPI Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <EnhancedKpiCard 
+              title="Conta Ativa"
+              value={1}
+              icon={UserCheck}
+              color="green"
+              trend="up"
+              trendValue="Verificada"
+              description="Status da conta"
+              delay={0}
             />
-          </label>
-          <label className="block font-medium mb-1 text-gray-700">
-            Telefone
-            <input
-              className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition"
-              value={profile.telefone}
-              onChange={(e) => setProfile({ ...profile, telefone: e.target.value })}
-              placeholder="(48) 99999-1234"
-              disabled={loading}
+            <EnhancedKpiCard 
+              title="Perfil"
+              value={profile.nome ? 100 : 50}
+              icon={User}
+              color="blue"
+              trend={profile.nome ? "up" : "neutral"}
+              trendValue={profile.nome ? "Completo" : "Incompleto"}
+              description="Dados do perfil (%)"
+              delay={0.05}
             />
-          </label>
-          <label className="block font-medium mb-1 text-gray-700 col-span-full">
-            E-mail
-            <input className="w-full rounded-lg border border-gray-200 bg-gray-100 px-3 py-2 mt-1" disabled value={user.email} />
-          </label>
-        </div>
-        <div className="flex justify-end mt-6">
-          <button
-            onClick={saveProfile}
-            className="bg-primary text-white font-semibold py-2 px-6 rounded-lg shadow hover:bg-primary2 transition disabled:opacity-60 ml-auto"
-            aria-label="Salvar perfil"
-            disabled={loading}
-          >
-            Salvar
-          </button>
-        </div>
-      </section>
+            <EnhancedKpiCard 
+              title="Segurança"
+              value={user?.email_confirmed_at ? 100 : 75}
+              icon={Shield}
+              color="purple"
+              trend={user?.email_confirmed_at ? "up" : "neutral"}
+              trendValue={user?.email_confirmed_at ? "Seguro" : "Pendente"}
+              description="Nível de segurança (%)"
+              delay={0.1}
+            />
+            <EnhancedKpiCard 
+              title="Último Login"
+              value="Hoje"}
+              icon={Key}
+              color="yellow"
+              trend="neutral"
+              trendValue="Ativo"
+              description="Atividade recente"
+              delay={0.15}
+            />
+          </div>
 
-      {/* SEGURANÇA */}
-      <section className="space-y-4">
-        <h2 className="text-lg font-semibold text-gray-800">Segurança</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-          <input
-            type="password"
-            className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition"
-            placeholder="Nova senha"
-            value={novaSenha}
-            onChange={e => setNovaSenha(e.target.value)}
-            disabled={loading}
-          />
-          <input
-            type="password"
-            className="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition"
-            placeholder="Confirmar nova senha"
-            value={novaSenha2}
-            onChange={e => setNovaSenha2(e.target.value)}
-            disabled={loading}
-          />
+          {/* Gráficos de Status da Conta */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <AnimatedChart
+              title="Status do Perfil"
+              type="pie"
+              data={[
+                { name: 'Completo', value: profile.nome && profile.telefone ? 80 : 20 },
+                { name: 'Pendente', value: profile.nome && profile.telefone ? 20 : 80 },
+              ]}
+              colors={["#10b981", "#f59e0b"]}
+            />
+            
+            <AnimatedChart
+              title="Atividade da Conta"
+              type="bar"
+              data={[
+                { name: 'Logins', value: 25 },
+                { name: 'Perfil', value: profile.nome ? 100 : 50 },
+                { name: 'Segurança', value: user?.email_confirmed_at ? 100 : 75 },
+              ]}
+              colors={["#3b82f6", "#10b981", "#8b5cf6"]}
+            />
+          </div>
+
+          {/* Bento Grid Layout */}
+          <BentoGrid className="md:auto-rows-[20rem] mb-8">
+            {/* Resumo do Perfil */}
+            <BentoGridItem
+              className="md:col-span-2"
+              title="Resumo do Perfil"
+              description={
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <User className="h-5 w-5 text-blue-600" />
+                    <span className="font-semibold">{profile.nome || 'Nome não definido'}</span>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-600">📧 {user?.email}</p>
+                    <p className="text-sm text-gray-600">📱 {profile.telefone || 'Telefone não definido'}</p>
+                    <div className="flex gap-2 mt-3">
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        profile.nome ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {profile.nome ? 'Perfil Completo' : 'Perfil Incompleto'}
+                      </span>
+                      <span className={`px-2 py-1 rounded-full text-xs ${
+                        user?.email_confirmed_at ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                        {user?.email_confirmed_at ? 'E-mail Verificado' : 'E-mail Pendente'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              }
+              header={
+                <div className="flex h-20 w-full bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl items-center justify-center">
+                  <User className="h-10 w-10 text-white" />
+                </div>
+              }
+              icon={<User className="h-6 w-6 text-blue-500" />}
+            />
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.2 }}
+              className="bg-white/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 shadow-lg"
+            >
+              <div className="p-6 border-b border-gray-200/50">
+                <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                  <User className="h-5 w-5 text-blue-600" />
+                  Informações do Perfil
+                </h2>
+                <p className="text-gray-600 mt-1">Atualize suas informações pessoais</p>
+              </div>
+              
+              <div className="p-6 space-y-6">
+              <div className="p-6 border-b border-gray-200/50">
+                <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                  <User className="h-5 w-5 text-blue-600" />
+                  Informações do Perfil
+                </h2>
+                <p className="text-gray-600 mt-1">Atualize suas informações pessoais</p>
+              </div>
+              
+              <div className="p-6 space-y-6">
+                {/* Avatar Section */}
+                {avatarUrl && (
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <img 
+                        src={avatarUrl} 
+                        alt="Avatar" 
+                        className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
+                      />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={uploadAvatar}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        disabled={avatarUploading}
+                      />
+                      {avatarUploading && (
+                        <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Foto do Perfil</p>
+                      <p className="text-xs text-gray-500">Clique na foto para alterar</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Nome Completo
+                    </label>
+                    <Input
+                      value={profile.nome}
+                      onChange={(e) => setProfile({ ...profile, nome: e.target.value })}
+                      placeholder="Digite seu nome completo"
+                      disabled={loading}
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Telefone
+                    </label>
+                    <Input
+                      value={profile.telefone}
+                      onChange={(e) => setProfile({ ...profile, telefone: e.target.value })}
+                      placeholder="(48) 99999-1234"
+                      disabled={loading}
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      E-mail
+                    </label>
+                    <Input
+                      value={user?.email || ''}
+                      disabled
+                      className="w-full bg-gray-100"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">O e-mail não pode ser alterado</p>
+                  </div>
+                </div>
+                
+                <div className="flex justify-end">
+                  <Button 
+                    onClick={saveProfile}
+                    disabled={loading}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  >
+                    {loading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                        Salvando...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4 mr-2" />
+                        Salvar Perfil
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            
+            {/* Último Login */}
+            <BentoGridItem
+              title="Atividade Recente"
+              description={
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2">
+                    <Key className="h-5 w-5 text-yellow-600" />
+                    <span className="font-semibold text-yellow-600">Último Login: Hoje</span>
+                  </div>
+                  <p className="text-sm text-gray-600">Sessão ativa no sistema</p>
+                  <p className="text-sm text-gray-600">Dispositivo: Desktop</p>
+                </div>
+              }
+              header={
+                <div className="flex h-20 w-full bg-gradient-to-br from-yellow-500 to-orange-600 rounded-xl items-center justify-center">
+                  <Key className="h-10 w-10 text-white" />
+                </div>
+              }
+              icon={<Key className="h-6 w-6 text-yellow-500" />}
+            />
+          </BentoGrid>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Formulário de Perfil (fora do Bento Grid) */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.3 }}
+              className="bg-white/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 shadow-lg"
+            >
+              <div className="p-6 border-b border-gray-200/50">
+                <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                  <User className="h-5 w-5 text-blue-600" />
+                  Editar Perfil
+                </h2>
+                <p className="text-gray-600 mt-1">Altere seus dados pessoais</p>
+              </div>
+              
+              <div className="p-6 space-y-6">
+                {/* Avatar Section */}
+                {avatarUrl && (
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <img 
+                        src={avatarUrl} 
+                        alt="Avatar" 
+                        className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
+                      />
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={uploadAvatar}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        disabled={avatarUploading}
+                      />
+                      {avatarUploading && (
+                        <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Foto do Perfil</p>
+                      <p className="text-xs text-gray-500">Clique na foto para alterar</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Nome Completo
+                    </label>
+                    <Input
+                      value={profile.nome}
+                      onChange={(e) => setProfile({ ...profile, nome: e.target.value })}
+                      placeholder="Digite seu nome completo"
+                      disabled={loading}
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Telefone
+                    </label>
+                    <Input
+                      value={profile.telefone}
+                      onChange={(e) => setProfile({ ...profile, telefone: e.target.value })}
+                      placeholder="(48) 99999-1234"
+                      disabled={loading}
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      E-mail
+                    </label>
+                    <Input
+                      value={user?.email || ''}
+                      disabled
+                      className="w-full bg-gray-100"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">O e-mail não pode ser alterado</p>
+                  </div>
+                </div>
+                
+                <div className="flex justify-end">
+                  <Button 
+                    onClick={saveProfile}
+                    disabled={loading}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  >
+                    {loading ? (
+                      <>
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                        Salvando...
+                      </>
+                    ) : (
+                      <>
+                        <Save className="w-4 h-4 mr-2" />
+                        Salvar Perfil
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Seção Segurança */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: 0.3 }}
+              className="bg-white/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 shadow-lg"
+            >
+              <div className="p-6 border-b border-gray-200/50">
+                <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-green-600" />
+                  Segurança da Conta
+                </h2>
+                <p className="text-gray-600 mt-1">Gerencie sua senha e sessões</p>
+              </div>
+              
+              <div className="p-6 space-y-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Nova Senha
+                    </label>
+                    <Input
+                      type="password"
+                      placeholder="Digite a nova senha"
+                      value={novaSenha}
+                      onChange={e => setNovaSenha(e.target.value)}
+                      disabled={loading}
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Confirmar Nova Senha
+                    </label>
+                    <Input
+                      type="password"
+                      placeholder="Confirme a nova senha"
+                      value={novaSenha2}
+                      onChange={e => setNovaSenha2(e.target.value)}
+                      disabled={loading}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-3">
+                  <Button 
+                    onClick={changePassword}
+                    disabled={loading || !novaSenha || novaSenha !== novaSenha2}
+                    className="w-full bg-green-600 hover:bg-green-700"
+                  >
+                    <Key className="w-4 h-4 mr-2" />
+                    Alterar Senha
+                  </Button>
+                  
+                  <Button 
+                    onClick={logoutAll}
+                    variant="destructive"
+                    disabled={loading}
+                    className="w-full"
+                  >
+                    <LogOut className="w-4 h-4 mr-2" />
+                    Sair de Todos os Dispositivos
+                  </Button>
+                </div>
+                
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <p className="text-sm text-yellow-800">
+                    <strong>💡 Dica de Segurança:</strong> Use uma senha forte com pelo menos 8 caracteres, incluindo letras, números e símbolos.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
         </div>
-        <div className="flex flex-wrap gap-4 mt-6">
-          <button
-            onClick={changePassword}
-            className="bg-primary text-white font-semibold py-2 px-6 rounded-lg shadow hover:bg-primary2 transition disabled:opacity-60"
-            aria-label="Alterar senha"
-            disabled={loading}
-          >
-            Alterar senha
-          </button>
-          <button
-            onClick={logoutAll}
-            className="bg-gray-300 text-gray-700 font-semibold py-2 px-6 rounded-lg hover:bg-gray-400 transition disabled:opacity-60"
-            aria-label="Sair de todos os dispositivos"
-            disabled={loading}
-          >
-            Sair de todos os dispositivos
-          </button>
-        </div>
-      </section>
-    </div>
+      </EnhancedDashboardLayout>
+    </ProtectedRoute>
   );
 } 
