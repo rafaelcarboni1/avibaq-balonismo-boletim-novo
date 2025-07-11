@@ -97,7 +97,7 @@ export default function MinhaContaForm() {
 
   if (loading) {
     return (
-      <ProtectedRoute>
+      <ProtectedRoute allowedRoles={["admin", "meteo", "tesouraria", "piloto", "agencia"]}>
         <EnhancedDashboardLayout title="Minha Conta" breadcrumbs={[{ label: "Minha Conta", icon: User }]}>
           <div className="max-w-4xl mx-auto">
             <div className="bg-white rounded-2xl p-8 border border-gray-200/50">
@@ -113,7 +113,7 @@ export default function MinhaContaForm() {
   }
 
   return (
-    <ProtectedRoute>
+    <ProtectedRoute allowedRoles={["admin", "meteo", "tesouraria", "piloto", "agencia"]}>
       <EnhancedDashboardLayout 
         title="Minha Conta"
         breadcrumbs={[
@@ -162,7 +162,7 @@ export default function MinhaContaForm() {
             />
             <EnhancedKpiCard 
               title="Último Login"
-              value="Hoje"}
+              value="Hoje"
               icon={Key}
               color="yellow"
               trend="neutral"
@@ -233,119 +233,6 @@ export default function MinhaContaForm() {
               }
               icon={<User className="h-6 w-6 text-blue-500" />}
             />
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.2 }}
-              className="bg-white/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 shadow-lg"
-            >
-              <div className="p-6 border-b border-gray-200/50">
-                <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                  <User className="h-5 w-5 text-blue-600" />
-                  Informações do Perfil
-                </h2>
-                <p className="text-gray-600 mt-1">Atualize suas informações pessoais</p>
-              </div>
-              
-              <div className="p-6 space-y-6">
-              <div className="p-6 border-b border-gray-200/50">
-                <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                  <User className="h-5 w-5 text-blue-600" />
-                  Informações do Perfil
-                </h2>
-                <p className="text-gray-600 mt-1">Atualize suas informações pessoais</p>
-              </div>
-              
-              <div className="p-6 space-y-6">
-                {/* Avatar Section */}
-                {avatarUrl && (
-                  <div className="flex items-center gap-4">
-                    <div className="relative">
-                      <img 
-                        src={avatarUrl} 
-                        alt="Avatar" 
-                        className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
-                      />
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={uploadAvatar}
-                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                        disabled={avatarUploading}
-                      />
-                      {avatarUploading && (
-                        <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center">
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">Foto do Perfil</p>
-                      <p className="text-xs text-gray-500">Clique na foto para alterar</p>
-                    </div>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-1 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Nome Completo
-                    </label>
-                    <Input
-                      value={profile.nome}
-                      onChange={(e) => setProfile({ ...profile, nome: e.target.value })}
-                      placeholder="Digite seu nome completo"
-                      disabled={loading}
-                      className="w-full"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Telefone
-                    </label>
-                    <Input
-                      value={profile.telefone}
-                      onChange={(e) => setProfile({ ...profile, telefone: e.target.value })}
-                      placeholder="(48) 99999-1234"
-                      disabled={loading}
-                      className="w-full"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      E-mail
-                    </label>
-                    <Input
-                      value={user?.email || ''}
-                      disabled
-                      className="w-full bg-gray-100"
-                    />
-                    <p className="text-xs text-gray-500 mt-1">O e-mail não pode ser alterado</p>
-                  </div>
-                </div>
-                
-                <div className="flex justify-end">
-                  <Button 
-                    onClick={saveProfile}
-                    disabled={loading}
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                  >
-                    {loading ? (
-                      <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                        Salvando...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-4 h-4 mr-2" />
-                        Salvar Perfil
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
             
             {/* Último Login */}
             <BentoGridItem

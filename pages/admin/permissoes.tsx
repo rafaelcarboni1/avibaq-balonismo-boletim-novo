@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import EnhancedDashboardLayout from "@/components/magicui/enhanced-dashboard-layout";
@@ -230,36 +230,40 @@ export default function PermissoesAdmin() {
             <BentoGridItem
               className="md:col-span-2"
               title="Selecionar Função (Role)"
-              description="Escolha a função para configurar as permissões específicas"
+              description={
+                <div className="space-y-4">
+                  <p className="text-gray-600">Escolha a função para configurar as permissões específicas</p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                    {roles.map(r => {
+                      const RoleIcon = getRoleIcon(r);
+                      return (
+                        <Button
+                          key={r}
+                          variant={selectedRole === r ? "default" : "outline"}
+                          onClick={() => setSelectedRole(r)}
+                          className={`flex items-center gap-2 h-auto py-2 text-xs ${
+                            selectedRole === r ? 'bg-gradient-to-r from-blue-600 to-purple-600' : ''
+                          }`}
+                          size="sm"
+                        >
+                          <RoleIcon className="w-3 h-3" />
+                          <span className="capitalize">{r}</span>
+                          <Badge variant="secondary" className="ml-auto text-xs">
+                            {stats.permissionsByRole[r] || 0}
+                          </Badge>
+                        </Button>
+                      );
+                    })}
+                  </div>
+                </div>
+              }
               header={
                 <div className="flex h-20 w-full bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl items-center justify-center">
                   <Shield className="h-10 w-10 text-white" />
                 </div>
               }
               icon={<Shield className="h-6 w-6 text-blue-500" />}
-            >
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 mt-4">
-                {roles.map(r => {
-                  const RoleIcon = getRoleIcon(r);
-                  return (
-                    <Button
-                      key={r}
-                      variant={selectedRole === r ? "default" : "outline"}
-                      onClick={() => setSelectedRole(r)}
-                      className={`flex items-center gap-2 h-auto py-3 ${
-                        selectedRole === r ? 'bg-gradient-to-r from-blue-600 to-purple-600' : ''
-                      }`}
-                    >
-                      <RoleIcon className="w-4 h-4" />
-                      <span className="capitalize">{r}</span>
-                      <Badge variant="secondary" className="ml-auto text-xs">
-                        {stats.permissionsByRole[r] || 0}
-                      </Badge>
-                    </Button>
-                  );
-                })}
-              </div>
-            </BentoGridItem>
+            />
 
             {/* Estatísticas da Role Selecionada */}
             <BentoGridItem
@@ -275,6 +279,13 @@ export default function PermissoesAdmin() {
                   <p className="text-sm text-gray-600">
                     {stats.permissionsByRole[selectedRole] || 0} permissões ativas
                   </p>
+                  <div className="mt-3">
+                    <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                      (stats.permissionsByRole[selectedRole] || 0) > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
+                      {(stats.permissionsByRole[selectedRole] || 0) > 0 ? 'Ativa' : 'Sem permissões'}
+                    </div>
+                  </div>
                 </div>
               }
               header={
