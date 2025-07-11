@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "../integrations/supabase/client";
 
 export function useUser() {
   const [user, setUser] = useState(null);
@@ -34,5 +34,7 @@ export function useUser() {
     console.log('[useUser] Estado final:', { user, role, nome, loading });
   }, [user, role, nome, loading]);
 
-  return { user, role, nome, loading };
+  // Retorna user com role anexado para compatibilidade
+  const userWithRole = user ? { ...user, role } : null;
+  return { user: userWithRole, role, nome, loading };
 } 

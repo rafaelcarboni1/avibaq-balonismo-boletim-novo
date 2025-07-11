@@ -14,29 +14,12 @@ const loginRoutes = {
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   
-  // Verificar se é uma rota protegida
-  const isProtectedRoute = protectedRoutes.some(route => 
-    pathname.startsWith(route) && !pathname.includes('/login')
-  );
+  // Por enquanto, desabilitar middleware para permitir que as páginas
+  // façam suas próprias verificações de autenticação
+  // TODO: Implementar verificação correta de cookies do Supabase
   
-  if (!isProtectedRoute) {
-    return NextResponse.next();
-  }
-  
-  // Verificar se existe token de autenticação
-  const token = request.cookies.get('sb-access-token')?.value;
-  
-  if (!token) {
-    // Redirecionar para login específico baseado na rota
-    for (const [routePrefix, loginPath] of Object.entries(loginRoutes)) {
-      if (pathname.startsWith(routePrefix)) {
-        return NextResponse.redirect(new URL(loginPath, request.url));
-      }
-    }
-    
-    // Fallback para home se não encontrar rota específica
-    return NextResponse.redirect(new URL('/', request.url));
-  }
+  console.log('[Middleware] Pathname:', pathname);
+  console.log('[Middleware] Cookies:', request.cookies.getAll().map(c => c.name));
   
   return NextResponse.next();
 }
