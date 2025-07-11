@@ -4,6 +4,9 @@ import EnhancedKpiCard from "@/components/magicui/enhanced-kpi-card";
 import { BentoGrid, BentoGridItem } from "@/components/magicui/bento-grid";
 import AnimatedChart from "@/components/magicui/animated-chart";
 import LoadingSkeleton from "@/components/magicui/loading-skeleton";
+import { SafetyKPIPanel, OperationalKPIPanel, AdvancedKPICard } from "@/components/magicui/advanced-kpi-analytics";
+import { AdvancedLineChart, GaugeChart, HeatmapChart } from "@/components/magicui/advanced-charts";
+import { ComparativeAnalyticsDashboard } from "@/components/magicui/comparative-analytics";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -19,7 +22,10 @@ import {
   CheckCircleIcon,
   ClockIcon,
   ExclamationTriangleIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  ShieldCheckIcon,
+  ChartBarIcon,
+  CurrencyDollarIcon
 } from "@heroicons/react/24/solid";
 
 function CardLink({ title, value, href, subtitle }: { title: any, value: any, href: any, subtitle?: any }) {
@@ -52,6 +58,8 @@ export default function AdminDashboard() {
   const [loadingBoletimAmanha, setLoadingBoletimAmanha] = useState(true);
   const [logs, setLogs] = useState<any[]>([]);
   const [loadingLogs, setLoadingLogs] = useState(true);
+  const [activeTab, setActiveTab] = useState<'overview' | 'safety' | 'operations' | 'analytics'>('overview');
+  const [advancedData, setAdvancedData] = useState<any>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -86,6 +94,18 @@ export default function AdminDashboard() {
       setLoadingBoletimAmanha(false);
     }
     fetchBoletimAmanha();
+    
+    // Carregar dados avançados para analytics
+    async function loadAdvancedData() {
+      // Simular dados avançados - em produção, viriam da API
+      setAdvancedData({
+        heatmapData: generateHeatmapData(),
+        performanceMetrics: generatePerformanceMetrics(),
+        trendData: generateTrendData()
+      });
+    }
+    
+    loadAdvancedData();
   }, []);
 
   useEffect(() => {
@@ -115,6 +135,47 @@ export default function AdminDashboard() {
     }
   }
 
+  // Funções para gerar dados de demonstração
+  function generateHeatmapData() {
+    const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    const data = [];
+    
+    for (const day of days) {
+      for (let hour = 6; hour <= 18; hour++) {
+        let value = 0;
+        // Simular mais voos nos fins de semana e horários específicos
+        if (day === 'Sáb' || day === 'Dom') {
+          value = Math.floor(Math.random() * 8) + 2;
+        } else if (hour >= 8 && hour <= 10 || hour >= 15 && hour <= 17) {
+          value = Math.floor(Math.random() * 5) + 1;
+        } else {
+          value = Math.floor(Math.random() * 3);
+        }
+        
+        data.push({ day, hour, value });
+      }
+    }
+    
+    return data;
+  }
+
+  function generatePerformanceMetrics() {
+    return [
+      { x: 85, y: 92, label: 'João Silva' },
+      { x: 78, y: 88, label: 'Maria Santos' },
+      { x: 90, y: 95, label: 'Pedro Costa' },
+      { x: 82, y: 86, label: 'Ana Oliveira' },
+      { x: 88, y: 91, label: 'Carlos Lima' }
+    ];
+  }
+
+  function generateTrendData() {
+    return Array.from({ length: 30 }, (_, i) => ({
+      name: `${i + 1}`,
+      value: Math.floor(Math.random() * 20) + 30 + (i * 0.3)
+    }));
+  }
+
   // Performance: Remove debug logs in production
   // console.log("DASHBOARD RENDER", { stats, boletimAmanha, loadingBoletimAmanha });
   if (!stats || typeof stats !== 'object') {
@@ -127,12 +188,40 @@ export default function AdminDashboard() {
   return (
     <ProtectedRoute allowedRoles={["admin", "meteo", "tesouraria"]}>
       <EnhancedDashboardLayout 
-        title="Dashboard"
+        title="Dashboard Avançado"
         breadcrumbs={[
           { label: "Dashboard", icon: DocumentTextIcon }
         ]}
       >
         <div className="space-y-8">
+          {/* Navegação por abas */}
+          <div className="flex gap-4 border-b border-gray-200">
+            {[
+              { key: 'overview', label: 'Visão Geral', icon: ChartBarIcon },
+              { key: 'safety', label: 'Segurança', icon: ShieldCheckIcon },
+              { key: 'operations', label: 'Operações', icon: DocumentTextIcon },
+              { key: 'analytics', label: 'Analytics', icon: CurrencyDollarIcon }
+            ].map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key as any)}
+                className={`
+                  flex items-center gap-2 px-4 py-2 border-b-2 transition-colors
+                  ${activeTab === tab.key 
+                    ? 'border-blue-500 text-blue-600 bg-blue-50' 
+                    : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                  }
+                `}
+              >
+                <tab.icon className="h-5 w-5" />
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Conteúdo das abas */}
+          {activeTab === 'overview' && (
+            <div className="space-y-8">
           {/* KPI Cards Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {!stats || stats.totalPilotos === "--" ? (
@@ -345,6 +434,83 @@ export default function AdminDashboard() {
               icon={<ClockIcon className="h-6 w-6 text-indigo-500" />}
             />
           </BentoGrid>
+            </div>
+          )}
+
+          {/* Aba de Segurança */}
+          {activeTab === 'safety' && (
+            <div className="space-y-8">
+              <SafetyKPIPanel flightStats={stats} />
+              
+              {advancedData && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <GaugeChart
+                    title="Safety Score Geral"
+                    value={98.5}
+                    max={100}
+                    colors={['#ef4444', '#f59e0b', '#10b981']}
+                  />
+                  
+                  <HeatmapChart
+                    title="Mapa de Calor - Incidentes por Horário"
+                    data={advancedData.heatmapData}
+                  />
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Aba de Operações */}
+          {activeTab === 'operations' && (
+            <div className="space-y-8">
+              <OperationalKPIPanel operationalStats={stats} />
+              
+              {advancedData && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <AdvancedLineChart
+                    title="Tendência Operacional - Últimos 30 Dias"
+                    data={advancedData.trendData}
+                    type="line"
+                    colors={['#3b82f6', '#10b981']}
+                  />
+                  
+                  <div className="space-y-4">
+                    <AdvancedKPICard
+                      title="Eficiência da Frota"
+                      metric={{
+                        value: 87.3,
+                        target: 85,
+                        previousValue: 84.1,
+                        format: 'percentage'
+                      }}
+                      icon={ChartBarIcon}
+                      color="blue"
+                      description="Utilização vs. Capacidade"
+                    />
+                    
+                    <AdvancedKPICard
+                      title="Receita por Hora de Voo"
+                      metric={{
+                        value: 2850,
+                        previousValue: 2650,
+                        format: 'currency'
+                      }}
+                      icon={CurrencyDollarIcon}
+                      color="green"
+                      description="Receita otimizada"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Aba de Analytics Comparativo */}
+          {activeTab === 'analytics' && (
+            <div className="space-y-8">
+              <ComparativeAnalyticsDashboard data={advancedData} />
+            </div>
+          )}
         </div>
       </EnhancedDashboardLayout>
     </ProtectedRoute>

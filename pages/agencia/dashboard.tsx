@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { PlusIcon, UsersIcon, CalendarIcon, DocumentTextIcon, BriefcaseIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, UsersIcon, CalendarIcon, DocumentTextIcon, BriefcaseIcon, ChartBarIcon, CurrencyDollarIcon } from '@heroicons/react/24/outline';
 import { EnhancedDashboardLayout } from '../../src/components/magicui/enhanced-dashboard-layout';
 import { MagicCard } from '../../src/components/magicui/magic-card';
 import { BentoGrid, BentoGridItem } from '../../src/components/magicui/bento-grid';
 import { NumberTicker } from '../../src/components/magicui/number-ticker';
 import { OfflineIndicator } from '../../src/components/magicui/offline-indicator';
+import { AdvancedKPICard } from '../../src/components/magicui/advanced-kpi-analytics';
+import { AdvancedLineChart, HeatmapChart } from '../../src/components/magicui/advanced-charts';
 import { supabase } from '../../src/integrations/supabase/client';
 import { useUser } from '../../src/hooks/useUser';
 import { useToast } from '../../src/hooks/use-toast';
@@ -400,6 +402,105 @@ export default function AgenciaDashboard() {
             </div>
           </div>
         </MagicCard>
+
+        {/* Analytics Avançados para Agência */}
+        <div className="space-y-6">
+          <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <ChartBarIcon className="h-6 w-6 text-purple-600" />
+            Business Analytics
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <AdvancedKPICard
+              title="Receita Mensal"
+              metric={{
+                value: 45750,
+                target: 50000,
+                previousValue: 38200,
+                format: 'currency'
+              }}
+              icon={CurrencyDollarIcon}
+              color="green"
+              description="Receita este mês"
+            />
+            
+            <AdvancedKPICard
+              title="Taxa de Ocupação"
+              metric={{
+                value: 78.5,
+                target: 80,
+                previousValue: 73.2,
+                format: 'percentage'
+              }}
+              icon={CalendarIcon}
+              color="blue"
+              description="Voos vs. Capacidade"
+            />
+            
+            <AdvancedKPICard
+              title="Satisfação Cliente"
+              metric={{
+                value: 4.8,
+                target: 4.5,
+                previousValue: 4.6,
+                unit: '/5'
+              }}
+              icon={UsersIcon}
+              color="yellow"
+              description="Avaliação média"
+            />
+            
+            <AdvancedKPICard
+              title="ROI Operacional"
+              metric={{
+                value: 28.3,
+                target: 25,
+                previousValue: 24.1,
+                format: 'percentage'
+              }}
+              icon={ChartBarIcon}
+              color="purple"
+              description="Retorno sobre investimento"
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <AdvancedLineChart
+              title="Receita por Mês - Últimos 12 Meses"
+              data={[
+                { name: 'Jan', value: 32000 },
+                { name: 'Fev', value: 28000 },
+                { name: 'Mar', value: 35000 },
+                { name: 'Abr', value: 42000 },
+                { name: 'Mai', value: 48000 },
+                { name: 'Jun', value: 45750 }
+              ]}
+              type="line"
+              colors={['#8b5cf6']}
+              height={300}
+            />
+            
+            <HeatmapChart
+              title="Demanda por Horário da Semana"
+              data={[
+                { day: 'Seg', hour: 9, value: 2 },
+                { day: 'Seg', hour: 15, value: 3 },
+                { day: 'Ter', hour: 10, value: 1 },
+                { day: 'Qua', hour: 14, value: 2 },
+                { day: 'Qui', hour: 16, value: 4 },
+                { day: 'Sex', hour: 9, value: 3 },
+                { day: 'Sex', hour: 17, value: 5 },
+                { day: 'Sáb', hour: 8, value: 8 },
+                { day: 'Sáb', hour: 10, value: 12 },
+                { day: 'Sáb', hour: 14, value: 15 },
+                { day: 'Sáb', hour: 16, value: 18 },
+                { day: 'Dom', hour: 9, value: 10 },
+                { day: 'Dom', hour: 11, value: 14 },
+                { day: 'Dom', hour: 15, value: 16 }
+              ]}
+            />
+          </div>
+        </div>
       </div>
     </EnhancedDashboardLayout>
   );

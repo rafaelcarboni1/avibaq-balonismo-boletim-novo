@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { PlusIcon, ClipboardDocumentListIcon, CalendarIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, ClipboardDocumentListIcon, CalendarIcon, DocumentTextIcon, ShieldCheckIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 import { EnhancedDashboardLayout } from '../../src/components/magicui/enhanced-dashboard-layout';
 import { MagicCard } from '../../src/components/magicui/magic-card';
 import { BentoGrid, BentoGridItem } from '../../src/components/magicui/bento-grid';
 import { NumberTicker } from '../../src/components/magicui/number-ticker';
 import { OfflineIndicator } from '../../src/components/magicui/offline-indicator';
+import { AdvancedKPICard } from '../../src/components/magicui/advanced-kpi-analytics';
+import { AdvancedLineChart, GaugeChart } from '../../src/components/magicui/advanced-charts';
 import { supabase } from '../../src/integrations/supabase/client';
 import { useUser } from '../../src/hooks/useUser';
 import { useToast } from '../../src/hooks/use-toast';
@@ -397,6 +399,78 @@ export default function PilotoDashboard() {
               </div>
             )}
           </MagicCard>
+        </div>
+
+        {/* KPIs Avançados de Performance do Piloto */}
+        <div className="space-y-6">
+          <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+            <ChartBarIcon className="h-6 w-6 text-blue-600" />
+            Performance Analytics
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <AdvancedKPICard
+              title="Safety Score"
+              metric={{
+                value: 96.8,
+                target: 95,
+                previousValue: 94.2,
+                format: 'percentage'
+              }}
+              icon={ShieldCheckIcon}
+              color="green"
+              description="Score de segurança"
+            />
+            
+            <AdvancedKPICard
+              title="Tempo Médio de Voo"
+              metric={{
+                value: 2.4,
+                previousValue: 2.1,
+                format: 'time'
+              }}
+              icon={CalendarIcon}
+              color="blue"
+              description="Duração média"
+            />
+            
+            <AdvancedKPICard
+              title="Taxa de Compliance"
+              metric={{
+                value: 98.5,
+                target: 95,
+                previousValue: 97.8,
+                format: 'percentage'
+              }}
+              icon={ClipboardDocumentListIcon}
+              color="purple"
+              description="Checklists completos"
+            />
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <GaugeChart
+              title="Performance Geral"
+              value={94.2}
+              max={100}
+              colors={['#ef4444', '#f59e0b', '#10b981']}
+            />
+            
+            <AdvancedLineChart
+              title="Voos por Mês - Últimos 6 Meses"
+              data={[
+                { name: 'Jan', value: 8 },
+                { name: 'Fev', value: 12 },
+                { name: 'Mar', value: 15 },
+                { name: 'Abr', value: 18 },
+                { name: 'Mai', value: 22 },
+                { name: 'Jun', value: 25 }
+              ]}
+              type="line"
+              colors={['#3b82f6']}
+              height={250}
+            />
+          </div>
         </div>
       </div>
     </EnhancedDashboardLayout>
