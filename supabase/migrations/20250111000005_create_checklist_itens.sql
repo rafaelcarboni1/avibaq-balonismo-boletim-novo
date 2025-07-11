@@ -1,0 +1,247 @@
+-- Migração para criar tabela de checklist de voos
+-- Criada em: 2025-01-11
+-- Descrição: Sistema de checklist de 3 blocos conforme especificação AVIBAQ
+
+-- Criar enum para blocos do checklist
+CREATE TYPE bloco_checklist AS ENUM ('bloco1', 'bloco2', 'bloco3');
+
+-- Criar tabela de itens do checklist
+CREATE TABLE checklist_itens (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  voo_id UUID NOT NULL REFERENCES voos(id) ON DELETE CASCADE,
+  bloco bloco_checklist NOT NULL,
+  item_numero INTEGER NOT NULL,
+  item_descricao TEXT NOT NULL,
+  marcado BOOLEAN DEFAULT false,
+  motivo_nao_marcado TEXT, -- obrigatório se marcado = false
+  preenchido_em TIMESTAMP WITH TIME ZONE,
+  preenchido_por UUID REFERENCES users(id),
+  
+  -- Metadados
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  
+  -- Não pode ter item duplicado no mesmo voo/bloco
+  UNIQUE(voo_id, bloco, item_numero),
+  
+  -- Se não marcado, deve ter motivo
+  CONSTRAINT check_motivo_obrigatorio CHECK (
+    marcado = true OR motivo_nao_marcado IS NOT NULL
+  )
+);
+
+-- Habilitar RLS na tabela checklist_itens
+ALTER TABLE checklist_itens ENABLE ROW LEVEL SECURITY;
+
+-- Políticas RLS para checklist_itens
+-- Herdam as permissões da tabela voos
+
+-- Usuários que podem ver o voo podem ver checklist
+CREATE POLICY "Usuários que veem voo podem ver checklist" ON checklist_itens
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM voos v
+      WHERE v.id = checklist_itens.voo_id
+      -- As policies da tabela voos já validam o acesso
+    )
+  );
+
+-- Usuários que podem atualizar o voo podem atualizar checklist
+CREATE POLICY "Usuários que editam voo podem editar checklist" ON checklist_itens
+  FOR ALL USING (
+    EXISTS (
+      SELECT 1 FROM voos v
+      WHERE v.id = checklist_itens.voo_id
+      -- As policies da tabela voos já validam o acesso
+    )
+  );
+
+-- Criar índices para performance
+CREATE INDEX idx_checklist_voo ON checklist_itens(voo_id);
+CREATE INDEX idx_checklist_bloco ON checklist_itens(bloco);
+CREATE INDEX idx_checklist_voo_bloco ON checklist_itens(voo_id, bloco);
+CREATE INDEX idx_checklist_preenchido_em ON checklist_itens(preenchido_em);
+
+-- Função para popular checklist automaticamente quando voo é criado
+CREATE OR REPLACE FUNCTION criar_checklist_padrao(p_voo_id UUID)
+RETURNS VOID AS $$
+BEGIN
+  -- Bloco 1 - Antes do tombamento do cesto
+  INSERT INTO checklist_itens (voo_id, bloco, item_numero, item_descricao) VALUES
+  (p_voo_id, 'bloco1', 1, 'Verificação de fixação e estrutura do queimador e tanques'),
+  (p_voo_id, 'bloco1', 2, 'Verificar os cabos/mosquetões do cesto'),
+  (p_voo_id, 'bloco1', 3, 'Verificar fitas de tanques bem ajustadas e presas; manter a presilha num local de acesso fácil para remoção rápida'),
+  (p_voo_id, 'bloco1', 4, 'Verificar válvulas do suspiro cheias'),
+  (p_voo_id, 'bloco1', 5, 'Garantir mangueiras com folgas para manobra necessária no queimador'),
+  (p_voo_id, 'bloco1', 6, 'Verificar mangueiras fora da borda do cesto ou em local não apropriado'),
+  (p_voo_id, 'bloco1', 7, 'Confirmar registros dos tanques devidamente fechados (linha líquida e linha vapor)'),
+  (p_voo_id, 'bloco1', 8, 'Verificar todas as conexões entre queimador e tanques bem fixadas e sem vazamento'),
+  (p_voo_id, 'bloco1', 9, 'Caso exista tanque auxiliar para inflagem, mantê-lo dentro do cockpit devidamente fixado'),
+  (p_voo_id, 'bloco1', 10, 'Verificar pressão do extintor 1 (ponteiro no verde)'),
+  (p_voo_id, 'bloco1', 11, 'Verificar pressão do extintor 2 (ponteiro no verde)'),
+  (p_voo_id, 'bloco1', 12, 'Conferir kit de primeiros socorros completo'),
+  (p_voo_id, 'bloco1', 13, 'Fazer primeiro acionamento do queimador (teste)'),
+  (p_voo_id, 'bloco1', 14, 'Esgotar (esvaziar) todo o sistema de gás após o teste');
+
+  -- Bloco 2 - Após tombamento do cesto para conexão com envelope
+  INSERT INTO checklist_itens (voo_id, bloco, item_numero, item_descricao) VALUES
+  (p_voo_id, 'bloco2', 1, 'Conectar ancoragem em ponto fixo e resistente do veículo (preferir parte frontal, não carreta)'),
+  (p_voo_id, 'bloco2', 2, 'Usar sistema de desengate rápido apropriado ao tamanho do balão'),
+  (p_voo_id, 'bloco2', 3, 'Inspecionar cabos do envelope íntegros, sem desfiados, dobras ou entrelaço'),
+  (p_voo_id, 'bloco2', 4, 'Conectar cabos de forma ordenada, um de cada vez, revisando o anterior, iniciar pelos inferiores centrais'),
+  (p_voo_id, 'bloco2', 5, 'Garantir mosquetões fechados com meia volta aberta para não travar'),
+  (p_voo_id, 'bloco2', 6, 'Esticar o envelope no chão para checar integridade do tecido'),
+  (p_voo_id, 'bloco2', 7, 'Posicionar ventiladores, travar rodas; puxar cordinha para verificar rotação livre das pás'),
+  (p_voo_id, 'bloco2', 8, 'Colocar cone de segurança delimitando a área'),
+  (p_voo_id, 'bloco2', 9, 'Acionar ventiladores; atenção a cadarços, rádios, cachecóis'),
+  (p_voo_id, 'bloco2', 10, 'Orientar equipe de boca sobre cuidados, rajadas e procedimento de desligamento rápido a comando do piloto'),
+  (p_voo_id, 'bloco2', 11, 'Entrar no envelope, fechar tap, desobstruir cabos e cordins nas roldanas'),
+  (p_voo_id, 'bloco2', 12, 'Organizar e fixar cabos de tap e janelas de rotação no quadro ou cockpit'),
+  (p_voo_id, 'bloco2', 13, 'Aguardar inflagem de pelo menos 75% do envelope antes de começar a aquecer');
+
+  -- Bloco 3 - Após o balão em pé
+  INSERT INTO checklist_itens (voo_id, bloco, item_numero, item_descricao) VALUES
+  (p_voo_id, 'bloco3', 1, 'Rever conexões bem apertadas e posicionadas'),
+  (p_voo_id, 'bloco3', 2, 'Verificar itens obrigatórios na mala de voo: água, manta anti-chama, luvas de couro, acendedores alternativos, canivete ou faca, alicate'),
+  (p_voo_id, 'bloco3', 3, 'Instalar instrumentos de voo'),
+  (p_voo_id, 'bloco3', 4, 'Chamar passageiros para embarque'),
+  (p_voo_id, 'bloco3', 5, 'Apresentar piloto e equipamento'),
+  (p_voo_id, 'bloco3', 6, 'Confirmar com todos os passageiros que entenderam a experiência'),
+  (p_voo_id, 'bloco3', 7, 'Repetir treinamento da posição de pouso (costas para o scoop, pernas flexionadas, mãos nas alças)'),
+  (p_voo_id, 'bloco3', 8, 'Informar na frequência 142.210 MHz a decolagem da aeronave, identificando o piloto no comando'),
+  (p_voo_id, 'bloco3', 9, 'Verificar condições de vento; abortar se ultrapassarem limite');
+END;
+$$ LANGUAGE plpgsql;
+
+-- Trigger para criar checklist automaticamente quando voo é criado
+CREATE OR REPLACE FUNCTION trigger_criar_checklist_automatico()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Criar checklist padrão para o novo voo
+  PERFORM criar_checklist_padrao(NEW.id);
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_voos_criar_checklist
+  AFTER INSERT ON voos
+  FOR EACH ROW
+  EXECUTE FUNCTION trigger_criar_checklist_automatico();
+
+-- Função para atualizar status do voo baseado no progresso do checklist
+CREATE OR REPLACE FUNCTION trigger_checklist_update_status_voo()
+RETURNS TRIGGER AS $$
+DECLARE
+  todos_bloco1_completos BOOLEAN;
+  todos_bloco2_completos BOOLEAN;
+  todos_bloco3_completos BOOLEAN;
+  voo_status status_voo_registro;
+BEGIN
+  -- Verificar se todos os itens de cada bloco estão preenchidos
+  SELECT 
+    NOT EXISTS (
+      SELECT 1 FROM checklist_itens 
+      WHERE voo_id = NEW.voo_id AND bloco = 'bloco1' 
+      AND (marcado = false AND motivo_nao_marcado IS NULL)
+    ),
+    NOT EXISTS (
+      SELECT 1 FROM checklist_itens 
+      WHERE voo_id = NEW.voo_id AND bloco = 'bloco2' 
+      AND (marcado = false AND motivo_nao_marcado IS NULL)
+    ),
+    NOT EXISTS (
+      SELECT 1 FROM checklist_itens 
+      WHERE voo_id = NEW.voo_id AND bloco = 'bloco3' 
+      AND (marcado = false AND motivo_nao_marcado IS NULL)
+    )
+  INTO todos_bloco1_completos, todos_bloco2_completos, todos_bloco3_completos;
+  
+  -- Obter status atual do voo
+  SELECT status INTO voo_status FROM voos WHERE id = NEW.voo_id;
+  
+  -- Atualizar status baseado no progresso
+  IF todos_bloco3_completos AND voo_status NOT IN ('finalizado', 'cancelado') THEN
+    UPDATE voos SET status = 'checklist_concluido', updated_at = NOW() WHERE id = NEW.voo_id;
+  ELSIF todos_bloco2_completos AND voo_status = 'checklist_bloco1' THEN
+    UPDATE voos SET status = 'checklist_bloco2', updated_at = NOW() WHERE id = NEW.voo_id;
+  ELSIF todos_bloco1_completos AND voo_status = 'planejado' THEN
+    UPDATE voos SET status = 'checklist_bloco1', updated_at = NOW() WHERE id = NEW.voo_id;
+  END IF;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_checklist_update_status_voo
+  AFTER UPDATE ON checklist_itens
+  FOR EACH ROW
+  WHEN (OLD.marcado IS DISTINCT FROM NEW.marcado OR OLD.motivo_nao_marcado IS DISTINCT FROM NEW.motivo_nao_marcado)
+  EXECUTE FUNCTION trigger_checklist_update_status_voo();
+
+-- Função para validar preenchimento do checklist
+CREATE OR REPLACE FUNCTION trigger_checklist_validation()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Atualizar timestamp e usuário
+  NEW.updated_at = NOW();
+  
+  -- Se está marcando/desmarcando, registrar timestamp e usuário
+  IF OLD.marcado IS DISTINCT FROM NEW.marcado OR OLD.motivo_nao_marcado IS DISTINCT FROM NEW.motivo_nao_marcado THEN
+    NEW.preenchido_em = NOW();
+    NEW.preenchido_por = auth.uid();
+  END IF;
+  
+  -- Validar que se não marcado, deve ter motivo
+  IF NEW.marcado = false AND (NEW.motivo_nao_marcado IS NULL OR trim(NEW.motivo_nao_marcado) = '') THEN
+    RAISE EXCEPTION 'Motivo é obrigatório quando item não é marcado';
+  END IF;
+  
+  -- Se marcado, limpar motivo
+  IF NEW.marcado = true THEN
+    NEW.motivo_nao_marcado = NULL;
+  END IF;
+  
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_checklist_validation
+  BEFORE UPDATE ON checklist_itens
+  FOR EACH ROW
+  EXECUTE FUNCTION trigger_checklist_validation();
+
+-- View para facilitar consultas de progresso do checklist
+CREATE VIEW vw_checklist_progresso AS
+SELECT 
+  v.id as voo_id,
+  v.data_voo,
+  v.periodo,
+  v.status as voo_status,
+  mp.nome_completo as piloto_nome,
+  -- Progresso por bloco
+  COUNT(CASE WHEN ci.bloco = 'bloco1' THEN 1 END) as total_bloco1,
+  COUNT(CASE WHEN ci.bloco = 'bloco1' AND (ci.marcado = true OR ci.motivo_nao_marcado IS NOT NULL) THEN 1 END) as completos_bloco1,
+  COUNT(CASE WHEN ci.bloco = 'bloco2' THEN 1 END) as total_bloco2,
+  COUNT(CASE WHEN ci.bloco = 'bloco2' AND (ci.marcado = true OR ci.motivo_nao_marcado IS NOT NULL) THEN 1 END) as completos_bloco2,
+  COUNT(CASE WHEN ci.bloco = 'bloco3' THEN 1 END) as total_bloco3,
+  COUNT(CASE WHEN ci.bloco = 'bloco3' AND (ci.marcado = true OR ci.motivo_nao_marcado IS NOT NULL) THEN 1 END) as completos_bloco3,
+  -- Percentual geral
+  ROUND(
+    (COUNT(CASE WHEN ci.marcado = true OR ci.motivo_nao_marcado IS NOT NULL THEN 1 END) * 100.0) / 
+    NULLIF(COUNT(*), 0), 
+    2
+  ) as percentual_completo
+FROM voos v
+JOIN membros mp ON mp.id = v.piloto_id
+LEFT JOIN checklist_itens ci ON ci.voo_id = v.id
+GROUP BY v.id, v.data_voo, v.periodo, v.status, mp.nome_completo
+ORDER BY v.data_voo DESC, v.periodo;
+
+-- Comentários na tabela
+COMMENT ON TABLE checklist_itens IS 'Itens do checklist de segurança divididos em 3 blocos conforme especificação AVIBAQ';
+COMMENT ON COLUMN checklist_itens.voo_id IS 'ID do voo relacionado';
+COMMENT ON COLUMN checklist_itens.bloco IS 'Bloco do checklist (1, 2 ou 3)';
+COMMENT ON COLUMN checklist_itens.item_numero IS 'Número sequencial do item dentro do bloco';
+COMMENT ON COLUMN checklist_itens.marcado IS 'Se o item foi verificado/marcado como OK';
+COMMENT ON COLUMN checklist_itens.motivo_nao_marcado IS 'Motivo obrigatório quando item não é marcado';
+COMMENT ON VIEW vw_checklist_progresso IS 'View para acompanhar progresso do checklist por voo';
