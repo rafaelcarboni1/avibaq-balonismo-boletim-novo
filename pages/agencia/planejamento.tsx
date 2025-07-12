@@ -66,9 +66,15 @@ export default function PlanejamentoAgencia() {
 
   // Verificar se usuário está autenticado e é agência
   useEffect(() => {
-    if (!userLoading && (!user || user.role !== 'agencia')) {
-      router.push('/login');
-      return;
+    if (!userLoading) {
+      if (!user) {
+        router.push('/agencia/login');
+        return;
+      }
+      if (user.role && user.role !== 'agencia') {
+        router.push('/');
+        return;
+      }
     }
   }, [user, userLoading, router]);
 

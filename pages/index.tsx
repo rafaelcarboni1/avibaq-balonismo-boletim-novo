@@ -96,11 +96,6 @@ const Home = () => {
                 Promovendo a segurança e excelência no balonismo em Praia Grande/SC através de informações meteorológicas precisas e confiáveis para nossa comunidade.
               </p>
             </article>
-            
-            {/* PWA Install Prompt */}
-            <div className="mt-8">
-              <InstallPrompt />
-            </div>
           </div>
         </section>
 
@@ -219,6 +214,12 @@ const Home = () => {
           <p className="text-gray-400 mb-4">
             Associação de Pilotos e Empresas de Balonismo
           </p>
+          
+          {/* PWA Install Prompt - Posição discreta */}
+          <div className="mb-6">
+            <InstallPrompt />
+          </div>
+          
           <div className="flex flex-wrap justify-center gap-6 text-sm">
             <a href="/politica-privacidade" className="text-gray-400 hover:text-white">
               Política de Privacidade

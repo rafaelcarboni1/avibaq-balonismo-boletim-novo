@@ -111,13 +111,13 @@ export function InstallPrompt({ className = '' }: InstallPromptProps) {
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
-              <ArrowDownTrayIcon className="h-5 w-5 text-blue-600" />
-              <h3 className="font-semibold text-blue-900">
+              <ArrowDownTrayIcon className="h-5 w-5 text-blue-500" />
+              <h3 className="font-semibold text-blue-700">
                 Instalar AVIBAQ App
               </h3>
             </div>
             
-            <p className="text-sm text-blue-700 mb-3">
+            <p className="text-sm text-blue-600 mb-3">
               Instale nosso app para acesso rápido, funcionalidade offline e melhor experiência mobile!
             </p>
 
@@ -130,7 +130,7 @@ export function InstallPrompt({ className = '' }: InstallPromptProps) {
               <div className="mt-3">
                 <Button 
                   onClick={handleInstall}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  className="bg-blue-500 hover:bg-blue-600 text-white"
                   size="sm"
                 >
                   <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
@@ -182,7 +182,7 @@ export function InstallBadge({ className = '' }: InstallPromptProps) {
   return (
     <button
       onClick={handleClick}
-      className={`flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm ${className}`}
+      className={`flex items-center gap-2 px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-sm ${className}`}
       title="Instalar App"
     >
       <ArrowDownTrayIcon className="h-4 w-4" />

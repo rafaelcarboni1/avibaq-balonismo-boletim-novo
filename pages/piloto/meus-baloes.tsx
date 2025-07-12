@@ -46,8 +46,22 @@ export default function MeusBaloes() {
 
   // Verificar se usuário está autenticado e é piloto
   useEffect(() => {
-    if (!userLoading && (!user || user.role !== 'piloto')) {
-      router.push('/login');
+    if (!userLoading) {
+      if (!user) {
+        router.push('/piloto/login');
+        return;
+      }
+      if (user.role && user.role !== 'piloto') {
+        router.push('/');
+        return;
+      }
+    }
+  }, [user, userLoading, router]);
+
+  // Carregar balões quando o usuário estiver disponível
+  useEffect(() => {
+    if (user && user.role === 'piloto') {
+      carregarBaloes();
       return;
     }
   }, [user, userLoading, router]);

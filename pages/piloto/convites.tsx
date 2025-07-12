@@ -39,9 +39,15 @@ export default function ConvitesRecebidos() {
 
   // Verificar se usuário está autenticado e é piloto
   useEffect(() => {
-    if (!userLoading && (!user || user.role !== 'piloto')) {
-      router.push('/login');
-      return;
+    if (!userLoading) {
+      if (!user) {
+        router.push('/piloto/login');
+        return;
+      }
+      if (user.role && user.role !== 'piloto') {
+        router.push('/');
+        return;
+      }
     }
   }, [user, userLoading, router]);
 
