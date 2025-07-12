@@ -106,18 +106,18 @@ export function InstallPrompt({ className = '' }: InstallPromptProps) {
   }
 
   return (
-    <MagicCard className={`border-blue-200 bg-blue-50 ${className}`}>
+    <MagicCard className={`border-blue-200 bg-slate-50 ${className}`}>
       <div className="p-4">
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
-              <ArrowDownTrayIcon className="h-5 w-5 text-blue-500" />
-              <h3 className="font-semibold text-blue-700">
+              <ArrowDownTrayIcon className="h-5 w-5 text-blue-600" />
+              <h3 className="font-semibold text-gray-900">
                 Instalar AVIBAQ App
               </h3>
             </div>
             
-            <p className="text-sm text-blue-600 mb-3">
+            <p className="text-sm text-gray-700 mb-3">
               Instale nosso app para acesso rápido, funcionalidade offline e melhor experiência mobile!
             </p>
 

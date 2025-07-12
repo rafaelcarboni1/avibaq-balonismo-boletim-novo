@@ -334,60 +334,60 @@ export default function MeusBaloes() {
       <div className="space-y-6">
         {/* Estatísticas */}
         <BentoGrid className="grid-cols-1 md:grid-cols-3 gap-4">
-          <BentoGridItem className="bg-gradient-to-br from-blue-50 to-blue-100">
+          <BentoGridItem className="bg-slate-50 border border-blue-100">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-blue-600">Total de Balões</p>
+                  <p className="text-sm font-medium text-blue-700">Total de Balões</p>
                   <div className="flex items-center gap-2">
-                    <NumberTicker value={baloes.length} className="text-2xl font-bold text-blue-900" />
+                    <NumberTicker value={baloes.length} className="text-2xl font-semibold text-gray-900" />
                     <span className="text-sm text-blue-600">
                       ({baloesAtivos.length} ativos)
                     </span>
                   </div>
                 </div>
-                <div className="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center">
-                  <EyeIcon className="h-6 w-6 text-blue-700" />
+                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                  <EyeIcon className="h-6 w-6 text-blue-600" />
                 </div>
               </div>
             </div>
           </BentoGridItem>
 
-          <BentoGridItem className="bg-gradient-to-br from-green-50 to-green-100">
+          <BentoGridItem className="bg-slate-50 border border-green-100">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-green-600">Volume Total</p>
+                  <p className="text-sm font-medium text-green-700">Volume Total</p>
                   <div className="flex items-center gap-2">
                     <NumberTicker 
                       value={volumeTotal} 
-                      className="text-2xl font-bold text-green-900" 
+                      className="text-2xl font-semibold text-gray-900" 
                     />
                     <span className="text-sm text-green-600">m³</span>
                   </div>
                 </div>
-                <div className="w-12 h-12 bg-green-200 rounded-full flex items-center justify-center">
-                  <div className="w-6 h-6 rounded-full bg-green-700"></div>
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-full bg-green-600"></div>
                 </div>
               </div>
             </div>
           </BentoGridItem>
 
-          <BentoGridItem className="bg-gradient-to-br from-purple-50 to-purple-100">
+          <BentoGridItem className="bg-slate-50 border border-purple-100">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-purple-600">Volume Médio</p>
+                  <p className="text-sm font-medium text-purple-700">Volume Médio</p>
                   <div className="flex items-center gap-2">
                     <NumberTicker 
                       value={baloesAtivos.length > 0 ? Math.round(volumeTotal / baloesAtivos.length) : 0} 
-                      className="text-2xl font-bold text-purple-900" 
+                      className="text-2xl font-semibold text-gray-900" 
                     />
                     <span className="text-sm text-purple-600">m³</span>
                   </div>
                 </div>
-                <div className="w-12 h-12 bg-purple-200 rounded-full flex items-center justify-center">
-                  <div className="w-6 h-6 bg-purple-700 transform rotate-45"></div>
+                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                  <div className="w-6 h-6 bg-purple-600 transform rotate-45"></div>
                 </div>
               </div>
             </div>

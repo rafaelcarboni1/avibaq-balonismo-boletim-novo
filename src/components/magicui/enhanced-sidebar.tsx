@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/router";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../../lib/utils";
 import { designTokens } from "../../lib/design-tokens";
@@ -96,16 +96,17 @@ export default function EnhancedSidebar({
 
   // Detecta rota ativa
   const isActive = (href: string) => {
-    if (typeof window === 'undefined') return false;
-    return window.location.pathname.startsWith(href);
+    return router.pathname.startsWith(href);
   };
 
   // Fecha sidebar mobile ao navegar
   useEffect(() => {
     const handleRouteChange = () => setIsMobileOpen(false);
-    // Simula listener de rota (Next.js router events não funcionam no cliente)
-    return () => {};
-  }, []);
+    router.events.on('routeChangeStart', handleRouteChange);
+    return () => {
+      router.events.off('routeChangeStart', handleRouteChange);
+    };
+  }, [router.events]);
 
   const handleLogout = async () => {
     setIsMobileOpen(false);

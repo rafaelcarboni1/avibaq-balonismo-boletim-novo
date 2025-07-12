@@ -184,18 +184,18 @@ export default function PilotoDashboard() {
         
         {/* Estatísticas principais */}
         <BentoGrid className="grid-cols-2 lg:grid-cols-4 gap-6">
-          <BentoGridItem className="bg-gradient-to-br from-blue-50 to-blue-100">
+          <BentoGridItem className="bg-slate-50 border border-blue-100">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-blue-600">Balões Ativos</p>
+                  <p className="text-sm font-medium text-blue-700">Balões Ativos</p>
                   <NumberTicker 
                     value={stats.totalBaloes} 
-                    className="text-2xl font-bold text-blue-900"
+                    className="text-2xl font-semibold text-gray-900"
                   />
                 </div>
-                <div className="h-12 w-12 bg-blue-500 rounded-lg flex items-center justify-center">
-                  <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                   </svg>
                 </div>
@@ -203,52 +203,52 @@ export default function PilotoDashboard() {
             </div>
           </BentoGridItem>
 
-          <BentoGridItem className="bg-gradient-to-br from-green-50 to-green-100">
+          <BentoGridItem className="bg-slate-50 border border-green-100">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-green-600">Voos Este Ano</p>
+                  <p className="text-sm font-medium text-green-700">Voos Este Ano</p>
                   <NumberTicker 
                     value={stats.voosEsteAno} 
-                    className="text-2xl font-bold text-green-900"
+                    className="text-2xl font-semibold text-gray-900"
                   />
                 </div>
-                <div className="h-12 w-12 bg-green-500 rounded-lg flex items-center justify-center">
-                  <CalendarIcon className="h-6 w-6 text-white" />
+                <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
+                  <CalendarIcon className="h-6 w-6 text-green-600" />
                 </div>
               </div>
             </div>
           </BentoGridItem>
 
-          <BentoGridItem className="bg-gradient-to-br from-purple-50 to-purple-100">
+          <BentoGridItem className="bg-slate-50 border border-purple-100">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-purple-600">Voos Este Mês</p>
+                  <p className="text-sm font-medium text-purple-700">Voos Este Mês</p>
                   <NumberTicker 
                     value={stats.voosEsteMes} 
-                    className="text-2xl font-bold text-purple-900"
+                    className="text-2xl font-semibold text-gray-900"
                   />
                 </div>
-                <div className="h-12 w-12 bg-purple-500 rounded-lg flex items-center justify-center">
-                  <DocumentTextIcon className="h-6 w-6 text-white" />
+                <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                  <DocumentTextIcon className="h-6 w-6 text-purple-600" />
                 </div>
               </div>
             </div>
           </BentoGridItem>
 
-          <BentoGridItem className="bg-gradient-to-br from-amber-50 to-amber-100">
+          <BentoGridItem className="bg-slate-50 border border-amber-100">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-amber-600">Convites Pendentes</p>
+                  <p className="text-sm font-medium text-amber-700">Convites Pendentes</p>
                   <NumberTicker 
                     value={stats.convitesPendentes} 
-                    className="text-2xl font-bold text-amber-900"
+                    className="text-2xl font-semibold text-gray-900"
                   />
                 </div>
-                <div className="h-12 w-12 bg-amber-500 rounded-lg flex items-center justify-center">
-                  <ClipboardDocumentListIcon className="h-6 w-6 text-white" />
+                <div className="h-12 w-12 bg-amber-100 rounded-lg flex items-center justify-center">
+                  <ClipboardDocumentListIcon className="h-6 w-6 text-amber-600" />
                 </div>
               </div>
             </div>
