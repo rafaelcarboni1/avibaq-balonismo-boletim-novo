@@ -9,7 +9,8 @@ export function ProtectedRoute({ allowedRoles, children }) {
   useEffect(() => {
     if (!loading && role !== null) {
       if (!user || !allowedRoles.includes(role)) {
-        router.replace("/login");
+        // Redirect to home instead of non-existent /login
+        router.replace("/");
       }
     }
   }, [user, role, loading, allowedRoles, router]);

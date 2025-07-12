@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../../lib/utils";
 import { designTokens } from "../../lib/design-tokens";
+import { supabase } from "../../integrations/supabase/client";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -17,7 +18,12 @@ import {
   ArrowLeftOnRectangleIcon,
   KeyIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  CloudIcon,
+  CalendarIcon,
+  EnvelopeIcon,
+  TruckIcon,
+  MapIcon
 } from "@heroicons/react/24/outline";
 
 interface NavigationItem {
@@ -35,14 +41,37 @@ interface EnhancedSidebarProps {
   children?: React.ReactNode;
 }
 
-const navLinks: NavigationItem[] = [
-  { href: "/admin/dashboard", label: "Dashboard", icon: HomeIcon },
-  { href: "/admin/boletins", label: "Boletins", icon: DocumentTextIcon },
-  { href: "/admin/associados", label: "Associados", icon: UsersIcon },
-  { href: "/admin/usuarios", label: "Usuários", icon: Cog6ToothIcon, adminOnly: true },
-  { href: "/admin/permissoes", label: "Permissões", icon: KeyIcon, adminOnly: true },
-  { href: "/admin/minha-conta", label: "Minha Conta", icon: UserCircleIcon },
-];
+// Navigation links based on user role
+const getNavLinks = (role?: string): NavigationItem[] => {
+  if (role === 'admin' || role === 'meteo' || role === 'tesouraria') {
+    return [
+      { href: "/admin/dashboard", label: "Dashboard", icon: HomeIcon },
+      { href: "/admin/boletins", label: "Boletins", icon: DocumentTextIcon },
+      { href: "/admin/associados", label: "Associados", icon: UsersIcon },
+      { href: "/admin/usuarios", label: "Usuários", icon: Cog6ToothIcon, adminOnly: true },
+      { href: "/admin/permissoes", label: "Permissões", icon: KeyIcon, adminOnly: true },
+      { href: "/admin/minha-conta", label: "Minha Conta", icon: UserCircleIcon },
+    ];
+  } else if (role === 'piloto') {
+    return [
+      { href: "/piloto/dashboard", label: "Dashboard", icon: HomeIcon },
+      { href: "/piloto/meus-baloes", label: "Meus Balões", icon: CloudIcon },
+      { href: "/piloto/planejamento", label: "Planejamento", icon: CalendarIcon },
+      { href: "/piloto/convites", label: "Convites", icon: EnvelopeIcon },
+      { href: "/piloto/minha-conta", label: "Minha Conta", icon: UserCircleIcon },
+    ];
+  } else if (role === 'agencia') {
+    return [
+      { href: "/agencia/dashboard", label: "Dashboard", icon: HomeIcon },
+      { href: "/agencia/frota", label: "Frota", icon: TruckIcon },
+      { href: "/agencia/pilotos", label: "Pilotos", icon: UsersIcon },
+      { href: "/agencia/planejamento", label: "Planejamento", icon: MapIcon },
+      { href: "/agencia/minha-conta", label: "Minha Conta", icon: UserCircleIcon },
+    ];
+  }
+  // Default empty array for unknown roles
+  return [];
+};
 
 // Variants para animações otimizadas
 const menuItemVariants = {
@@ -78,9 +107,18 @@ export default function EnhancedSidebar({
     return () => {};
   }, []);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     setIsMobileOpen(false);
-    router.push("/admin/logout");
+    try {
+      // Perform logout using Supabase
+      await supabase.auth.signOut();
+      // Redirect to home page
+      router.push("/");
+    } catch (error) {
+      console.error("Erro ao fazer logout:", error);
+      // Even if there's an error, redirect to home
+      router.push("/");
+    }
   };
 
   const SidebarContent = ({ isMobile = false }: { isMobile?: boolean }) => (
@@ -104,8 +142,8 @@ export default function EnhancedSidebar({
                 transition={{ duration: 0.2 }}
                 className="flex flex-col"
               >
-                <span className="text-lg font-bold text-gray-900">AVIBAQ</span>
-                <span className="text-xs text-gray-500">Sistema Meteorológico</span>
+                <span className="text-lg font-bold text-gray-800">AVIBAQ</span>
+                <span className="text-xs text-gray-600">Sistema Meteorológico</span>
               </motion.div>
             )}
           </AnimatePresence>
@@ -127,10 +165,10 @@ export default function EnhancedSidebar({
                 exit="collapsed"
                 className="flex flex-col min-w-0"
               >
-                <span className="text-sm font-medium text-gray-900 truncate">
+                <span className="text-sm font-medium text-gray-800 truncate">
                   {userName}
                 </span>
-                <span className="text-xs text-gray-500 capitalize">
+                <span className="text-xs text-gray-600 capitalize">
                   {role || 'usuário'}
                 </span>
               </motion.div>
@@ -141,7 +179,7 @@ export default function EnhancedSidebar({
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2">
-        {navLinks.map((link, index) => {
+        {getNavLinks(role).map((link, index) => {
           if (link.adminOnly && role !== "admin") return null;
           
           const active = isActive(link.href);
@@ -162,15 +200,15 @@ export default function EnhancedSidebar({
                 className={cn(
                   "relative flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group",
                   active 
-                    ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg shadow-blue-500/25" 
-                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+                    ? "bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg shadow-blue-400/25" 
+                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-800"
                 )}
               >
                 {/* Active indicator */}
                 {active && (
                   <motion.div
                     layoutId="activeIndicator"
-                    className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl"
+                    className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl"
                     transition={{ type: "spring", stiffness: 300, damping: 30 }}
                   />
                 )}

@@ -6,6 +6,7 @@ import { Card, CardContent } from "../src/components/ui/card";
 import { supabase } from "../src/integrations/supabase/client";
 import HomeSectionMembros from "../src/components/HomeSectionMembros";
 import ProtocolosSection from "../src/components/ProtocolosSection";
+import { InstallPrompt } from "../src/components/magicui/install-prompt";
 
 interface BoletimData {
   id: string;
@@ -95,6 +96,11 @@ const Home = () => {
                 Promovendo a segurança e excelência no balonismo em Praia Grande/SC através de informações meteorológicas precisas e confiáveis para nossa comunidade.
               </p>
             </article>
+            
+            {/* PWA Install Prompt */}
+            <div className="mt-8">
+              <InstallPrompt />
+            </div>
           </div>
         </section>
 
