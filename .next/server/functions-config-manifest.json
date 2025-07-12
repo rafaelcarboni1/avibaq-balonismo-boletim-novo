@@ -1,1 +1,1 @@
-{"version":1,"functions":{"/api/join":{},"/admin/boletins/[id]/edit":{},"/admin/boletins/new":{}}}
+{"version":1,"functions":{"/admin/boletins/[id]/edit":{},"/admin/boletins/new":{},"/api/join":{}}}

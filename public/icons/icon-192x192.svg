@@ -1,19 +1,17 @@
-<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="96" cy="96" r="92" fill="#2563eb" stroke="#1d4ed8" stroke-width="8"/>
-  <g transform="translate(96, 96)">
-    <!-- Hot air balloon -->
-    <ellipse cx="0" cy="-32" rx="32" ry="38.4" fill="#ef4444"/>
-    <ellipse cx="0" cy="-32" rx="24" ry="32" fill="#dc2626"/>
-    <ellipse cx="0" cy="-32" rx="16" ry="24" fill="#b91c1c"/>
-    
-    <!-- Basket -->
-    <rect x="-8" y="16" width="16" height="8" rx="2" fill="#92400e"/>
-    
-    <!-- Ropes -->
-    <line x1="-24" y1="-8" x2="-8" y2="16" stroke="#374151" stroke-width="2"/>
-    <line x1="24" y1="-8" x2="8" y2="16" stroke="#374151" stroke-width="2"/>
-    
-    <!-- Text A -->
-    <text x="0" y="48" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">A</text>
-  </g>
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 0 192 192">
+  <!-- Background circle -->
+  <circle cx="96" cy="96" r="92" fill="#2563eb"/>
+  
+  <!-- Balloon envelope -->
+  <ellipse cx="96" cy="64" rx="32" ry="38.4" fill="#ef4444"/>
+  
+  <!-- Inner balloon -->
+  <ellipse cx="96" cy="64" rx="24" ry="32" fill="#dc2626"/>
+  
+  <!-- Basket -->
+  <rect x="88" y="112" width="16" height="8" fill="#92400e"/>
+  
+  <!-- Letter A -->
+  <text x="96" y="144" text-anchor="middle" font-family="Arial, sans-serif" 
+        font-size="12" font-weight="bold" fill="white">A</text>
 </svg>
