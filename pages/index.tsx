@@ -6,7 +6,6 @@ import { Card, CardContent } from "../src/components/ui/card";
 import { supabase } from "../src/integrations/supabase/client";
 import HomeSectionMembros from "../src/components/HomeSectionMembros";
 import ProtocolosSection from "../src/components/ProtocolosSection";
-import { InstallPrompt } from "../src/components/magicui/install-prompt";
 
 interface BoletimData {
   id: string;
@@ -217,7 +216,6 @@ const Home = () => {
           
           {/* PWA Install Prompt - Posição discreta */}
           <div className="mb-6">
-            <InstallPrompt />
           </div>
           
           <div className="flex flex-wrap justify-center gap-6 text-sm">

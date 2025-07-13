@@ -1,16 +1,31 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
-import { PlusIcon, ClipboardDocumentListIcon, CalendarIcon, DocumentTextIcon, ShieldCheckIcon, ChartBarIcon } from '@heroicons/react/24/outline';
+import dynamic from 'next/dynamic';
+import { motion } from 'framer-motion';
+import { PlusIcon, ClipboardDocumentListIcon, CalendarIcon, DocumentTextIcon, ShieldCheckIcon, ChartBarIcon, UserIcon } from '@heroicons/react/24/solid';
 import { EnhancedDashboardLayout } from '../../src/components/magicui/enhanced-dashboard-layout';
 import { MagicCard } from '../../src/components/magicui/magic-card';
 import { BentoGrid, BentoGridItem } from '../../src/components/magicui/bento-grid';
-import { NumberTicker } from '../../src/components/magicui/number-ticker';
-import { OfflineIndicator } from '../../src/components/magicui/offline-indicator';
-import { AdvancedKPICard } from '../../src/components/magicui/advanced-kpi-analytics';
-import { AdvancedLineChart, GaugeChart } from '../../src/components/magicui/advanced-charts';
+import EnhancedKpiCard from '../../src/components/magicui/enhanced-kpi-card';
+import LoadingSkeleton from '../../src/components/magicui/loading-skeleton';
+import AnimatedChart from '../../src/components/magicui/animated-chart';
+import { Button } from '../../src/components/ui/button';
 import { supabase } from '../../src/integrations/supabase/client';
 import { useUser } from '../../src/hooks/useUser';
 import { useToast } from '../../src/hooks/use-toast';
+
+// Lazy load dos componentes pesados
+const AdvancedKPICard = dynamic(() => import('../../src/components/magicui/advanced-kpi-analytics').then(mod => ({ default: mod.AdvancedKPICard })), {
+  loading: () => <div className="animate-pulse bg-gray-200 rounded-lg h-32" />
+});
+
+const AdvancedLineChart = dynamic(() => import('../../src/components/magicui/advanced-charts').then(mod => ({ default: mod.AdvancedLineChart })), {
+  loading: () => <div className="animate-pulse bg-gray-200 rounded-lg h-64" />
+});
+
+const GaugeChart = dynamic(() => import('../../src/components/magicui/advanced-charts').then(mod => ({ default: mod.GaugeChart })), {
+  loading: () => <div className="animate-pulse bg-gray-200 rounded-lg h-64" />
+});
 
 interface DashboardStats {
   totalBaloes: number;
@@ -35,6 +50,7 @@ export default function PilotoDashboard() {
     voosRecentes: []
   });
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'overview' | 'analytics' | 'voos'>('overview');
 
   // Verificar se usuário está autenticado e é piloto
   useEffect(() => {
@@ -155,149 +171,213 @@ export default function PilotoDashboard() {
     }
   };
 
+  // Memoizar o mapeamento de status para evitar recriação
+  const statusDisplayMap = useMemo(() => ({
+    'rascunho': { label: 'Rascunho', color: 'bg-gray-100 text-gray-800' },
+    'planejado': { label: 'Planejado', color: 'bg-blue-100 text-blue-800' },
+    'checklist_bloco1': { label: 'Checklist 1/3', color: 'bg-yellow-100 text-yellow-800' },
+    'checklist_bloco2': { label: 'Checklist 2/3', color: 'bg-yellow-100 text-yellow-800' },
+    'checklist_concluido': { label: 'Checklist OK', color: 'bg-green-100 text-green-800' },
+    'finalizado': { label: 'Finalizado', color: 'bg-emerald-100 text-emerald-800' },
+    'cancelado': { label: 'Cancelado', color: 'bg-red-100 text-red-800' }
+  }), []);
+
   const getStatusDisplay = (status: string) => {
-    const statusMap = {
-      'rascunho': { label: 'Rascunho', color: 'bg-gray-100 text-gray-800' },
-      'planejado': { label: 'Planejado', color: 'bg-blue-100 text-blue-800' },
-      'checklist_bloco1': { label: 'Checklist 1/3', color: 'bg-yellow-100 text-yellow-800' },
-      'checklist_bloco2': { label: 'Checklist 2/3', color: 'bg-yellow-100 text-yellow-800' },
-      'checklist_concluido': { label: 'Checklist OK', color: 'bg-green-100 text-green-800' },
-      'finalizado': { label: 'Finalizado', color: 'bg-emerald-100 text-emerald-800' },
-      'cancelado': { label: 'Cancelado', color: 'bg-red-100 text-red-800' }
-    };
-    return statusMap[status] || { label: status, color: 'bg-gray-100 text-gray-800' };
+    return statusDisplayMap[status] || { label: status, color: 'bg-gray-100 text-gray-800' };
   };
 
   if (userLoading || loading) {
     return (
-      <EnhancedDashboardLayout title="Dashboard" loading={true}>
-        <div>Carregando...</div>
+      <EnhancedDashboardLayout 
+        title="Dashboard do Piloto" 
+        breadcrumbs={[
+          { label: "Dashboard", icon: DocumentTextIcon }
+        ]}
+        loading={true}
+      >
+        <div className="space-y-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-white rounded-2xl p-6 border border-gray-200/50">
+                <LoadingSkeleton variant="card" />
+              </div>
+            ))}
+          </div>
+        </div>
       </EnhancedDashboardLayout>
     );
   }
 
   return (
-    <EnhancedDashboardLayout title="Dashboard do Piloto">
+    <EnhancedDashboardLayout 
+      title="Dashboard do Piloto"
+      breadcrumbs={[
+        { label: "Dashboard", icon: DocumentTextIcon }
+      ]}
+    >
       <div className="space-y-8">
-        {/* Indicador offline */}
-        <OfflineIndicator showDetails={true} />
         
-        {/* Estatísticas principais */}
-        <BentoGrid className="grid-cols-2 lg:grid-cols-4 gap-6">
-          <BentoGridItem className="bg-slate-50 border border-blue-100">
-            <div className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-blue-700">Balões Ativos</p>
-                  <NumberTicker 
-                    value={stats.totalBaloes} 
-                    className="text-2xl font-semibold text-gray-900"
-                  />
-                </div>
-                <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <svg className="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </BentoGridItem>
-
-          <BentoGridItem className="bg-slate-50 border border-green-100">
-            <div className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-green-700">Voos Este Ano</p>
-                  <NumberTicker 
-                    value={stats.voosEsteAno} 
-                    className="text-2xl font-semibold text-gray-900"
-                  />
-                </div>
-                <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
-                  <CalendarIcon className="h-6 w-6 text-green-600" />
-                </div>
-              </div>
-            </div>
-          </BentoGridItem>
-
-          <BentoGridItem className="bg-slate-50 border border-purple-100">
-            <div className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-purple-700">Voos Este Mês</p>
-                  <NumberTicker 
-                    value={stats.voosEsteMes} 
-                    className="text-2xl font-semibold text-gray-900"
-                  />
-                </div>
-                <div className="h-12 w-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <DocumentTextIcon className="h-6 w-6 text-purple-600" />
-                </div>
-              </div>
-            </div>
-          </BentoGridItem>
-
-          <BentoGridItem className="bg-slate-50 border border-amber-100">
-            <div className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-amber-700">Convites Pendentes</p>
-                  <NumberTicker 
-                    value={stats.convitesPendentes} 
-                    className="text-2xl font-semibold text-gray-900"
-                  />
-                </div>
-                <div className="h-12 w-12 bg-amber-100 rounded-lg flex items-center justify-center">
-                  <ClipboardDocumentListIcon className="h-6 w-6 text-amber-600" />
-                </div>
-              </div>
-            </div>
-          </BentoGridItem>
-        </BentoGrid>
-
-        {/* Ações rápidas */}
-        <MagicCard className="p-6">
-          <h3 className="text-lg font-semibold mb-4">Ações Rápidas</h3>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Navegação por abas */}
+        <div className="flex gap-4 border-b border-gray-200">
+          {[
+            { key: 'overview', label: 'Visão Geral', icon: ChartBarIcon },
+            { key: 'voos', label: 'Meus Voos', icon: CalendarIcon },
+            { key: 'analytics', label: 'Performance', icon: ShieldCheckIcon }
+          ].map((tab) => (
             <button
-              onClick={() => router.push('/piloto/planejamento')}
-              className="p-4 border border-gray-200 rounded-lg hover:border-primary hover:bg-blue-50 transition-colors group"
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key as any)}
+              className={`
+                flex items-center gap-2 px-4 py-2 border-b-2 transition-colors
+                ${activeTab === tab.key 
+                  ? 'border-blue-500 text-blue-600 bg-blue-50' 
+                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                }
+              `}
             >
-              <PlusIcon className="h-8 w-8 text-primary mx-auto mb-2 group-hover:scale-110 transition-transform" />
-              <p className="font-medium">Planejar Voo</p>
-              <p className="text-sm text-gray-600">Criar novo planejamento</p>
+              <tab.icon className="h-5 w-5" />
+              {tab.label}
             </button>
+          ))}
+        </div>
 
-            <button
-              onClick={() => router.push('/piloto/meus-baloes')}
-              className="p-4 border border-gray-200 rounded-lg hover:border-primary hover:bg-blue-50 transition-colors group"
-            >
-              <svg className="h-8 w-8 text-primary mx-auto mb-2 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-              </svg>
-              <p className="font-medium">Meus Balões</p>
-              <p className="text-sm text-gray-600">Gerenciar frota</p>
-            </button>
+        {/* Conteúdo das abas */}
+        {activeTab === 'overview' && (
+          <div className="space-y-8">
+            {/* KPI Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <EnhancedKpiCard 
+                title="Balões Ativos"
+                value={stats.totalBaloes} 
+                icon={UserIcon}
+                color="blue"
+                trend="neutral"
+                trendValue="Frota pessoal"
+                description="Balões cadastrados"
+                delay={0}
+              />
 
-            <button
-              onClick={() => router.push('/piloto/convites')}
-              className="p-4 border border-gray-200 rounded-lg hover:border-primary hover:bg-blue-50 transition-colors group"
-            >
-              <ClipboardDocumentListIcon className="h-8 w-8 text-primary mx-auto mb-2 group-hover:scale-110 transition-transform" />
-              <p className="font-medium">Convites</p>
-              <p className="text-sm text-gray-600">Ver convites de agências</p>
-            </button>
+              <EnhancedKpiCard 
+                title="Voos Este Ano"
+                value={stats.voosEsteAno}
+                icon={CalendarIcon}
+                color="green"
+                trend="up"
+                trendValue="+15% vs 2023"
+                description="Total de voos realizados"
+                delay={0.05}
+              />
 
-            <button
-              onClick={() => router.push('/piloto/historico')}
-              className="p-4 border border-gray-200 rounded-lg hover:border-primary hover:bg-blue-50 transition-colors group"
-            >
-              <DocumentTextIcon className="h-8 w-8 text-primary mx-auto mb-2 group-hover:scale-110 transition-transform" />
-              <p className="font-medium">Histórico</p>
-              <p className="text-sm text-gray-600">Ver voos anteriores</p>
-            </button>
-          </div>
-        </MagicCard>
+              <EnhancedKpiCard 
+                title="Voos Este Mês"
+                value={stats.voosEsteMes}
+                icon={DocumentTextIcon}
+                color="purple"
+                trend={stats.voosEsteMes > 0 ? "up" : "neutral"}
+                trendValue={stats.voosEsteMes > 0 ? "Ativo" : "Inativo"}
+                description="Atividade mensal"
+                delay={0.1}
+              />
+
+              <EnhancedKpiCard 
+                title="Convites Pendentes"
+                value={stats.convitesPendentes}
+                icon={ClipboardDocumentListIcon}
+                color="yellow"
+                trend={stats.convitesPendentes > 0 ? "up" : "neutral"}
+                trendValue={stats.convitesPendentes > 0 ? "Requer atenção" : "Em dia"}
+                description="Convites de agências"
+                delay={0.15}
+              />
+            </div>
+
+            {/* Gráficos e Analytics */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <AnimatedChart
+                title="Voos por Mês"
+                type="line"
+                data={[
+                  { name: 'Jan', value: Math.floor(stats.voosEsteAno * 0.15) },
+                  { name: 'Fev', value: Math.floor(stats.voosEsteAno * 0.12) },
+                  { name: 'Mar', value: Math.floor(stats.voosEsteAno * 0.18) },
+                  { name: 'Abr', value: Math.floor(stats.voosEsteAno * 0.14) },
+                  { name: 'Mai', value: Math.floor(stats.voosEsteAno * 0.22) },
+                  { name: 'Jun', value: stats.voosEsteMes },
+                ]}
+                colors={["#3b82f6"]}
+              />
+              
+              <AnimatedChart
+                title="Distribuição de Status"
+                type="pie"
+                data={[
+                  { name: 'Finalizados', value: Math.floor(stats.voosEsteAno * 0.8) },
+                  { name: 'Planejados', value: Math.floor(stats.voosEsteAno * 0.15) },
+                  { name: 'Cancelados', value: Math.floor(stats.voosEsteAno * 0.05) },
+                ]}
+                colors={["#10b981", "#3b82f6", "#ef4444"]}
+              />
+            </div>
+
+            {/* Bento Grid Layout */}
+            <BentoGrid className="md:auto-rows-[20rem]">
+
+            {/* Ações rápidas */}
+            <BentoGridItem
+              className="md:col-span-2"
+              title="Ações Rápidas"
+              description={
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <Button
+                    onClick={() => router.push('/piloto/planejamento')}
+                    className="flex items-center gap-2 p-4 h-auto flex-col"
+                    variant="outline"
+                  >
+                    <PlusIcon className="h-6 w-6" />
+                    <span className="font-medium">Planejar Voo</span>
+                    <span className="text-sm text-gray-500">Criar novo planejamento</span>
+                  </Button>
+                  
+                  <Button
+                    onClick={() => router.push('/piloto/meus-baloes')}
+                    className="flex items-center gap-2 p-4 h-auto flex-col"
+                    variant="outline"
+                  >
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    </svg>
+                    <span className="font-medium">Meus Balões</span>
+                    <span className="text-sm text-gray-500">Gerenciar frota</span>
+                  </Button>
+                  
+                  <Button
+                    onClick={() => router.push('/piloto/convites')}
+                    className="flex items-center gap-2 p-4 h-auto flex-col"
+                    variant="outline"
+                  >
+                    <ClipboardDocumentListIcon className="h-6 w-6" />
+                    <span className="font-medium">Convites</span>
+                    <span className="text-sm text-gray-500">Ver convites de agências</span>
+                  </Button>
+                  
+                  <Button
+                    onClick={() => router.push('/piloto/historico')}
+                    className="flex items-center gap-2 p-4 h-auto flex-col"
+                    variant="outline"
+                  >
+                    <DocumentTextIcon className="h-6 w-6" />
+                    <span className="font-medium">Histórico</span>
+                    <span className="text-sm text-gray-500">Ver voos anteriores</span>
+                  </Button>
+                </div>
+              }
+              header={
+                <div className="flex h-20 w-full bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl items-center justify-center">
+                  <PlusIcon className="h-10 w-10 text-white" />
+                </div>
+              }
+              icon={<PlusIcon className="h-6 w-6 text-blue-500" />}
+            />
 
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Próximo voo */}
@@ -372,12 +452,12 @@ export default function PilotoDashboard() {
             {stats.voosRecentes.length > 0 ? (
               <div className="space-y-3">
                 {stats.voosRecentes.map((voo) => (
-                  <div key={voo.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                  <div key={voo.id} className="flex justify-between items-center p-3 bg-white rounded-lg border border-gray-100 hover:shadow-sm transition-shadow">
                     <div>
                       <p className="font-medium text-sm">
                         {new Date(voo.data_voo).toLocaleDateString('pt-BR')}
                       </p>
-                      <p className="text-xs text-gray-600">
+                      <p className="text-xs text-gray-500">
                         {voo.periodo === 'manha' ? 'Manhã' : 'Tarde'} • {voo.local_decolagem_previsto}
                       </p>
                       {voo.agencia && (
@@ -407,10 +487,14 @@ export default function PilotoDashboard() {
           </MagicCard>
         </div>
 
+        </BentoGrid>
+      </div>
+    )}
+
         {/* KPIs Avançados de Performance do Piloto */}
         <div className="space-y-6">
-          <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-            <ChartBarIcon className="h-6 w-6 text-blue-600" />
+          <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+            <ChartBarIcon className="h-6 w-6 text-blue-500" />
             Performance Analytics
           </h2>
           

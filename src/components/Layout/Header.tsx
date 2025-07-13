@@ -1,7 +1,6 @@
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/router";
-import { InstallBadge } from "../magicui/install-prompt";
 
 export const Header = () => {
   const router = useRouter();
@@ -24,7 +23,6 @@ export const Header = () => {
               <Button variant="ghost" className="hover:text-primary" onClick={() => router.push("/quem-somos")}>Quem Somos</Button>
               <Button variant="outline" className="hover:text-primary" onClick={() => router.push("/admin/login")}>Área Admin</Button>
             </div>
-            <InstallBadge />
           </nav>
         </div>
       </div>
