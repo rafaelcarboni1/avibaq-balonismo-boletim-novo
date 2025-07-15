@@ -149,8 +149,35 @@ export default function AssociarSe() {
         return;
       }
 
-      // Aguardar um momento para garantir que o trigger seja executado
-      await delay(1000);
+      // Aguardar que o trigger handle_new_user() crie o registro na tabela users
+      console.log("Aguardando criação do perfil de usuário...");
+      let userCreated = false;
+      let attempts = 0;
+      const maxAttempts = 10;
+      
+      while (!userCreated && attempts < maxAttempts) {
+        await delay(500);
+        attempts++;
+        
+        const { data: userCheck } = await supabase
+          .from("users")
+          .select("id")
+          .eq("id", authData.user?.id)
+          .maybeSingle();
+          
+        if (userCheck) {
+          userCreated = true;
+          console.log("Perfil de usuário criado com sucesso!");
+        } else {
+          console.log(`Tentativa ${attempts}/${maxAttempts} - Aguardando trigger...`);
+        }
+      }
+      
+      if (!userCreated) {
+        setErro("Erro: O perfil de usuário não foi criado. Tente novamente.");
+        setIsLoading(false);
+        return;
+      }
       
       // 4. Inserir membro na tabela membros com o user_id
       const membroData = {
