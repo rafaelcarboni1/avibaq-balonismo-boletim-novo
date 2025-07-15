@@ -381,7 +381,7 @@ export default function PilotoDashboard() {
 
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Próximo voo */}
-          <MagicCard className="p-6">
+          <MagicCard className="p-6 bg-white">
             <h3 className="text-lg font-semibold mb-4">Próximo Voo</h3>
             {stats.proximoVoo ? (
               <div className="space-y-3">
@@ -433,7 +433,7 @@ export default function PilotoDashboard() {
                 </div>
               </div>
             ) : (
-              <div className="text-center py-8">
+              <div className="text-center py-8 bg-gray-50 rounded-lg">
                 <CalendarIcon className="h-12 w-12 text-gray-300 mx-auto mb-2" />
                 <p className="text-gray-500">Nenhum voo agendado</p>
                 <button
@@ -447,7 +447,7 @@ export default function PilotoDashboard() {
           </MagicCard>
 
           {/* Voos recentes */}
-          <MagicCard className="p-6">
+          <MagicCard className="p-6 bg-white">
             <h3 className="text-lg font-semibold mb-4">Voos Recentes</h3>
             {stats.voosRecentes.length > 0 ? (
               <div className="space-y-3">
@@ -479,7 +479,7 @@ export default function PilotoDashboard() {
                 </div>
               </div>
             ) : (
-              <div className="text-center py-8">
+              <div className="text-center py-8 bg-gray-50 rounded-lg">
                 <DocumentTextIcon className="h-12 w-12 text-gray-300 mx-auto mb-2" />
                 <p className="text-gray-500">Nenhum voo realizado ainda</p>
               </div>

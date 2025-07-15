@@ -241,17 +241,17 @@ export default function ConvitesRecebidos() {
 
         {/* Lista de Convites */}
         {vinculos.length === 0 ? (
-          <MagicCard className="p-8 text-center">
-            <div className="space-y-4">
-              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto">
-                <BuildingOfficeIcon className="h-8 w-8 text-blue-400" />
+          <div className="bg-white rounded-xl p-12 text-center">
+            <div className="flex flex-col items-center justify-center space-y-4">
+              <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center">
+                <BuildingOfficeIcon className="h-10 w-10 text-blue-400" />
               </div>
-              <h3 className="text-lg font-medium text-gray-800">Nenhum convite recebido</h3>
-              <p className="text-gray-500">
+              <h3 className="text-xl font-medium text-gray-800">Nenhum convite recebido</h3>
+              <p className="text-gray-600 max-w-md">
                 Quando agências enviarem convites para você, eles aparecerão aqui.
               </p>
             </div>
-          </MagicCard>
+          </div>
         ) : (
           <div className="space-y-6">
             {/* Convites Pendentes */}

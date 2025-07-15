@@ -407,59 +407,69 @@ export default function MeusBaloes() {
         </div>
 
         {/* Lista de Balões */}
-        {baloes.length === 0 ? (
-          <MagicCard className="p-8 text-center">
-            <div className="space-y-4">
-              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto">
-                <EyeIcon className="h-8 w-8 text-blue-400" />
+        {baloes.length === 0 && !loading && (
+          <div className="bg-white rounded-xl p-12 text-center">
+            <div className="flex flex-col items-center justify-center space-y-4">
+              <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center">
+                <EyeIcon className="h-10 w-10 text-blue-400" />
               </div>
-              <h3 className="text-lg font-medium text-gray-800">Nenhum balão cadastrado</h3>
-              <p className="text-gray-500">Cadastre seu primeiro balão para começar a registrar voos.</p>
+              <h3 className="text-xl font-medium text-gray-800">Nenhum balão cadastrado</h3>
+              <p className="text-gray-600 max-w-md">
+                Cadastre seu primeiro balão para começar a registrar voos.
+              </p>
               <button
-                onClick={() => setIsModalOpen(true)}
-                className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors"
+                onClick={() => {
+                  setEditingBalao(null);
+                  setFormData({
+                    prefixo: '',
+                    volume_m3: 2000,
+                    nome_batismo: '',
+                    observacoes: ''
+                  });
+                  setIsModalOpen(true);
+                }}
+                className="mt-4 bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2"
               >
+                <PlusIcon className="h-5 w-5" />
                 Cadastrar Primeiro Balão
               </button>
             </div>
-          </MagicCard>
-        ) : (
-          <div className="space-y-4">
-            {/* Balões Ativos */}
-            {baloesAtivos.length > 0 && (
-              <div>
-                <h3 className="text-lg font-medium mb-3 text-green-700">Balões Ativos</h3>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {baloesAtivos.map((balao) => (
-                    <BalaoCard
-                      key={balao.id}
-                      balao={balao}
-                      onEdit={handleEdit}
-                      onDelete={handleDelete}
-                      onToggleStatus={handleToggleStatus}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
+          </div>
+        )}
 
-            {/* Balões Inativos */}
-            {baloesInativos.length > 0 && (
-              <div>
-                <h3 className="text-lg font-medium mb-3 text-gray-500">Balões Inativos</h3>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                  {baloesInativos.map((balao) => (
-                    <BalaoCard
-                      key={balao.id}
-                      balao={balao}
-                      onEdit={handleEdit}
-                      onDelete={handleDelete}
-                      onToggleStatus={handleToggleStatus}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
+        {/* Balões Ativos */}
+        {baloesAtivos.length > 0 && (
+          <div>
+            <h3 className="text-lg font-medium mb-3 text-green-700">Balões Ativos</h3>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {baloesAtivos.map((balao) => (
+                <BalaoCard
+                  key={balao.id}
+                  balao={balao}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onToggleStatus={handleToggleStatus}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Balões Inativos */}
+        {baloesInativos.length > 0 && (
+          <div>
+            <h3 className="text-lg font-medium mb-3 text-gray-500">Balões Inativos</h3>
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+              {baloesInativos.map((balao) => (
+                <BalaoCard
+                  key={balao.id}
+                  balao={balao}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                  onToggleStatus={handleToggleStatus}
+                />
+              ))}
+            </div>
           </div>
         )}
 
