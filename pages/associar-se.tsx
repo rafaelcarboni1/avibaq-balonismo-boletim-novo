@@ -116,49 +116,20 @@ export default function AssociarSe() {
         return;
       }
 
-      // 1. Primeiro inserir o membro na tabela membros (sem vincular ao user_id ainda)
-      const membroData = {
-        nome_completo: form.nome_completo,
-        email: form.email,
-        telefone: form.telefone,
-        tipo,
-        cpf: form.cpf,
-        cnpj: form.cnpj,
-        nome_empresa: form.nome_empresa,
-        observacoes: form.observacoes,
-        endereco,
-        cidade,
-        estado,
-        // RBAC 103
-        validade_rbac103: rbac103 ? validadeRbac103 : null,
-        associacao_rbac103: rbac103 ? associacaoRbac103 : null,
-        // RBAC 61
-        codigo_anac: rbac61 ? codigoAnac : null,
-        validade_habilitacao: rbac61 ? validadeHabilitacao : null,
-        numero_licenca: rbac61 ? numeroLicenca : null,
-        validade_cma: rbac61 ? validadeCma : null,
-        created_at: new Date().toISOString(),
-        status: "pendente",
-        pagamento_inscricao: "aguardando",
-      };
-      
-      const { data: membro, error: membroError } = await supabase
+      // Verificar se já existe membro com o mesmo e-mail
+      const { data: existingMembro } = await supabase
         .from("membros")
-        .insert([membroData])
-        .select()
-        .single();
+        .select("id")
+        .eq("email", form.email)
+        .maybeSingle();
       
-      if (membroError) {
-        console.error("Erro ao criar membro:", membroError);
-        setErro("Erro ao cadastrar membro: " + membroError.message);
+      if (existingMembro) {
+        setErro("Já existe um membro cadastrado com este e-mail. Por favor, utilize outro e-mail ou entre em contato com a administração.");
         setIsLoading(false);
         return;
       }
 
-      // Adicionar um delay para evitar o erro de limite de tempo
-      await delay(1000);
-      
-      // 2. Registrar o usuário no Auth do Supabase
+      // 1. Primeiro criar o usuário no Auth do Supabase
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: form.email,
         password: senha,
@@ -178,13 +149,13 @@ export default function AssociarSe() {
       }
 
       // Adicionar um delay para evitar o erro de limite de tempo
-      await delay(1000);
-      
-      // 3. Gerar hash da senha para armazenar na tabela users
+      await delay(2000);
+
+      // 2. Gerar hash da senha para armazenar na tabela users
       const senha_hash = await bcrypt.hash(senha, 10);
       const role = tipo === "piloto" ? "piloto" : "agencia";
       
-      // 4. Inserir usuário na tabela users usando o ID gerado pelo Auth
+      // 3. Inserir usuário na tabela users usando o ID gerado pelo Auth
       const { data: user, error: userError } = await supabase
         .from("users")
         .insert([
@@ -208,15 +179,45 @@ export default function AssociarSe() {
         return;
       }
       
-      // 5. Atualizar o membro com o user_id
-      const { error: updateMembroError } = await supabase
-        .from("membros")
-        .update({ user_id: user.id })
-        .eq("id", membro.id);
+      // Adicionar um delay para evitar o erro de limite de tempo
+      await delay(2000);
       
-      if (updateMembroError) {
-        console.error("Erro ao atualizar membro com user_id:", updateMembroError);
-        // Não interrompe o fluxo, pois o cadastro principal já foi feito
+      // 4. Inserir membro na tabela membros com o user_id
+      const membroData = {
+        nome_completo: form.nome_completo,
+        email: form.email,
+        telefone: form.telefone,
+        tipo,
+        cpf: form.cpf,
+        cnpj: form.cnpj,
+        nome_empresa: form.nome_empresa,
+        observacoes: form.observacoes,
+        endereco,
+        cidade,
+        estado,
+        user_id: user.id,
+        // RBAC 103
+        validade_rbac103: rbac103 ? validadeRbac103 : null,
+        associacao_rbac103: rbac103 ? associacaoRbac103 : null,
+        // RBAC 61
+        codigo_anac: rbac61 ? codigoAnac : null,
+        validade_habilitacao: rbac61 ? validadeHabilitacao : null,
+        numero_licenca: rbac61 ? numeroLicenca : null,
+        validade_cma: rbac61 ? validadeCma : null,
+        created_at: new Date().toISOString(),
+        status: "pendente",
+        pagamento_inscricao: "aguardando",
+      };
+      
+      const { error: membroError } = await supabase
+        .from("membros")
+        .insert([membroData]);
+      
+      if (membroError) {
+        console.error("Erro ao criar membro:", membroError);
+        setErro("Erro ao cadastrar membro: " + membroError.message);
+        setIsLoading(false);
+        return;
       }
       
       // Sucesso! Deslogar o usuário recém-criado (ele só poderá acessar após aprovação)
