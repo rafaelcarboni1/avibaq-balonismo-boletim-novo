@@ -339,57 +339,57 @@ export default function GestãoPilotos() {
       <div className="space-y-6">
         {/* Estatísticas */}
         <BentoGrid className="grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <BentoGridItem className="bg-gradient-to-br from-blue-50 to-blue-100">
+          <BentoGridItem className="bg-white border border-blue-200 shadow-sm hover:shadow-md transition-shadow">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-blue-600">Total de Vínculos</p>
-                  <NumberTicker value={vinculos.length} className="text-2xl font-bold text-blue-900" />
+                  <NumberTicker value={vinculos.length} className="text-2xl font-semibold text-gray-800" />
                 </div>
-                <div className="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center">
-                  <UsersIcon className="h-6 w-6 text-blue-700" />
+                <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center">
+                  <UsersIcon className="h-6 w-6 text-blue-500" />
                 </div>
               </div>
             </div>
           </BentoGridItem>
 
-          <BentoGridItem className="bg-gradient-to-br from-green-50 to-green-100">
+          <BentoGridItem className="bg-white border border-green-200 shadow-sm hover:shadow-md transition-shadow">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-green-600">Pilotos Ativos</p>
-                  <NumberTicker value={vinculosAceitos.length} className="text-2xl font-bold text-green-900" />
+                  <NumberTicker value={vinculosAceitos.length} className="text-2xl font-semibold text-gray-800" />
                 </div>
-                <div className="w-12 h-12 bg-green-200 rounded-full flex items-center justify-center">
-                  <CheckIcon className="h-6 w-6 text-green-700" />
+                <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center">
+                  <CheckIcon className="h-6 w-6 text-green-500" />
                 </div>
               </div>
             </div>
           </BentoGridItem>
 
-          <BentoGridItem className="bg-gradient-to-br from-yellow-50 to-yellow-100">
+          <BentoGridItem className="bg-white border border-yellow-200 shadow-sm hover:shadow-md transition-shadow">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-yellow-600">Pendentes</p>
-                  <NumberTicker value={vinculosPendentes.length} className="text-2xl font-bold text-yellow-900" />
+                  <NumberTicker value={vinculosPendentes.length} className="text-2xl font-semibold text-gray-800" />
                 </div>
-                <div className="w-12 h-12 bg-yellow-200 rounded-full flex items-center justify-center">
-                  <ClockIcon className="h-6 w-6 text-yellow-700" />
+                <div className="w-12 h-12 bg-yellow-50 rounded-full flex items-center justify-center">
+                  <ClockIcon className="h-6 w-6 text-yellow-500" />
                 </div>
               </div>
             </div>
           </BentoGridItem>
 
-          <BentoGridItem className="bg-gradient-to-br from-red-50 to-red-100">
+          <BentoGridItem className="bg-white border border-red-200 shadow-sm hover:shadow-md transition-shadow">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-red-600">Recusados</p>
-                  <NumberTicker value={vinculosRecusados.length} className="text-2xl font-bold text-red-900" />
+                  <NumberTicker value={vinculosRecusados.length} className="text-2xl font-semibold text-gray-800" />
                 </div>
-                <div className="w-12 h-12 bg-red-200 rounded-full flex items-center justify-center">
-                  <XMarkIcon className="h-6 w-6 text-red-700" />
+                <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center">
+                  <XMarkIcon className="h-6 w-6 text-red-500" />
                 </div>
               </div>
             </div>
@@ -412,10 +412,10 @@ export default function GestãoPilotos() {
         {vinculos.length === 0 ? (
           <MagicCard className="p-8 text-center">
             <div className="space-y-4">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
-                <UsersIcon className="h-8 w-8 text-gray-400" />
+              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto">
+                <UsersIcon className="h-8 w-8 text-blue-400" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900">Nenhum piloto vinculado</h3>
+              <h3 className="text-lg font-medium text-gray-800">Nenhum piloto vinculado</h3>
               <p className="text-gray-500">Convide pilotos para formar sua equipe e expandir suas operações.</p>
               <button
                 onClick={() => setIsModalOpen(true)}
@@ -488,7 +488,7 @@ export default function GestãoPilotos() {
 
         {/* Modal de Convite */}
         {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl max-w-md w-full p-6 space-y-4">
               <h3 className="text-xl font-semibold flex items-center gap-2">
                 <PaperAirplaneIcon className="h-6 w-6 text-primary" />
@@ -635,7 +635,7 @@ function ConvitePendenteCard({
 
         <button
           onClick={() => onCancelar(vinculo)}
-          className="w-full bg-gray-50 text-gray-700 px-3 py-2 rounded-lg text-sm hover:bg-gray-100 transition-colors"
+          className="w-full bg-orange-50 text-orange-700 px-3 py-2 rounded-lg text-sm hover:bg-orange-100 transition-colors"
         >
           Cancelar Convite
         </button>
@@ -653,7 +653,7 @@ function ConviteRecusadoCard({
   onRemover: (vinculo: Vinculo) => void;
 }) {
   return (
-    <MagicCard className="p-4 border-red-200 opacity-75">
+    <MagicCard className="p-4 border-red-200 opacity-80">
       <div className="space-y-3">
         <div className="flex items-start justify-between">
           <div>
@@ -671,7 +671,7 @@ function ConviteRecusadoCard({
 
         <button
           onClick={() => onRemover(vinculo)}
-          className="w-full bg-gray-50 text-gray-700 px-3 py-2 rounded-lg text-sm hover:bg-gray-100 transition-colors"
+          className="w-full bg-red-50 text-red-700 px-3 py-2 rounded-lg text-sm hover:bg-red-100 transition-colors"
         >
           Remover Registro
         </button>

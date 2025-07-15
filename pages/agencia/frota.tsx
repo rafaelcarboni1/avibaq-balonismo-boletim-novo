@@ -382,69 +382,69 @@ export default function Frota() {
       <div className="space-y-6">
         {/* Estatísticas */}
         <BentoGrid className="grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <BentoGridItem className="bg-gradient-to-br from-blue-50 to-blue-100">
+          <BentoGridItem className="bg-white border border-blue-200 shadow-sm hover:shadow-md transition-shadow">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-blue-600">Total da Frota</p>
                   <div className="flex items-center gap-2">
-                    <NumberTicker value={baloes.length} className="text-2xl font-bold text-blue-900" />
+                    <NumberTicker value={baloes.length} className="text-2xl font-semibold text-gray-800" />
                     <span className="text-sm text-blue-600">balões</span>
                   </div>
                 </div>
-                <div className="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center">
-                  <BuildingOfficeIcon className="h-6 w-6 text-blue-700" />
+                <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center">
+                  <BuildingOfficeIcon className="h-6 w-6 text-blue-500" />
                 </div>
               </div>
             </div>
           </BentoGridItem>
 
-          <BentoGridItem className="bg-gradient-to-br from-green-50 to-green-100">
+          <BentoGridItem className="bg-white border border-green-200 shadow-sm hover:shadow-md transition-shadow">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-green-600">Balões Ativos</p>
                   <div className="flex items-center gap-2">
-                    <NumberTicker value={baloesAtivos.length} className="text-2xl font-bold text-green-900" />
+                    <NumberTicker value={baloesAtivos.length} className="text-2xl font-semibold text-gray-800" />
                     <span className="text-sm text-green-600">operacionais</span>
                   </div>
                 </div>
-                <div className="w-12 h-12 bg-green-200 rounded-full flex items-center justify-center">
-                  <EyeIcon className="h-6 w-6 text-green-700" />
+                <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center">
+                  <EyeIcon className="h-6 w-6 text-green-500" />
                 </div>
               </div>
             </div>
           </BentoGridItem>
 
-          <BentoGridItem className="bg-gradient-to-br from-purple-50 to-purple-100">
+          <BentoGridItem className="bg-white border border-purple-200 shadow-sm hover:shadow-md transition-shadow">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-purple-600">Volume Total</p>
                   <div className="flex items-center gap-2">
-                    <NumberTicker value={volumeTotal} className="text-2xl font-bold text-purple-900" />
+                    <NumberTicker value={volumeTotal} className="text-2xl font-semibold text-gray-800" />
                     <span className="text-sm text-purple-600">m³</span>
                   </div>
                 </div>
-                <div className="w-12 h-12 bg-purple-200 rounded-full flex items-center justify-center">
-                  <div className="w-6 h-6 rounded-full bg-purple-700"></div>
+                <div className="w-12 h-12 bg-purple-50 rounded-full flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-full bg-purple-500"></div>
                 </div>
               </div>
             </div>
           </BentoGridItem>
 
-          <BentoGridItem className="bg-gradient-to-br from-orange-50 to-orange-100">
+          <BentoGridItem className="bg-white border border-orange-200 shadow-sm hover:shadow-md transition-shadow">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-orange-600">Capacidade Est.</p>
                   <div className="flex items-center gap-2">
-                    <NumberTicker value={capacidadeMaxima} className="text-2xl font-bold text-orange-900" />
+                    <NumberTicker value={capacidadeMaxima} className="text-2xl font-semibold text-gray-800" />
                     <span className="text-sm text-orange-600">passageiros</span>
                   </div>
                 </div>
-                <div className="w-12 h-12 bg-orange-200 rounded-full flex items-center justify-center">
-                  <UsersIcon className="h-6 w-6 text-orange-700" />
+                <div className="w-12 h-12 bg-orange-50 rounded-full flex items-center justify-center">
+                  <UsersIcon className="h-6 w-6 text-orange-500" />
                 </div>
               </div>
             </div>
@@ -492,10 +492,10 @@ export default function Frota() {
         {baloes.length === 0 ? (
           <MagicCard className="p-8 text-center">
             <div className="space-y-4">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
-                <BuildingOfficeIcon className="h-8 w-8 text-gray-400" />
+              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto">
+                <BuildingOfficeIcon className="h-8 w-8 text-blue-400" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900">Nenhum balão na frota</h3>
+              <h3 className="text-lg font-medium text-gray-800">Nenhum balão na frota</h3>
               <p className="text-gray-500">Adicione balões à sua frota para começar a operar voos comerciais.</p>
               <button
                 onClick={() => setIsModalOpen(true)}
@@ -549,7 +549,7 @@ export default function Frota() {
 
         {/* Modal de Cadastro/Edição */}
         {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl max-w-md w-full p-6 space-y-4">
               <h3 className="text-xl font-semibold">
                 {editingBalao ? 'Editar Balão da Frota' : 'Adicionar Balão à Frota'}
@@ -655,7 +655,7 @@ function FrotaBalaoCard({
   const capacidadeEstimada = Math.floor(balao.volume_m3 / 300); // Estimativa baseada no volume
 
   return (
-    <MagicCard className={`p-4 ${balao.ativo ? 'border-green-200' : 'border-gray-200 opacity-70'}`}>
+    <MagicCard className={`p-4 ${balao.ativo ? 'border-green-200' : 'border-gray-300 opacity-80'}`}>
       <div className="space-y-3">
         <div className="flex items-start justify-between">
           <div>
@@ -664,63 +664,4 @@ function FrotaBalaoCard({
               <p className="text-sm text-gray-600">{balao.nome_batismo}</p>
             )}
           </div>
-          <div className={`px-2 py-1 rounded-full text-xs font-medium ${
-            balao.ativo 
-              ? 'bg-green-100 text-green-800' 
-              : 'bg-gray-100 text-gray-600'
-          }`}>
-            {balao.ativo ? 'Operacional' : 'Inativo'}
-          </div>
-        </div>
-
-        <div className="space-y-1 text-sm">
-          <div className="flex justify-between">
-            <span className="font-medium">Volume:</span>
-            <span>{balao.volume_m3.toLocaleString()} m³</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-medium">Capacidade est.:</span>
-            <span>{capacidadeEstimada} passageiros</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="font-medium">Total de voos:</span>
-            <span className="font-semibold text-blue-600">{vooCount}</span>
-          </div>
-          {balao.observacoes && (
-            <p className="text-sm text-gray-600 mt-2">
-              <span className="font-medium">Obs:</span> {balao.observacoes}
-            </p>
-          )}
-        </div>
-
-        <div className="flex gap-2 pt-2">
-          <button
-            onClick={() => onEdit(balao)}
-            className="flex-1 bg-blue-50 text-blue-700 px-3 py-2 rounded-lg text-sm hover:bg-blue-100 transition-colors flex items-center justify-center gap-2"
-          >
-            <PencilIcon className="h-4 w-4" />
-            Editar
-          </button>
-          
-          <button
-            onClick={() => onToggleStatus(balao)}
-            className={`flex-1 px-3 py-2 rounded-lg text-sm transition-colors ${
-              balao.ativo
-                ? 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100'
-                : 'bg-green-50 text-green-700 hover:bg-green-100'
-            }`}
-          >
-            {balao.ativo ? 'Desativar' : 'Ativar'}
-          </button>
-          
-          <button
-            onClick={() => onDelete(balao)}
-            className="bg-red-50 text-red-700 px-3 py-2 rounded-lg text-sm hover:bg-red-100 transition-colors"
-          >
-            <TrashIcon className="h-4 w-4" />
-          </button>
-        </div>
-      </div>
-    </MagicCard>
-  );
-}
+          <div className={`

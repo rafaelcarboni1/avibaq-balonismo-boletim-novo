@@ -334,60 +334,60 @@ export default function MeusBaloes() {
       <div className="space-y-6">
         {/* Estatísticas */}
         <BentoGrid className="grid-cols-1 md:grid-cols-3 gap-4">
-          <BentoGridItem className="bg-slate-50 border border-blue-100">
+          <BentoGridItem className="bg-white border border-blue-200 shadow-sm hover:shadow-md transition-shadow">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-blue-700">Total de Balões</p>
+                  <p className="text-sm font-medium text-blue-600">Total de Balões</p>
                   <div className="flex items-center gap-2">
-                    <NumberTicker value={baloes.length} className="text-2xl font-semibold text-gray-900" />
+                    <NumberTicker value={baloes.length} className="text-2xl font-semibold text-gray-800" />
                     <span className="text-sm text-blue-600">
                       ({baloesAtivos.length} ativos)
                     </span>
                   </div>
                 </div>
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                  <EyeIcon className="h-6 w-6 text-blue-600" />
+                <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center">
+                  <EyeIcon className="h-6 w-6 text-blue-500" />
                 </div>
               </div>
             </div>
           </BentoGridItem>
 
-          <BentoGridItem className="bg-slate-50 border border-green-100">
+          <BentoGridItem className="bg-white border border-green-200 shadow-sm hover:shadow-md transition-shadow">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-green-700">Volume Total</p>
+                  <p className="text-sm font-medium text-green-600">Volume Total</p>
                   <div className="flex items-center gap-2">
                     <NumberTicker 
                       value={volumeTotal} 
-                      className="text-2xl font-semibold text-gray-900" 
+                      className="text-2xl font-semibold text-gray-800" 
                     />
                     <span className="text-sm text-green-600">m³</span>
                   </div>
                 </div>
-                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                  <div className="w-6 h-6 rounded-full bg-green-600"></div>
+                <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center">
+                  <div className="w-6 h-6 rounded-full bg-green-500"></div>
                 </div>
               </div>
             </div>
           </BentoGridItem>
 
-          <BentoGridItem className="bg-slate-50 border border-purple-100">
+          <BentoGridItem className="bg-white border border-purple-200 shadow-sm hover:shadow-md transition-shadow">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-purple-700">Volume Médio</p>
+                  <p className="text-sm font-medium text-purple-600">Volume Médio</p>
                   <div className="flex items-center gap-2">
                     <NumberTicker 
                       value={baloesAtivos.length > 0 ? Math.round(volumeTotal / baloesAtivos.length) : 0} 
-                      className="text-2xl font-semibold text-gray-900" 
+                      className="text-2xl font-semibold text-gray-800" 
                     />
                     <span className="text-sm text-purple-600">m³</span>
                   </div>
                 </div>
-                <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-                  <div className="w-6 h-6 bg-purple-600 transform rotate-45"></div>
+                <div className="w-12 h-12 bg-purple-50 rounded-full flex items-center justify-center">
+                  <div className="w-6 h-6 bg-purple-500 transform rotate-45"></div>
                 </div>
               </div>
             </div>
@@ -410,10 +410,10 @@ export default function MeusBaloes() {
         {baloes.length === 0 ? (
           <MagicCard className="p-8 text-center">
             <div className="space-y-4">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
-                <EyeIcon className="h-8 w-8 text-gray-400" />
+              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto">
+                <EyeIcon className="h-8 w-8 text-blue-400" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900">Nenhum balão cadastrado</h3>
+              <h3 className="text-lg font-medium text-gray-800">Nenhum balão cadastrado</h3>
               <p className="text-gray-500">Cadastre seu primeiro balão para começar a registrar voos.</p>
               <button
                 onClick={() => setIsModalOpen(true)}
@@ -465,10 +465,10 @@ export default function MeusBaloes() {
 
         {/* Modal de Cadastro/Edição */}
         {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl max-w-md w-full p-6 space-y-4">
               <h3 className="text-xl font-semibold">
-                {editingBalao ? 'Editar Balão' : 'Cadastrar Novo Balão'}
+                {editingBalao ? 'Editar Balão' : 'Adicionar Balão'}
               </h3>
               
               <form onSubmit={handleSubmit} className="space-y-4">
@@ -567,7 +567,7 @@ function BalaoCard({
   onToggleStatus: (balao: Balao) => void;
 }) {
   return (
-    <MagicCard className={`p-4 ${balao.ativo ? 'border-green-200' : 'border-gray-200 opacity-70'}`}>
+    <MagicCard className={`p-4 ${balao.ativo ? 'border-green-200' : 'border-gray-300 opacity-80'}`}>
       <div className="space-y-3">
         <div className="flex items-start justify-between">
           <div>
@@ -579,7 +579,7 @@ function BalaoCard({
           <div className={`px-2 py-1 rounded-full text-xs font-medium ${
             balao.ativo 
               ? 'bg-green-100 text-green-800' 
-              : 'bg-gray-100 text-gray-600'
+              : 'bg-gray-50 text-gray-500'
           }`}>
             {balao.ativo ? 'Ativo' : 'Inativo'}
           </div>

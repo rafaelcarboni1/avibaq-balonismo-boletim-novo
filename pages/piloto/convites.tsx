@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { CheckIcon, XMarkIcon, ClockIcon, BuildingOfficeIcon, EyeIcon } from '@heroicons/react/24/outline';
+import { CheckIcon, XMarkIcon, ClockIcon, BuildingOfficeIcon, EyeIcon, HomeIcon } from '@heroicons/react/24/outline';
 import { EnhancedDashboardLayout } from '../../src/components/magicui/enhanced-dashboard-layout';
 import { MagicCard } from '../../src/components/magicui/magic-card';
 import { NumberTicker } from '../../src/components/magicui/number-ticker';
@@ -175,61 +175,64 @@ export default function ConvitesRecebidos() {
   }
 
   return (
-    <EnhancedDashboardLayout title="Convites de Agências">
+    <EnhancedDashboardLayout title="Convites de Agências" breadcrumbs={[
+      { label: 'Dashboard', href: '/piloto/dashboard', icon: HomeIcon },
+      { label: 'Convites de Agências' }
+    ]}>
       <div className="space-y-6">
         {/* Estatísticas */}
         <BentoGrid className="grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <BentoGridItem className="bg-gradient-to-br from-blue-50 to-blue-100">
+          <BentoGridItem className="bg-white border border-blue-200 shadow-sm hover:shadow-md transition-shadow">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-blue-600">Total de Convites</p>
-                  <NumberTicker value={vinculos.length} className="text-2xl font-bold text-blue-900" />
+                  <NumberTicker value={vinculos.length} className="text-2xl font-semibold text-gray-800" />
                 </div>
-                <div className="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center">
-                  <EyeIcon className="h-6 w-6 text-blue-700" />
+                <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center">
+                  <EyeIcon className="h-6 w-6 text-blue-500" />
                 </div>
               </div>
             </div>
           </BentoGridItem>
 
-          <BentoGridItem className="bg-gradient-to-br from-yellow-50 to-yellow-100">
+          <BentoGridItem className="bg-white border border-yellow-200 shadow-sm hover:shadow-md transition-shadow">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-yellow-600">Pendentes</p>
-                  <NumberTicker value={vinculosPendentes.length} className="text-2xl font-bold text-yellow-900" />
+                  <NumberTicker value={vinculosPendentes.length} className="text-2xl font-semibold text-gray-800" />
                 </div>
-                <div className="w-12 h-12 bg-yellow-200 rounded-full flex items-center justify-center">
-                  <ClockIcon className="h-6 w-6 text-yellow-700" />
+                <div className="w-12 h-12 bg-yellow-50 rounded-full flex items-center justify-center">
+                  <ClockIcon className="h-6 w-6 text-yellow-500" />
                 </div>
               </div>
             </div>
           </BentoGridItem>
 
-          <BentoGridItem className="bg-gradient-to-br from-green-50 to-green-100">
+          <BentoGridItem className="bg-white border border-green-200 shadow-sm hover:shadow-md transition-shadow">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-green-600">Aceitos</p>
-                  <NumberTicker value={vinculosAceitos.length} className="text-2xl font-bold text-green-900" />
+                  <NumberTicker value={vinculosAceitos.length} className="text-2xl font-semibold text-gray-800" />
                 </div>
-                <div className="w-12 h-12 bg-green-200 rounded-full flex items-center justify-center">
-                  <CheckIcon className="h-6 w-6 text-green-700" />
+                <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center">
+                  <CheckIcon className="h-6 w-6 text-green-500" />
                 </div>
               </div>
             </div>
           </BentoGridItem>
 
-          <BentoGridItem className="bg-gradient-to-br from-red-50 to-red-100">
+          <BentoGridItem className="bg-white border border-red-200 shadow-sm hover:shadow-md transition-shadow">
             <div className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-red-600">Recusados</p>
-                  <NumberTicker value={vinculosRecusados.length} className="text-2xl font-bold text-red-900" />
+                  <NumberTicker value={vinculosRecusados.length} className="text-2xl font-semibold text-gray-800" />
                 </div>
-                <div className="w-12 h-12 bg-red-200 rounded-full flex items-center justify-center">
-                  <XMarkIcon className="h-6 w-6 text-red-700" />
+                <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center">
+                  <XMarkIcon className="h-6 w-6 text-red-500" />
                 </div>
               </div>
             </div>
@@ -240,10 +243,10 @@ export default function ConvitesRecebidos() {
         {vinculos.length === 0 ? (
           <MagicCard className="p-8 text-center">
             <div className="space-y-4">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto">
-                <BuildingOfficeIcon className="h-8 w-8 text-gray-400" />
+              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto">
+                <BuildingOfficeIcon className="h-8 w-8 text-blue-400" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900">Nenhum convite recebido</h3>
+              <h3 className="text-lg font-medium text-gray-800">Nenhum convite recebido</h3>
               <p className="text-gray-500">
                 Quando agências enviarem convites para você, eles aparecerão aqui.
               </p>
@@ -427,7 +430,7 @@ function ConviteRecusadoCard({
   vinculo: Vinculo;
 }) {
   return (
-    <MagicCard className="p-4 border-red-200 opacity-75">
+    <MagicCard className="p-4 border-red-200 opacity-80">
       <div className="space-y-3">
         <div className="flex items-start justify-between">
           <div>
