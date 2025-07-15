@@ -149,35 +149,33 @@ export default function AssociarSe() {
         return;
       }
 
-      // Aguardar que o trigger handle_new_user() crie o registro na tabela users
-      console.log("Aguardando criação do perfil de usuário...");
-      let userCreated = false;
-      let attempts = 0;
-      const maxAttempts = 10;
+      // Criar perfil na tabela users usando API route (mais confiável que trigger)
+      console.log("Criando perfil de usuário...");
       
-      while (!userCreated && attempts < maxAttempts) {
-        await delay(500);
-        attempts++;
-        
-        const { data: userCheck } = await supabase
-          .from("users")
-          .select("id")
-          .eq("id", authData.user?.id)
-          .maybeSingle();
-          
-        if (userCheck) {
-          userCreated = true;
-          console.log("Perfil de usuário criado com sucesso!");
-        } else {
-          console.log(`Tentativa ${attempts}/${maxAttempts} - Aguardando trigger...`);
-        }
-      }
+      const createProfileResponse = await fetch('/api/create-user-profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: authData.user?.id,
+          nome: form.nome_completo,
+          email: form.email,
+          role: tipo === "piloto" ? "piloto" : "agencia",
+          username: username
+        })
+      });
       
-      if (!userCreated) {
-        setErro("Erro: O perfil de usuário não foi criado. Tente novamente.");
+      const profileResult = await createProfileResponse.json();
+      
+      if (!createProfileResponse.ok) {
+        console.error("Erro ao criar perfil:", profileResult);
+        setErro("Erro ao criar perfil de usuário: " + profileResult.error);
         setIsLoading(false);
         return;
       }
+      
+      console.log("Perfil de usuário criado com sucesso!");
       
       // 4. Inserir membro na tabela membros com o user_id
       const membroData = {
