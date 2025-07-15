@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { PlusIcon, CalendarIcon, ClockIcon, MapPinIcon, UsersIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, CalendarIcon, ClockIcon, MapPinIcon, UsersIcon, CheckIcon, HomeIcon } from '@heroicons/react/24/outline';
 import { EnhancedDashboardLayout } from '../../src/components/magicui/enhanced-dashboard-layout';
 import { MagicCard } from '../../src/components/magicui/magic-card';
 import { BentoGrid, BentoGridItem } from '../../src/components/magicui/bento-grid';
@@ -844,7 +844,7 @@ export default function PlanejamentoVoo() {
     <EnhancedDashboardLayout
       title="Planejamento de Voo"
       breadcrumbs={[
-        { label: 'Dashboard', href: '/piloto/dashboard' },
+        { label: 'Dashboard', href: '/piloto/dashboard', icon: HomeIcon },
         { label: 'Planejamento de Voo' }
       ]}
     >
