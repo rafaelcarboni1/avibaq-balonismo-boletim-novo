@@ -141,7 +141,7 @@ export function AdvancedLineChart({
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="absolute bg-gray-900 text-white text-xs rounded px-2 py-1 pointer-events-none z-10"
+            className="absolute bg-white text-gray-900 border border-gray-200 shadow-lg text-xs rounded px-2 py-1 pointer-events-none z-10"
             style={{
               left: `${points[hoveredPoint].x}%`,
               top: `${points[hoveredPoint].y}%`,
@@ -403,7 +403,7 @@ export function ScatterChart({
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="absolute bg-gray-900 text-white text-xs rounded px-2 py-1 pointer-events-none z-10"
+            className="absolute bg-white text-gray-900 border border-gray-200 shadow-lg text-xs rounded px-2 py-1 pointer-events-none z-10"
             style={{
               left: `${((data[hoveredPoint].x - minX) / (maxX - minX)) * 100}%`,
               top: `${100 - ((data[hoveredPoint].y - minY) / (maxY - minY)) * 100}%`,

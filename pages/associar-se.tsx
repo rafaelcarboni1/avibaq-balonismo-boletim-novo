@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "../src/components/Layout/Header";
 import { supabase } from "../src/integrations/supabase/client";
-import bcrypt from "bcryptjs";
 
 const tipos = [
   { value: "piloto", label: "Piloto" },
@@ -130,13 +129,15 @@ export default function AssociarSe() {
       }
 
       // 1. Primeiro criar o usuário no Auth do Supabase
+      // O trigger handle_new_user() criará automaticamente o registro na tabela users
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: form.email,
         password: senha,
         options: {
           data: {
             nome: form.nome_completo,
-            role: tipo
+            role: tipo === "piloto" ? "piloto" : "agencia",
+            username: username
           }
         }
       });
@@ -148,39 +149,8 @@ export default function AssociarSe() {
         return;
       }
 
-      // Adicionar um delay para evitar o erro de limite de tempo
-      await delay(2000);
-
-      // 2. Gerar hash da senha para armazenar na tabela users
-      const senha_hash = await bcrypt.hash(senha, 10);
-      const role = tipo === "piloto" ? "piloto" : "agencia";
-      
-      // 3. Inserir usuário na tabela users usando o ID gerado pelo Auth
-      const { data: user, error: userError } = await supabase
-        .from("users")
-        .insert([
-          {
-            id: authData.user?.id,
-            nome: form.nome_completo,
-            email: form.email,
-            username,
-            senha_hash,
-            role,
-            created_at: new Date().toISOString(),
-          },
-        ])
-        .select()
-        .single();
-      
-      if (userError) {
-        console.error("Erro ao criar usuário na tabela users:", userError);
-        setErro("Erro ao criar usuário: " + userError.message);
-        setIsLoading(false);
-        return;
-      }
-      
-      // Adicionar um delay para evitar o erro de limite de tempo
-      await delay(2000);
+      // Aguardar um momento para garantir que o trigger seja executado
+      await delay(1000);
       
       // 4. Inserir membro na tabela membros com o user_id
       const membroData = {
@@ -195,7 +165,7 @@ export default function AssociarSe() {
         endereco,
         cidade,
         estado,
-        user_id: user.id,
+        user_id: authData.user?.id,
         // RBAC 103
         validade_rbac103: rbac103 ? validadeRbac103 : null,
         associacao_rbac103: rbac103 ? associacaoRbac103 : null,

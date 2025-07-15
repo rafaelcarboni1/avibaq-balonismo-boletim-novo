@@ -327,7 +327,7 @@ export default function EnhancedSidebar({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMobileOpen(false)}
-              className="lg:hidden fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
+              className="lg:hidden fixed inset-0 bg-gray-900/30 backdrop-blur-sm z-40"
             />
             
             {/* Sidebar */}

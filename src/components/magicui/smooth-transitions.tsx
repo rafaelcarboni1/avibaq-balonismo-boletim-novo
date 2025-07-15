@@ -47,7 +47,7 @@ export function ModalTransition({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+            className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40"
             onClick={onClose}
           />
           

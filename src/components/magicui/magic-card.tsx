@@ -16,8 +16,8 @@ export const MagicCard: React.FC<MagicCardProps> = ({
   children,
   className,
   gradientSize = 200,
-  gradientColor = "#262626",
-  gradientOpacity = 0.8,
+  gradientColor = "rgba(59, 130, 246, 0.15)",
+  gradientOpacity = 0.6,
 }) => {
   const divRef = useRef<HTMLDivElement>(null);
   const [isFocused, setIsFocused] = useState(false);
@@ -60,7 +60,7 @@ export const MagicCard: React.FC<MagicCardProps> = ({
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       className={cn(
-        "relative overflow-hidden rounded-xl border bg-gradient-to-r from-black to-gray-950 p-6",
+        "relative overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-md transition-shadow p-6",
         className,
       )}
       initial={{ opacity: 0, y: 20 }}
