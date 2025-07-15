@@ -410,21 +410,24 @@ export default function GestãoPilotos() {
 
         {/* Lista de Vínculos */}
         {vinculos.length === 0 ? (
-          <MagicCard className="p-8 text-center">
-            <div className="space-y-4">
-              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto">
-                <UsersIcon className="h-8 w-8 text-blue-400" />
+          <div className="bg-white rounded-xl p-12 text-center">
+            <div className="flex flex-col items-center justify-center space-y-4">
+              <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center">
+                <UsersIcon className="h-10 w-10 text-blue-400" />
               </div>
-              <h3 className="text-lg font-medium text-gray-800">Nenhum piloto vinculado</h3>
-              <p className="text-gray-500">Convide pilotos para formar sua equipe e expandir suas operações.</p>
+              <h3 className="text-xl font-medium text-gray-800">Nenhum piloto vinculado</h3>
+              <p className="text-gray-600 max-w-md">
+                Convide pilotos para formar sua equipe e expandir suas operações.
+              </p>
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors"
+                className="mt-4 bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2"
               >
+                <UserPlusIcon className="h-5 w-5" />
                 Convidar Primeiro Piloto
               </button>
             </div>
-          </MagicCard>
+          </div>
         ) : (
           <div className="space-y-6">
             {/* Pilotos Ativos */}

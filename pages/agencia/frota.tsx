@@ -490,21 +490,24 @@ export default function Frota() {
 
         {/* Lista de Balões */}
         {baloes.length === 0 ? (
-          <MagicCard className="p-8 text-center">
-            <div className="space-y-4">
-              <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto">
-                <BuildingOfficeIcon className="h-8 w-8 text-blue-400" />
+          <div className="bg-white rounded-xl p-12 text-center">
+            <div className="flex flex-col items-center justify-center space-y-4">
+              <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center">
+                <BuildingOfficeIcon className="h-10 w-10 text-blue-400" />
               </div>
-              <h3 className="text-lg font-medium text-gray-800">Nenhum balão na frota</h3>
-              <p className="text-gray-500">Adicione balões à sua frota para começar a operar voos comerciais.</p>
+              <h3 className="text-xl font-medium text-gray-800">Nenhum balão na frota</h3>
+              <p className="text-gray-600 max-w-md">
+                Adicione balões à sua frota para começar a operar voos comerciais.
+              </p>
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors"
+                className="mt-4 bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2"
               >
+                <PlusIcon className="h-5 w-5" />
                 Adicionar Primeiro Balão
               </button>
             </div>
-          </MagicCard>
+          </div>
         ) : (
           <div className="space-y-4">
             {/* Balões Ativos */}
