@@ -44,8 +44,10 @@ export default function AssociarSe() {
   const [senha, setSenha] = useState("");
   const [senhaConfirm, setSenhaConfirm] = useState("");
 
-  function handleChange(e) {
-    const { name, value, files } = e.target;
+  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
+    const { name, value } = e.target;
+    const files = 'files' in e.target ? e.target.files : null;
+    
     if (name === "comprovante") {
       setForm((f) => ({ ...f, comprovante: files?.[0] || null }));
     } else {
@@ -53,7 +55,7 @@ export default function AssociarSe() {
     }
   }
 
-  function handleTipoChange(e) {
+  function handleTipoChange(e: React.ChangeEvent<HTMLInputElement>) {
     setTipo(e.target.value);
     setForm((f) => ({ ...f, tipo: e.target.value }));
   }
@@ -71,15 +73,18 @@ export default function AssociarSe() {
     return "";
   }
 
-  function handleNext(e) {
+  function handleNext(e: React.FormEvent) {
     e.preventDefault();
     const err = validarCamposEtapa1();
     if (err) return setErro(err);
     setErro("");
     setStep(2);
   }
+  
+  // Função para criar um delay (para evitar o erro de limite de tempo)
+  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErro("");
     setIsLoading(true);
@@ -87,6 +92,12 @@ export default function AssociarSe() {
     // Validar senha
     if (senha !== senhaConfirm) {
       setErro("As senhas não coincidem.");
+      setIsLoading(false);
+      return;
+    }
+
+    if (senha.length < 6) {
+      setErro("A senha deve ter pelo menos 6 caracteres.");
       setIsLoading(false);
       return;
     }
@@ -105,7 +116,49 @@ export default function AssociarSe() {
         return;
       }
 
-      // 1. Registrar o usuário no Auth do Supabase primeiro
+      // 1. Primeiro inserir o membro na tabela membros (sem vincular ao user_id ainda)
+      const membroData = {
+        nome_completo: form.nome_completo,
+        email: form.email,
+        telefone: form.telefone,
+        tipo,
+        cpf: form.cpf,
+        cnpj: form.cnpj,
+        nome_empresa: form.nome_empresa,
+        observacoes: form.observacoes,
+        endereco,
+        cidade,
+        estado,
+        // RBAC 103
+        validade_rbac103: rbac103 ? validadeRbac103 : null,
+        associacao_rbac103: rbac103 ? associacaoRbac103 : null,
+        // RBAC 61
+        codigo_anac: rbac61 ? codigoAnac : null,
+        validade_habilitacao: rbac61 ? validadeHabilitacao : null,
+        numero_licenca: rbac61 ? numeroLicenca : null,
+        validade_cma: rbac61 ? validadeCma : null,
+        created_at: new Date().toISOString(),
+        status: "pendente",
+        pagamento_inscricao: "aguardando",
+      };
+      
+      const { data: membro, error: membroError } = await supabase
+        .from("membros")
+        .insert([membroData])
+        .select()
+        .single();
+      
+      if (membroError) {
+        console.error("Erro ao criar membro:", membroError);
+        setErro("Erro ao cadastrar membro: " + membroError.message);
+        setIsLoading(false);
+        return;
+      }
+
+      // Adicionar um delay para evitar o erro de limite de tempo
+      await delay(1000);
+      
+      // 2. Registrar o usuário no Auth do Supabase
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: form.email,
         password: senha,
@@ -124,11 +177,14 @@ export default function AssociarSe() {
         return;
       }
 
-      // 2. Gerar hash da senha para armazenar na tabela users
+      // Adicionar um delay para evitar o erro de limite de tempo
+      await delay(1000);
+      
+      // 3. Gerar hash da senha para armazenar na tabela users
       const senha_hash = await bcrypt.hash(senha, 10);
       const role = tipo === "piloto" ? "piloto" : "agencia";
       
-      // 3. Inserir usuário na tabela users usando o ID gerado pelo Auth
+      // 4. Inserir usuário na tabela users usando o ID gerado pelo Auth
       const { data: user, error: userError } = await supabase
         .from("users")
         .insert([
@@ -152,42 +208,15 @@ export default function AssociarSe() {
         return;
       }
       
-      // 4. Inserir membro na tabela membros, vinculando ao user_id
-      const membroPayload = {
-        nome_completo: form.nome_completo,
-        email: form.email,
-        telefone: form.telefone,
-        tipo,
-        cpf: form.cpf,
-        cnpj: form.cnpj,
-        nome_empresa: form.nome_empresa,
-        observacoes: form.observacoes,
-        endereco,
-        cidade,
-        estado,
-        user_id: user.id,
-        // RBAC 103
-        validade_rbac103: rbac103 ? validadeRbac103 : null,
-        associacao_rbac103: rbac103 ? associacaoRbac103 : null,
-        // RBAC 61
-        codigo_anac: rbac61 ? codigoAnac : null,
-        validade_habilitacao: rbac61 ? validadeHabilitacao : null,
-        numero_licenca: rbac61 ? numeroLicenca : null,
-        validade_cma: rbac61 ? validadeCma : null,
-        created_at: new Date().toISOString(),
-        status: "pendente",
-        pagamento_inscricao: "aguardando",
-      };
-      
-      const { error: membroError } = await supabase
+      // 5. Atualizar o membro com o user_id
+      const { error: updateMembroError } = await supabase
         .from("membros")
-        .insert([membroPayload]);
+        .update({ user_id: user.id })
+        .eq("id", membro.id);
       
-      if (membroError) {
-        console.error("Erro ao criar membro:", membroError);
-        setErro("Usuário criado, mas erro ao cadastrar membro: " + membroError.message);
-        setIsLoading(false);
-        return;
+      if (updateMembroError) {
+        console.error("Erro ao atualizar membro com user_id:", updateMembroError);
+        // Não interrompe o fluxo, pois o cadastro principal já foi feito
       }
       
       // Sucesso! Deslogar o usuário recém-criado (ele só poderá acessar após aprovação)
@@ -197,7 +226,7 @@ export default function AssociarSe() {
       router.push("/inscricao-recebida");
     } catch (e) {
       console.error("Erro inesperado:", e);
-      setErro(e.message || "Erro inesperado ao enviar inscrição");
+      setErro((e as Error).message || "Erro inesperado ao enviar inscrição");
     } finally {
       setIsLoading(false);
     }
