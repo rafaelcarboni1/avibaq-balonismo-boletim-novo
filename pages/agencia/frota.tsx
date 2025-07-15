@@ -664,4 +664,63 @@ function FrotaBalaoCard({
               <p className="text-sm text-gray-600">{balao.nome_batismo}</p>
             )}
           </div>
-          <div className={`
+          <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+            balao.ativo 
+              ? 'bg-green-100 text-green-800' 
+              : 'bg-gray-50 text-gray-500'
+          }`}>
+            {balao.ativo ? 'Operacional' : 'Inativo'}
+          </div>
+        </div>
+
+        <div className="space-y-1 text-sm">
+          <div className="flex justify-between">
+            <span className="font-medium">Volume:</span>
+            <span>{balao.volume_m3.toLocaleString()} m³</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium">Capacidade est.:</span>
+            <span>{capacidadeEstimada} passageiros</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium">Total de voos:</span>
+            <span className="font-semibold text-blue-600">{vooCount}</span>
+          </div>
+          {balao.observacoes && (
+            <p className="text-sm text-gray-600 mt-2">
+              <span className="font-medium">Obs:</span> {balao.observacoes}
+            </p>
+          )}
+        </div>
+
+        <div className="flex gap-2 pt-2">
+          <button
+            onClick={() => onEdit(balao)}
+            className="flex-1 bg-blue-50 text-blue-700 px-3 py-2 rounded-lg text-sm hover:bg-blue-100 transition-colors flex items-center justify-center gap-2"
+          >
+            <PencilIcon className="h-4 w-4" />
+            Editar
+          </button>
+          
+          <button
+            onClick={() => onToggleStatus(balao)}
+            className={`flex-1 px-3 py-2 rounded-lg text-sm transition-colors ${
+              balao.ativo
+                ? 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100'
+                : 'bg-green-50 text-green-700 hover:bg-green-100'
+            }`}
+          >
+            {balao.ativo ? 'Desativar' : 'Ativar'}
+          </button>
+          
+          <button
+            onClick={() => onDelete(balao)}
+            className="bg-red-50 text-red-700 px-3 py-2 rounded-lg text-sm hover:bg-red-100 transition-colors"
+          >
+            <TrashIcon className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    </MagicCard>
+  );
+}
