@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { useUser } from "@/hooks/useUser";
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/router";
 import { UserCircleIcon, HomeIcon, DocumentTextIcon, UsersIcon, Cog6ToothIcon, ArrowLeftOnRectangleIcon, KeyIcon } from "@heroicons/react/24/outline";
 
 const navLinks = [

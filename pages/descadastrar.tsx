@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/router";
 import { Card, CardContent, CardHeader, CardTitle } from "../src/components/ui/card";
 import { CheckCircle, AlertCircle } from "lucide-react";
 import { supabase } from "../src/integrations/supabase/client";

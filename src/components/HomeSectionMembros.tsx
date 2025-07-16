@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo, useRef } from "react";
 import { getAssociadosEmDia } from "../helpers/getAssociadosEmDia";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/router";
 import { Card, CardContent } from "./ui/card";
 import { UserIcon, BuildingOfficeIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 

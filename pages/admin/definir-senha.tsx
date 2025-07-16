@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/router";
 import { supabase } from "../../src/integrations/supabase/client";
 import { Card, CardContent, CardHeader } from "../../src/components/ui/card";
 import { Button } from "../../src/components/ui/button";

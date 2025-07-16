@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams } from "next/router";
 import { supabase } from "../../../../src/integrations/supabase/client";
 import EnhancedDashboardLayout from "../../../../src/components/magicui/enhanced-dashboard-layout";
 import LoadingSkeleton from "../../../../src/components/magicui/loading-skeleton";

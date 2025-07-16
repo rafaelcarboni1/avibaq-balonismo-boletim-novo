@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "next/router";
 import { supabase } from "../../../src/integrations/supabase/client";
 import EnhancedDashboardLayout from "../../../src/components/magicui/enhanced-dashboard-layout";
 import { Button } from "../../../src/components/ui/button";
