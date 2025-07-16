@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useRouter, useParams } from "next/router";
+import { useRouter } from "next/router";
 import { supabase } from "../../../../src/integrations/supabase/client";
 import EnhancedDashboardLayout from "../../../../src/components/magicui/enhanced-dashboard-layout";
 import LoadingSkeleton from "../../../../src/components/magicui/loading-skeleton";
@@ -30,9 +30,9 @@ export const toDbPeriodo = (value: string) =>
 
 export default function AdminBoletimEditForm() {
   const router = useRouter();
-  const params = useParams();
-  const id = params?.id as string;
-  const isEdit = Boolean(id);
+  const { id } = router.query;
+  const idString = id as string;
+  const isEdit = Boolean(idString);
   const { user } = useUser();
   const [form, setForm] = useState({
     data: "",
@@ -56,7 +56,7 @@ export default function AdminBoletimEditForm() {
   useEffect(() => {
     if (isEdit) {
       setPageLoading(true);
-      supabase.from("boletins").select("*", { count: "exact" }).eq("id", id).single().then(({ data }) => {
+      supabase.from("boletins").select("*", { count: "exact" }).eq("id", idString).single().then(({ data }) => {
         if (data) {
           setForm({
             data: data.data,
@@ -73,7 +73,7 @@ export default function AdminBoletimEditForm() {
     } else {
       setPageLoading(false);
     }
-  }, [id, isEdit]);
+  }, [idString, isEdit]);
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -204,7 +204,7 @@ export default function AdminBoletimEditForm() {
         .select("*", { count: "exact", head: true })
         .eq("data", dataDb)
         .eq("periodo", periodoDb)
-        .neq("id", id || "");
+        .neq("id", idString || "");
       count = c || 0;
     } else {
       const { count: c } = await supabase
@@ -220,7 +220,7 @@ export default function AdminBoletimEditForm() {
       return;
     }
     // Update
-    let boletimId = id;
+    let boletimId = idString;
     const updatePrincipalPayload = {
       data: dataDb,
       periodo: periodoDb,
@@ -232,7 +232,7 @@ export default function AdminBoletimEditForm() {
       publicado: true,
     };
     // console.log('Payload update principal:', updatePrincipalPayload);
-    const { data: updated, error } = await supabase.from("boletins").update(updatePrincipalPayload).eq("id", id).select("id").single();
+    const { data: updated, error } = await supabase.from("boletins").update(updatePrincipalPayload).eq("id", idString).select("id").single();
     if (error) {
       console.error("Erro detalhado Supabase:", error);
       toast.error("Erro ao salvar boletim");

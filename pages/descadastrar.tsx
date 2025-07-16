@@ -1,29 +1,30 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/router";
+import { useRouter } from "next/router";
 import { Card, CardContent, CardHeader, CardTitle } from "../src/components/ui/card";
 import { CheckCircle, AlertCircle } from "lucide-react";
 import { supabase } from "../src/integrations/supabase/client";
 
 export default function Descadastrar() {
-  const searchParams = useSearchParams();
+  const router = useRouter();
   const [status, setStatus] = useState<"loading" | "ok" | "fail">("loading");
 
   useEffect(() => {
-    const token = searchParams.get("token");
-    if (!token) {
+    const { token } = router.query;
+    const tokenString = token as string;
+    if (!tokenString) {
       setStatus("fail");
       return;
     }
     supabase
       .from("assinantes")
       .update({ ativo: false })
-      .eq("token_descadastro", token)
+      .eq("token_descadastro", tokenString)
       .select()
       .then(({ error, data }) => {
         if (error || !data || data.length === 0) setStatus("fail");
         else setStatus("ok");
       });
-  }, [searchParams]);
+  }, [router.query]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">

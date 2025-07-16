@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useRouter, useSearchParams } from "next/router";
+import { useRouter } from "next/router";
 import { supabase } from "../../src/integrations/supabase/client";
 import { Card, CardContent, CardHeader } from "../../src/components/ui/card";
 import { Button } from "../../src/components/ui/button";
@@ -9,7 +9,6 @@ import bcrypt from "bcryptjs";
 
 export default function AdminSetPassword() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
