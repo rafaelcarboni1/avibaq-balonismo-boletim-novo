@@ -214,9 +214,6 @@ const Home = () => {
             Associação de Pilotos e Empresas de Balonismo
           </p>
           
-          {/* PWA Install Prompt - Posição discreta */}
-          <div className="mb-6">
-          </div>
           
           <div className="flex flex-wrap justify-center gap-6 text-sm">
             <a href="/politica-privacidade" className="text-gray-400 hover:text-white">

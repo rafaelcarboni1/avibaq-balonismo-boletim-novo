@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Toaster } from "../src/components/ui/toaster";
 import { Toaster as Sonner } from "../src/components/ui/sonner";
 import { TooltipProvider } from "../src/components/ui/tooltip";
@@ -11,6 +11,18 @@ import { Analytics } from '@vercel/analytics/react';
 const queryClient = new QueryClient();
 
 function MyApp({ Component, pageProps }: AppProps) {
+  // Clean up any existing service workers from PWA implementation
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for (let registration of registrations) {
+          registration.unregister().then(function(boolean) {
+            console.log('Service worker unregistered:', boolean);
+          });
+        }
+      });
+    }
+  }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <Head>

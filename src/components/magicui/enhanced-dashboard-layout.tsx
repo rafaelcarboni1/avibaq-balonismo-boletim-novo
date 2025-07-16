@@ -74,9 +74,6 @@ export default function EnhancedDashboardLayout({
       {/* Enhanced Sidebar */}
       <EnhancedSidebar user={user} role={role} nome={nome}>
         <div className="max-w-7xl mx-auto px-0">
-          {/* PWA Install Prompt */}
-          <div className="mb-4">
-          </div>
           
           {/* Header */}
           {(title || breadcrumbs.length > 0 || headerActions) && (
