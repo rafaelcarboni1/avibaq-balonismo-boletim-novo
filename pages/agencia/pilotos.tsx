@@ -55,6 +55,7 @@ export default function GestãoPilotos() {
         return;
       }
       if (user.role && user.role !== 'agencia') {
+        console.log('[AgenciaPilotos] Redirecionando - role:', user.role);
         router.push('/');
         return;
       }

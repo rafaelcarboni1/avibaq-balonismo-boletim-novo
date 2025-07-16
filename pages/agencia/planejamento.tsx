@@ -72,6 +72,7 @@ export default function PlanejamentoAgencia() {
         return;
       }
       if (user.role && user.role !== 'agencia') {
+        console.log('[AgenciaPlanejamento] Redirecionando - role:', user.role);
         router.push('/');
         return;
       }

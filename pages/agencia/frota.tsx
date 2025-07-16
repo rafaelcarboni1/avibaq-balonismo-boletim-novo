@@ -59,6 +59,7 @@ export default function Frota() {
         return;
       }
       if (user.role && user.role !== 'agencia') {
+        console.log('[AgenciaFrota] Redirecionando - role:', user.role);
         router.push('/');
         return;
       }

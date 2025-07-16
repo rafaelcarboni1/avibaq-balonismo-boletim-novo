@@ -60,6 +60,7 @@ export default function AgenciaDashboard() {
         return;
       }
       if (user.role && user.role !== 'agencia') {
+        console.log('[AgenciaDashboard] Redirecionando - role:', user.role);
         router.push('/');
         return;
       }

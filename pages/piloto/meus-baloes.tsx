@@ -51,7 +51,9 @@ export default function MeusBaloes() {
         router.push('/piloto/login');
         return;
       }
+      // Só redireciona se o role estiver carregado E for diferente de piloto
       if (user.role && user.role !== 'piloto') {
+        console.log('[MeusBaloes] Redirecionando - role:', user.role);
         router.push('/');
         return;
       }
