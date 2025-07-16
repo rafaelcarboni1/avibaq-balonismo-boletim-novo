@@ -31,6 +31,7 @@ export default async function handler(
         email: email,
         role: role || 'piloto',
         username: username || email.split('@')[0],
+        primeira_senha: false,
         created_at: new Date().toISOString()
       })
       .select()
