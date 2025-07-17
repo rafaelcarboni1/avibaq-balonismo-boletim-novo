@@ -1,8 +1,7 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "avibaq-balonismo-sistema",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "version": "1.0.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

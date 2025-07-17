@@ -27,6 +27,7 @@ import {
   ChartBarIcon,
   CurrencyDollarIcon
 } from "@heroicons/react/24/solid";
+import VooEmAndamento from '@/components/VooEmAndamento';
 
 function CardLink({ title, value, href, subtitle }: { title: any, value: any, href: any, subtitle?: any }) {
   // Cores de depuração para cada card
@@ -58,8 +59,14 @@ export default function AdminDashboard() {
   const [loadingBoletimAmanha, setLoadingBoletimAmanha] = useState(true);
   const [logs, setLogs] = useState<any[]>([]);
   const [loadingLogs, setLoadingLogs] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'safety' | 'operations' | 'analytics'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'safety' | 'operations' | 'analytics' | 'voos'>('overview');
   const [advancedData, setAdvancedData] = useState<any>(null);
+  const [voosData, setVoosData] = useState<any>({
+    voosEmAndamento: [],
+    voosRecentes: [],
+    estatisticasVoos: {}
+  });
+  const [loadingVoos, setLoadingVoos] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -125,6 +132,63 @@ export default function AdminDashboard() {
     }
     fetchLogs();
   }, []);
+
+  // Função para carregar dados de voos (admin vê todos os voos)
+  const carregarDadosVoos = async () => {
+    try {
+      setLoadingVoos(true);
+      
+      const [
+        voosEmAndamentoResult,
+        voosRecentesResult,
+        estatisticasResult
+      ] = await Promise.all([
+        // Todos os voos em andamento da associação
+        supabase
+          .from('voos')
+          .select(`
+            *, 
+            piloto:membros!voos_piloto_id_fkey(nome),
+            agencia:membros!voos_agencia_id_fkey(nome)
+          `)
+          .in('status', ['rascunho', 'planejado', 'checklist_bloco1', 'checklist_bloco2', 'checklist_concluido'])
+          .order('data_voo', { ascending: true }),
+        
+        // Voos recentes finalizados (últimos 10)
+        supabase
+          .from('voos')
+          .select(`
+            *, 
+            piloto:membros!voos_piloto_id_fkey(nome),
+            agencia:membros!voos_agencia_id_fkey(nome)
+          `)
+          .in('status', ['finalizado', 'cancelado'])
+          .order('data_voo', { ascending: false })
+          .limit(10),
+        
+        // Estatísticas gerais de voos
+        supabase
+          .from('voos')
+          .select('status')
+      ]);
+
+      const estatisticas = estatisticasResult.data?.reduce((acc: any, voo: any) => {
+        acc[voo.status] = (acc[voo.status] || 0) + 1;
+        return acc;
+      }, {}) || {};
+
+      setVoosData({
+        voosEmAndamento: voosEmAndamentoResult.data || [],
+        voosRecentes: voosRecentesResult.data || [],
+        estatisticasVoos: estatisticas
+      });
+
+    } catch (error) {
+      console.error('Erro ao carregar dados de voos:', error);
+    } finally {
+      setLoadingVoos(false);
+    }
+  };
 
   function getBandeiraColor(bandeira: string) {
     switch (bandeira) {
@@ -198,6 +262,7 @@ export default function AdminDashboard() {
           <div className="flex gap-4 border-b border-gray-200">
             {[
               { key: 'overview', label: 'Visão Geral', icon: ChartBarIcon },
+              { key: 'voos', label: 'Voos', icon: ClockIcon },
               { key: 'safety', label: 'Segurança', icon: ShieldCheckIcon },
               { key: 'operations', label: 'Operações', icon: DocumentTextIcon },
               { key: 'analytics', label: 'Analytics', icon: CurrencyDollarIcon }
@@ -500,6 +565,130 @@ export default function AdminDashboard() {
                       description="Receita otimizada"
                     />
                   </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Aba de Voos */}
+          {activeTab === 'voos' && (
+            <div className="space-y-8">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                  <ClockIcon className="h-6 w-6 text-blue-500" />
+                  Gestão de Voos da Associação
+                </h2>
+                <button
+                  onClick={carregarDadosVoos}
+                  disabled={loadingVoos}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                >
+                  {loadingVoos ? 'Carregando...' : 'Atualizar'}
+                </button>
+              </div>
+
+              {/* Estatísticas de Voos */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <EnhancedKpiCard 
+                  title="Voos em Andamento"
+                  value={voosData.voosEmAndamento.length} 
+                  icon={ClockIcon}
+                  color="blue"
+                  trend="neutral"
+                  trendValue="Ativos"
+                  description="Rascunho até checklist"
+                  delay={0}
+                />
+                <EnhancedKpiCard 
+                  title="Finalizados"
+                  value={voosData.estatisticasVoos.finalizado || 0}
+                  icon={CheckCircleIcon}
+                  color="green"
+                  trend="up"
+                  trendValue="Completos"
+                  description="Voos executados"
+                  delay={0.05}
+                />
+                <EnhancedKpiCard 
+                  title="Cancelados"
+                  value={voosData.estatisticasVoos.cancelado || 0}
+                  icon={ExclamationTriangleIcon}
+                  color="red"
+                  trend="neutral"
+                  trendValue="Cancelados"
+                  description="Voos não executados"
+                  delay={0.1}
+                />
+                <EnhancedKpiCard 
+                  title="Total Geral"
+                  value={
+                    (voosData.estatisticasVoos.finalizado || 0) + 
+                    (voosData.estatisticasVoos.cancelado || 0) + 
+                    (voosData.estatisticasVoos.rascunho || 0) + 
+                    (voosData.estatisticasVoos.planejado || 0) + 
+                    (voosData.estatisticasVoos.checklist_bloco1 || 0) + 
+                    (voosData.estatisticasVoos.checklist_bloco2 || 0) + 
+                    (voosData.estatisticasVoos.checklist_concluido || 0)
+                  }
+                  icon={DocumentTextIcon}
+                  color="purple"
+                  trend="up"
+                  trendValue="Crescendo"
+                  description="Todos os voos"
+                  delay={0.15}
+                />
+              </div>
+
+              {/* Voos em Andamento */}
+              {voosData.voosEmAndamento.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Voos em Andamento ({voosData.voosEmAndamento.length})
+                  </h3>
+                  <div className="grid gap-4">
+                    {voosData.voosEmAndamento.map((voo: any) => (
+                      <VooEmAndamento 
+                        key={voo.id} 
+                        voo={voo} 
+                        showPilotInfo={true}
+                        compact={true}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Voos Recentes */}
+              {voosData.voosRecentes.length > 0 && (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Voos Recentes ({voosData.voosRecentes.length})
+                  </h3>
+                  <div className="grid gap-4">
+                    {voosData.voosRecentes.map((voo: any) => (
+                      <VooEmAndamento 
+                        key={voo.id} 
+                        voo={voo} 
+                        showPilotInfo={true}
+                        compact={true}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Estado vazio */}
+              {!loadingVoos && voosData.voosEmAndamento.length === 0 && voosData.voosRecentes.length === 0 && (
+                <div className="text-center py-12 bg-gray-50 rounded-lg">
+                  <ClockIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum voo encontrado</h3>
+                  <p className="text-gray-500 mb-4">Clique em "Atualizar" para carregar os dados de voos</p>
+                  <button
+                    onClick={carregarDadosVoos}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    Carregar Voos
+                  </button>
                 </div>
               )}
             </div>

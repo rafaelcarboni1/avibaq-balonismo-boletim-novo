@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
-import { PlusIcon, UsersIcon, CalendarIcon, DocumentTextIcon, BriefcaseIcon, ChartBarIcon, CurrencyDollarIcon, BuildingOfficeIcon } from '@heroicons/react/24/solid';
+import { PlusIcon, UsersIcon, CalendarIcon, DocumentTextIcon, BriefcaseIcon, ChartBarIcon, CurrencyDollarIcon, BuildingOfficeIcon, ClockIcon } from '@heroicons/react/24/solid';
 import { EnhancedDashboardLayout } from '../../src/components/magicui/enhanced-dashboard-layout';
 import { MagicCard } from '../../src/components/magicui/magic-card';
 import { BentoGrid, BentoGridItem } from '../../src/components/magicui/bento-grid';
@@ -13,6 +13,9 @@ import { Button } from '../../src/components/ui/button';
 import { supabase } from '../../src/integrations/supabase/client';
 import { useUser } from '../../src/hooks/useUser';
 import { useToast } from '../../src/hooks/use-toast';
+import VooEmAndamento from '../../src/components/VooEmAndamento';
+import VoosStatistics from '../../src/components/VoosStatistics';
+import VoosCharts from '../../src/components/VoosCharts';
 
 // Lazy load dos componentes pesados
 const AdvancedKPICard = dynamic(() => import('../../src/components/magicui/advanced-kpi-analytics').then(mod => ({ default: mod.AdvancedKPICard })), {
@@ -34,6 +37,7 @@ interface DashboardStats {
   voosEsteMes: number;
   proximoVoo: any;
   voosRecentes: any[];
+  voosEmAndamento: any[];
 }
 
 export default function AgenciaDashboard() {
@@ -47,32 +51,32 @@ export default function AgenciaDashboard() {
     voosEsteAno: 0,
     voosEsteMes: 0,
     proximoVoo: null,
-    voosRecentes: []
+    voosRecentes: [],
+    voosEmAndamento: []
   });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'business' | 'team'>('overview');
 
-  // Verificar se usuário está autenticado e é agência
+  // Verificar autenticação e carregar dados
   useEffect(() => {
-    if (!userLoading) {
-      if (!user) {
-        router.push('/agencia/login');
-        return;
-      }
-      if (user.role && user.role !== 'agencia') {
-        console.log('[AgenciaDashboard] Redirecionando - role:', user.role);
-        router.push('/');
-        return;
-      }
-    }
-  }, [user, userLoading, router]);
+    if (userLoading) return;
 
-  // Carregar dados do dashboard
-  useEffect(() => {
-    if (user) {
+    if (!user) {
+      router.push('/agencia/login');
+      return;
+    }
+
+    if (user.role && user.role !== 'agencia') {
+      console.log('[AgenciaDashboard] Redirecionando - role:', user.role);
+      router.push('/');
+      return;
+    }
+
+    // Se chegou até aqui, usuário está autenticado e é agência
+    if (user.role === 'agencia') {
       carregarDashboard();
     }
-  }, [user]);
+  }, [user, userLoading, router]);
 
   const carregarDashboard = async () => {
     try {
@@ -102,7 +106,8 @@ export default function AgenciaDashboard() {
         voosAnoResult,
         voosMesResult,
         proximoVooResult,
-        voosRecentesResult
+        voosRecentesResult,
+        voosEmAndamentoResult
       ] = await Promise.all([
         // Total de pilotos vinculados
         supabase
@@ -141,13 +146,22 @@ export default function AgenciaDashboard() {
           .limit(1)
           .single(),
         
-        // Voos recentes (últimos 5)
+        // Voos recentes (últimos 5) - apenas finalizados e cancelados
         supabase
           .from('voos')
           .select('*, piloto:membros!voos_piloto_id_fkey(nome)')
           .eq('agencia_id', membro.id)
+          .in('status', ['finalizado', 'cancelado'])
           .order('data_voo', { ascending: false })
-          .limit(5)
+          .limit(5),
+        
+        // Voos em andamento da agência (rascunho até checklist_concluido)
+        supabase
+          .from('voos')
+          .select('*, piloto:membros!voos_piloto_id_fkey(nome)')
+          .eq('agencia_id', membro.id)
+          .in('status', ['rascunho', 'planejado', 'checklist_bloco1', 'checklist_bloco2', 'checklist_concluido'])
+          .order('data_voo', { ascending: true })
       ]);
 
       setStats({
@@ -156,7 +170,8 @@ export default function AgenciaDashboard() {
         voosEsteAno: voosAnoResult.data?.length || 0,
         voosEsteMes: voosMesResult.data?.length || 0,
         proximoVoo: proximoVooResult.data || null,
-        voosRecentes: voosRecentesResult.data || []
+        voosRecentes: voosRecentesResult.data || [],
+        voosEmAndamento: voosEmAndamentoResult.data || []
       });
 
     } catch (error) {
@@ -317,6 +332,26 @@ export default function AgenciaDashboard() {
                 colors={["#10b981", "#f59e0b"]}
               />
             </div>
+            
+            {/* Seção Voos em Andamento da Equipe */}
+            {stats.voosEmAndamento.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                  <ClockIcon className="h-6 w-6 text-blue-500" />
+                  Voos em Andamento da Equipe ({stats.voosEmAndamento.length})
+                </h3>
+                <div className="grid gap-4">
+                  {stats.voosEmAndamento.map((voo) => (
+                    <VooEmAndamento 
+                      key={voo.id} 
+                      voo={voo} 
+                      showPilotInfo={true}
+                      compact={true}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -363,6 +398,12 @@ export default function AgenciaDashboard() {
         {/* Aba de Business Analytics */}
         {activeTab === 'business' && (
           <div className="space-y-8">
+            {/* Estatísticas de Voos */}
+            <VoosStatistics periodo="trimestre" />
+            
+            {/* Gráficos de Voos */}
+            <VoosCharts />
+            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <AdvancedKPICard
                 title="Receita Mensal"

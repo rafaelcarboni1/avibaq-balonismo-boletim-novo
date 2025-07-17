@@ -198,6 +198,10 @@ export default function EnhancedSidebar({
                 href={link.href}
                 onMouseEnter={() => setHoveredItem(link.href)}
                 onMouseLeave={() => setHoveredItem(null)}
+                onClick={() => {
+                  console.log('[EnhancedSidebar] Navegando para:', link.href);
+                  console.log('[EnhancedSidebar] URL atual:', router.pathname);
+                }}
                 className={cn(
                   "relative flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 group",
                   active 

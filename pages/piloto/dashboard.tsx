@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
-import { PlusIcon, ClipboardDocumentListIcon, CalendarIcon, DocumentTextIcon, ShieldCheckIcon, ChartBarIcon, UserIcon } from '@heroicons/react/24/solid';
+import { PlusIcon, ClipboardDocumentListIcon, CalendarIcon, DocumentTextIcon, ShieldCheckIcon, ChartBarIcon, UserIcon, ClockIcon } from '@heroicons/react/24/solid';
 import { EnhancedDashboardLayout } from '../../src/components/magicui/enhanced-dashboard-layout';
 import { MagicCard } from '../../src/components/magicui/magic-card';
 import { BentoGrid, BentoGridItem } from '../../src/components/magicui/bento-grid';
@@ -13,6 +13,10 @@ import { Button } from '../../src/components/ui/button';
 import { supabase } from '../../src/integrations/supabase/client';
 import { useUser } from '../../src/hooks/useUser';
 import { useToast } from '../../src/hooks/use-toast';
+import { useRouterDebug } from '../../src/hooks/useRouterDebug';
+import VooEmAndamento from '../../src/components/VooEmAndamento';
+import VoosStatistics from '../../src/components/VoosStatistics';
+import VoosCharts from '../../src/components/VoosCharts';
 
 // Lazy load dos componentes pesados
 const AdvancedKPICard = dynamic(() => import('../../src/components/magicui/advanced-kpi-analytics').then(mod => ({ default: mod.AdvancedKPICard })), {
@@ -34,10 +38,11 @@ interface DashboardStats {
   convitesPendentes: number;
   proximoVoo: any;
   voosRecentes: any[];
+  voosEmAndamento: any[];
 }
 
 export default function PilotoDashboard() {
-  const router = useRouter();
+  const router = useRouterDebug();
   const { user, loading: userLoading } = useUser();
   const { toast } = useToast();
   
@@ -47,33 +52,33 @@ export default function PilotoDashboard() {
     voosEsteMes: 0,
     convitesPendentes: 0,
     proximoVoo: null,
-    voosRecentes: []
+    voosRecentes: [],
+    voosEmAndamento: []
   });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'analytics' | 'voos'>('overview');
 
-  // Verificar se usuário está autenticado e é piloto
+  // Verificar autenticação e carregar dados
   useEffect(() => {
-    if (!userLoading) {
-      if (!user) {
-        router.push('/piloto/login');
-        return;
-      }
-      // Só redireciona se o role estiver carregado E for diferente de piloto
-      if (user.role && user.role !== 'piloto') {
-        console.log('[Dashboard] Redirecionando - role:', user.role);
-        router.push('/');
-        return;
-      }
-    }
-  }, [user, userLoading, router]);
+    if (userLoading) return;
 
-  // Carregar dados do dashboard
-  useEffect(() => {
-    if (user) {
+    if (!user) {
+      router.push('/piloto/login');
+      return;
+    }
+
+    // Só redireciona se o role estiver carregado E for diferente de piloto
+    if (user.role && user.role !== 'piloto') {
+      console.log('[Dashboard] Redirecionando - role:', user.role);
+      router.push('/');
+      return;
+    }
+
+    // Se chegou até aqui, usuário está autenticado e é piloto
+    if (user.role === 'piloto') {
       carregarDashboard();
     }
-  }, [user]);
+  }, [user, userLoading, router]);
 
   const carregarDashboard = async () => {
     try {
@@ -103,7 +108,8 @@ export default function PilotoDashboard() {
         voosMesResult,
         convitesResult,
         proximoVooResult,
-        voosRecentesResult
+        voosRecentesResult,
+        voosEmAndamentoResult
       ] = await Promise.all([
         // Total de balões ativos
         supabase
@@ -143,13 +149,22 @@ export default function PilotoDashboard() {
           .limit(1)
           .single(),
         
-        // Voos recentes (últimos 5)
+        // Voos recentes (últimos 5) - apenas finalizados e cancelados
         supabase
           .from('voos')
           .select('*, agencia:membros!voos_agencia_id_fkey(nome)')
           .eq('piloto_id', membro.id)
+          .in('status', ['finalizado', 'cancelado'])
           .order('data_voo', { ascending: false })
-          .limit(5)
+          .limit(5),
+        
+        // Voos em andamento (rascunho até checklist_concluido)
+        supabase
+          .from('voos')
+          .select('*, agencia:membros!voos_agencia_id_fkey(nome)')
+          .eq('piloto_id', membro.id)
+          .in('status', ['rascunho', 'planejado', 'checklist_bloco1', 'checklist_bloco2', 'checklist_concluido'])
+          .order('data_voo', { ascending: true })
       ]);
 
       setStats({
@@ -158,7 +173,8 @@ export default function PilotoDashboard() {
         voosEsteMes: voosMesResult.data?.length || 0,
         convitesPendentes: convitesResult.data?.length || 0,
         proximoVoo: proximoVooResult.data || null,
-        voosRecentes: voosRecentesResult.data || []
+        voosRecentes: voosRecentesResult.data || [],
+        voosEmAndamento: voosEmAndamentoResult.data || []
       });
 
     } catch (error) {
@@ -244,6 +260,219 @@ export default function PilotoDashboard() {
         </div>
 
         {/* Conteúdo das abas */}
+        {activeTab === 'analytics' && (
+          <div className="space-y-8">
+            {/* Estatísticas Avançadas */}
+            <VoosStatistics periodo="mes" />
+            
+            {/* Gráficos e Visualizações */}
+            <VoosCharts />
+
+            {/* KPIs Avançados de Performance do Piloto */}
+            <div className="space-y-6">
+              <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
+                <ChartBarIcon className="h-6 w-6 text-blue-500" />
+                Performance Analytics
+              </h2>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <AdvancedKPICard
+                  title="Safety Score"
+                  metric={{
+                    value: 96.8,
+                    target: 95,
+                    previousValue: 94.2,
+                    format: 'percentage'
+                  }}
+                  icon={ShieldCheckIcon}
+                  color="green"
+                  description="Score de segurança"
+                />
+                
+                <AdvancedKPICard
+                  title="Tempo Médio de Voo"
+                  metric={{
+                    value: 2.4,
+                    previousValue: 2.1,
+                    format: 'time'
+                  }}
+                  icon={CalendarIcon}
+                  color="blue"
+                  description="Duração média"
+                />
+                
+                <AdvancedKPICard
+                  title="Taxa de Compliance"
+                  metric={{
+                    value: 98.5,
+                    target: 95,
+                    previousValue: 97.8,
+                    format: 'percentage'
+                  }}
+                  icon={ClipboardDocumentListIcon}
+                  color="purple"
+                  description="Checklists completos"
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <GaugeChart
+                  title="Performance Geral"
+                  value={94.2}
+                  max={100}
+                  colors={['#ef4444', '#f59e0b', '#10b981']}
+                />
+                
+                <AdvancedLineChart
+                  title="Voos por Mês - Últimos 6 Meses"
+                  data={[
+                    { name: 'Jan', value: 8 },
+                    { name: 'Fev', value: 12 },
+                    { name: 'Mar', value: 15 },
+                    { name: 'Abr', value: 18 },
+                    { name: 'Mai', value: 22 },
+                    { name: 'Jun', value: 25 }
+                  ]}
+                  type="line"
+                  colors={['#3b82f6']}
+                  height={250}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'voos' && (
+          <div className="space-y-8">
+            {/* Seção Voos em Andamento */}
+            {stats.voosEmAndamento.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                  <ClockIcon className="h-6 w-6 text-blue-500" />
+                  Voos em Andamento ({stats.voosEmAndamento.length})
+                </h3>
+                <div className="grid gap-4">
+                  {stats.voosEmAndamento.map((voo) => (
+                    <VooEmAndamento 
+                      key={voo.id} 
+                      voo={voo} 
+                      compact={false}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="grid lg:grid-cols-2 gap-6">
+              {/* Próximo voo */}
+              <MagicCard className="p-6 bg-white">
+                <h3 className="text-lg font-semibold mb-4">Próximo Voo</h3>
+                {stats.proximoVoo ? (
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <p className="font-medium">
+                          {new Date(stats.proximoVoo.data_voo).toLocaleDateString('pt-BR')}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          {stats.proximoVoo.periodo === 'manha' ? 'Manhã' : 'Tarde'} • {stats.proximoVoo.horario_previsto}
+                        </p>
+                      </div>
+                      <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusDisplay(stats.proximoVoo.status).color}`}>
+                        {getStatusDisplay(stats.proximoVoo.status).label}
+                      </span>
+                    </div>
+                    <p className="text-sm">{stats.proximoVoo.local_decolagem_previsto}</p>
+                    {stats.proximoVoo.agencia && (
+                      <p className="text-sm text-gray-600">
+                        Agência: {stats.proximoVoo.agencia.nome}
+                      </p>
+                    )}
+                    
+                    <div className="flex gap-2 mt-4">
+                      {stats.proximoVoo.status === 'checklist_concluido' && (
+                        <button
+                          onClick={() => router.push(`/piloto/pos-voo/${stats.proximoVoo.id}`)}
+                          className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition-colors"
+                        >
+                          Finalizar Voo
+                        </button>
+                      )}
+                      {['checklist_bloco1', 'checklist_bloco2'].includes(stats.proximoVoo.status) && (
+                        <button
+                          onClick={() => router.push(`/piloto/checklist/${stats.proximoVoo.id}`)}
+                          className="bg-yellow-600 text-white px-3 py-1 rounded text-sm hover:bg-yellow-700 transition-colors"
+                        >
+                          Continuar Checklist
+                        </button>
+                      )}
+                      {stats.proximoVoo.status === 'planejado' && (
+                        <button
+                          onClick={() => router.push(`/piloto/checklist/${stats.proximoVoo.id}`)}
+                          className="bg-primary text-white px-3 py-1 rounded text-sm hover:bg-primary/90 transition-colors"
+                        >
+                          Iniciar Checklist
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 bg-gray-50 rounded-lg">
+                    <CalendarIcon className="h-12 w-12 text-gray-300 mx-auto mb-2" />
+                    <p className="text-gray-500">Nenhum voo agendado</p>
+                    <button
+                      onClick={() => router.push('/piloto/planejamento')}
+                      className="mt-2 text-primary hover:underline text-sm"
+                    >
+                      Planejar novo voo
+                    </button>
+                  </div>
+                )}
+              </MagicCard>
+
+              {/* Voos recentes */}
+              <MagicCard className="p-6 bg-white">
+                <h3 className="text-lg font-semibold mb-4">Voos Recentes</h3>
+                {stats.voosRecentes.length > 0 ? (
+                  <div className="space-y-3">
+                    {stats.voosRecentes.map((voo) => (
+                      <div key={voo.id} className="flex justify-between items-center p-3 bg-white rounded-lg border border-gray-100 hover:shadow-sm transition-shadow">
+                        <div>
+                          <p className="font-medium text-sm">
+                            {new Date(voo.data_voo).toLocaleDateString('pt-BR')}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {voo.periodo === 'manha' ? 'Manhã' : 'Tarde'} • {voo.local_decolagem_previsto}
+                          </p>
+                          {voo.agencia && (
+                            <p className="text-xs text-gray-500">{voo.agencia.nome}</p>
+                          )}
+                        </div>
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusDisplay(voo.status).color}`}>
+                          {getStatusDisplay(voo.status).label}
+                        </span>
+                      </div>
+                    ))}
+                    <div className="text-center mt-4">
+                      <button
+                        onClick={() => router.push('/piloto/historico')}
+                        className="text-primary hover:underline text-sm"
+                      >
+                        Ver todos os voos
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8 bg-gray-50 rounded-lg">
+                    <DocumentTextIcon className="h-12 w-12 text-gray-300 mx-auto mb-2" />
+                    <p className="text-gray-500">Nenhum voo realizado ainda</p>
+                  </div>
+                )}
+              </MagicCard>
+            </div>
+          </div>
+        )}
+
         {activeTab === 'overview' && (
           <div className="space-y-8">
             {/* KPI Cards Grid */}
@@ -331,7 +560,10 @@ export default function PilotoDashboard() {
               description={
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <Button
-                    onClick={() => router.push('/piloto/planejamento')}
+                    onClick={() => {
+                      console.log('[PilotoDashboard] Navegando para planejamento');
+                      router.push('/piloto/planejamento');
+                    }}
                     className="flex items-center gap-2 p-4 h-auto flex-col"
                     variant="outline"
                   >
@@ -341,7 +573,10 @@ export default function PilotoDashboard() {
                   </Button>
                   
                   <Button
-                    onClick={() => router.push('/piloto/meus-baloes')}
+                    onClick={() => {
+                      console.log('[PilotoDashboard] Navegando para meus-baloes');
+                      router.push('/piloto/meus-baloes');
+                    }}
                     className="flex items-center gap-2 p-4 h-auto flex-col"
                     variant="outline"
                   >
@@ -353,7 +588,10 @@ export default function PilotoDashboard() {
                   </Button>
                   
                   <Button
-                    onClick={() => router.push('/piloto/convites')}
+                    onClick={() => {
+                      console.log('[PilotoDashboard] Navegando para convites');
+                      router.push('/piloto/convites');
+                    }}
                     className="flex items-center gap-2 p-4 h-auto flex-col"
                     variant="outline"
                   >
@@ -381,189 +619,9 @@ export default function PilotoDashboard() {
               icon={<PlusIcon className="h-6 w-6 text-blue-500" />}
             />
 
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Próximo voo */}
-          <MagicCard className="p-6 bg-white">
-            <h3 className="text-lg font-semibold mb-4">Próximo Voo</h3>
-            {stats.proximoVoo ? (
-              <div className="space-y-3">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="font-medium">
-                      {new Date(stats.proximoVoo.data_voo).toLocaleDateString('pt-BR')}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      {stats.proximoVoo.periodo === 'manha' ? 'Manhã' : 'Tarde'} • {stats.proximoVoo.horario_previsto}
-                    </p>
-                  </div>
-                  <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusDisplay(stats.proximoVoo.status).color}`}>
-                    {getStatusDisplay(stats.proximoVoo.status).label}
-                  </span>
-                </div>
-                <p className="text-sm">{stats.proximoVoo.local_decolagem_previsto}</p>
-                {stats.proximoVoo.agencia && (
-                  <p className="text-sm text-gray-600">
-                    Agência: {stats.proximoVoo.agencia.nome}
-                  </p>
-                )}
-                
-                <div className="flex gap-2 mt-4">
-                  {stats.proximoVoo.status === 'checklist_concluido' && (
-                    <button
-                      onClick={() => router.push(`/piloto/pos-voo/${stats.proximoVoo.id}`)}
-                      className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition-colors"
-                    >
-                      Finalizar Voo
-                    </button>
-                  )}
-                  {['checklist_bloco1', 'checklist_bloco2'].includes(stats.proximoVoo.status) && (
-                    <button
-                      onClick={() => router.push(`/piloto/checklist/${stats.proximoVoo.id}`)}
-                      className="bg-yellow-600 text-white px-3 py-1 rounded text-sm hover:bg-yellow-700 transition-colors"
-                    >
-                      Continuar Checklist
-                    </button>
-                  )}
-                  {stats.proximoVoo.status === 'planejado' && (
-                    <button
-                      onClick={() => router.push(`/piloto/checklist/${stats.proximoVoo.id}`)}
-                      className="bg-primary text-white px-3 py-1 rounded text-sm hover:bg-primary/90 transition-colors"
-                    >
-                      Iniciar Checklist
-                    </button>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-8 bg-gray-50 rounded-lg">
-                <CalendarIcon className="h-12 w-12 text-gray-300 mx-auto mb-2" />
-                <p className="text-gray-500">Nenhum voo agendado</p>
-                <button
-                  onClick={() => router.push('/piloto/planejamento')}
-                  className="mt-2 text-primary hover:underline text-sm"
-                >
-                  Planejar novo voo
-                </button>
-              </div>
-            )}
-          </MagicCard>
-
-          {/* Voos recentes */}
-          <MagicCard className="p-6 bg-white">
-            <h3 className="text-lg font-semibold mb-4">Voos Recentes</h3>
-            {stats.voosRecentes.length > 0 ? (
-              <div className="space-y-3">
-                {stats.voosRecentes.map((voo) => (
-                  <div key={voo.id} className="flex justify-between items-center p-3 bg-white rounded-lg border border-gray-100 hover:shadow-sm transition-shadow">
-                    <div>
-                      <p className="font-medium text-sm">
-                        {new Date(voo.data_voo).toLocaleDateString('pt-BR')}
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {voo.periodo === 'manha' ? 'Manhã' : 'Tarde'} • {voo.local_decolagem_previsto}
-                      </p>
-                      {voo.agencia && (
-                        <p className="text-xs text-gray-500">{voo.agencia.nome}</p>
-                      )}
-                    </div>
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusDisplay(voo.status).color}`}>
-                      {getStatusDisplay(voo.status).label}
-                    </span>
-                  </div>
-                ))}
-                <div className="text-center mt-4">
-                  <button
-                    onClick={() => router.push('/piloto/historico')}
-                    className="text-primary hover:underline text-sm"
-                  >
-                    Ver todos os voos
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-8 bg-gray-50 rounded-lg">
-                <DocumentTextIcon className="h-12 w-12 text-gray-300 mx-auto mb-2" />
-                <p className="text-gray-500">Nenhum voo realizado ainda</p>
-              </div>
-            )}
-          </MagicCard>
-        </div>
-
-        </BentoGrid>
-      </div>
-    )}
-
-        {/* KPIs Avançados de Performance do Piloto */}
-        <div className="space-y-6">
-          <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
-            <ChartBarIcon className="h-6 w-6 text-blue-500" />
-            Performance Analytics
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <AdvancedKPICard
-              title="Safety Score"
-              metric={{
-                value: 96.8,
-                target: 95,
-                previousValue: 94.2,
-                format: 'percentage'
-              }}
-              icon={ShieldCheckIcon}
-              color="green"
-              description="Score de segurança"
-            />
-            
-            <AdvancedKPICard
-              title="Tempo Médio de Voo"
-              metric={{
-                value: 2.4,
-                previousValue: 2.1,
-                format: 'time'
-              }}
-              icon={CalendarIcon}
-              color="blue"
-              description="Duração média"
-            />
-            
-            <AdvancedKPICard
-              title="Taxa de Compliance"
-              metric={{
-                value: 98.5,
-                target: 95,
-                previousValue: 97.8,
-                format: 'percentage'
-              }}
-              icon={ClipboardDocumentListIcon}
-              color="purple"
-              description="Checklists completos"
-            />
+            </BentoGrid>
           </div>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <GaugeChart
-              title="Performance Geral"
-              value={94.2}
-              max={100}
-              colors={['#ef4444', '#f59e0b', '#10b981']}
-            />
-            
-            <AdvancedLineChart
-              title="Voos por Mês - Últimos 6 Meses"
-              data={[
-                { name: 'Jan', value: 8 },
-                { name: 'Fev', value: 12 },
-                { name: 'Mar', value: 15 },
-                { name: 'Abr', value: 18 },
-                { name: 'Mai', value: 22 },
-                { name: 'Jun', value: 25 }
-              ]}
-              type="line"
-              colors={['#3b82f6']}
-              height={250}
-            />
-          </div>
-        </div>
+        )}
       </div>
     </EnhancedDashboardLayout>
   );

@@ -111,12 +111,12 @@ BEGIN
     ultima_tentativa = NOW(),
     tentativas_sync = tentativas_sync + 1
   WHERE id IN (
-    SELECT do.id 
-    FROM dados_offline do
-    WHERE do.user_id = p_user_id 
-    AND do.status = 'pendente'
-    AND do.tentativas_sync < do.max_tentativas
-    ORDER BY do.created_at ASC
+    SELECT d.id 
+    FROM dados_offline d
+    WHERE d.user_id = p_user_id 
+    AND d.status = 'pendente'
+    AND d.tentativas_sync < d.max_tentativas
+    ORDER BY d.created_at ASC
     LIMIT p_limite
     FOR UPDATE SKIP LOCKED
   )
@@ -289,46 +289,46 @@ CREATE VIEW vw_stats_sincronizacao AS
 SELECT 
   u.id as user_id,
   u.nome as usuario_nome,
-  COUNT(*) as total_itens,
-  COUNT(CASE WHEN do.status = 'pendente' THEN 1 END) as pendentes,
-  COUNT(CASE WHEN do.status = 'sincronizando' THEN 1 END) as sincronizando,
-  COUNT(CASE WHEN do.status = 'sincronizado' THEN 1 END) as sincronizados,
-  COUNT(CASE WHEN do.status = 'erro' THEN 1 END) as com_erro,
-  COUNT(CASE WHEN do.status = 'conflito' THEN 1 END) as conflitos,
-  COUNT(CASE WHEN do.tipo_dados = 'voo' THEN 1 END) as voos,
-  COUNT(CASE WHEN do.tipo_dados = 'checklist' THEN 1 END) as checklists,
-  COUNT(CASE WHEN do.tipo_dados = 'anexo' THEN 1 END) as anexos,
-  MIN(do.created_at) as primeiro_item,
-  MAX(do.created_at) as ultimo_item
+  COUNT(d.id) as total_itens,
+  COUNT(CASE WHEN d.status = 'pendente' THEN 1 END) as pendentes,
+  COUNT(CASE WHEN d.status = 'sincronizando' THEN 1 END) as sincronizando,
+  COUNT(CASE WHEN d.status = 'sincronizado' THEN 1 END) as sincronizados,
+  COUNT(CASE WHEN d.status = 'erro' THEN 1 END) as com_erro,
+  COUNT(CASE WHEN d.status = 'conflito' THEN 1 END) as conflitos,
+  COUNT(CASE WHEN d.tipo_dados = 'voo' THEN 1 END) as voos,
+  COUNT(CASE WHEN d.tipo_dados = 'checklist' THEN 1 END) as checklists,
+  COUNT(CASE WHEN d.tipo_dados = 'anexo' THEN 1 END) as anexos,
+  MIN(d.created_at) as primeiro_item,
+  MAX(d.created_at) as ultimo_item
 FROM users u
-LEFT JOIN dados_offline do ON do.user_id = u.id
+LEFT JOIN dados_offline d ON d.user_id = u.id
 GROUP BY u.id, u.nome
 ORDER BY total_itens DESC;
 
 -- View para itens com problemas de sincronização
 CREATE VIEW vw_problemas_sincronizacao AS
 SELECT 
-  do.id,
+  d.id,
   u.nome as usuario_nome,
-  do.tipo_dados,
-  do.operacao,
-  do.status,
-  do.tentativas_sync,
-  do.max_tentativas,
-  do.ultimo_erro,
-  do.created_at,
-  do.ultima_tentativa,
+  d.tipo_dados,
+  d.operacao,
+  d.status,
+  d.tentativas_sync,
+  d.max_tentativas,
+  d.ultimo_erro,
+  d.created_at,
+  d.ultima_tentativa,
   CASE 
-    WHEN do.status = 'erro' THEN 'Falha após ' || do.max_tentativas || ' tentativas'
-    WHEN do.status = 'conflito' THEN 'Conflito de dados detectado'
-    WHEN do.tentativas_sync >= 3 THEN 'Múltiplas tentativas falharam'
+    WHEN d.status = 'erro' THEN 'Falha após ' || d.max_tentativas || ' tentativas'
+    WHEN d.status = 'conflito' THEN 'Conflito de dados detectado'
+    WHEN d.tentativas_sync >= 3 THEN 'Múltiplas tentativas falharam'
     ELSE 'Outro problema'
   END as tipo_problema
-FROM dados_offline do
-JOIN users u ON u.id = do.user_id
-WHERE do.status IN ('erro', 'conflito') 
-   OR do.tentativas_sync >= 3
-ORDER BY do.created_at DESC;
+FROM dados_offline d
+JOIN users u ON u.id = d.user_id
+WHERE d.status IN ('erro', 'conflito') 
+   OR d.tentativas_sync >= 3
+ORDER BY d.created_at DESC;
 
 -- Comentários na tabela
 COMMENT ON TABLE dados_offline IS 'Fila de sincronização para funcionalidade offline PWA';

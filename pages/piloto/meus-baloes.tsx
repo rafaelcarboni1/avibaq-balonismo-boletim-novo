@@ -44,36 +44,27 @@ export default function MeusBaloes() {
   });
   const [submitting, setSubmitting] = useState(false);
 
-  // Verificar se usuário está autenticado e é piloto
+  // Verificar autenticação e carregar balões
   useEffect(() => {
-    if (!userLoading) {
-      if (!user) {
-        router.push('/piloto/login');
-        return;
-      }
-      // Só redireciona se o role estiver carregado E for diferente de piloto
-      if (user.role && user.role !== 'piloto') {
-        console.log('[MeusBaloes] Redirecionando - role:', user.role);
-        router.push('/');
-        return;
-      }
-    }
-  }, [user, userLoading, router]);
+    if (userLoading) return;
 
-  // Carregar balões quando o usuário estiver disponível
-  useEffect(() => {
-    if (user && user.role === 'piloto') {
-      carregarBaloes();
+    if (!user) {
+      router.push('/piloto/login');
       return;
     }
-  }, [user, userLoading, router]);
 
-  // Carregar balões do piloto
-  useEffect(() => {
-    if (user) {
+    // Só redireciona se o role estiver carregado E for diferente de piloto
+    if (user.role && user.role !== 'piloto') {
+      console.log('[MeusBaloes] Redirecionando - role:', user.role);
+      router.push('/');
+      return;
+    }
+
+    // Se chegou até aqui, usuário está autenticado e é piloto
+    if (user.role === 'piloto') {
       carregarBaloes();
     }
-  }, [user]);
+  }, [user, userLoading, router]);
 
   const carregarBaloes = async () => {
     try {

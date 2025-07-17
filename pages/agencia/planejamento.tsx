@@ -213,18 +213,23 @@ export default function PlanejamentoAgencia() {
     try {
       // Buscar voos já agendados para a data/período
       const { data: voosExistentes, error } = await supabase
-        .from('vw_voos_com_baloes')
-        .select('balao_id')
+        .from('voos')
+        .select(`
+          id,
+          voos_baloes(balao_id)
+        `)
         .eq('data_voo', formData.data_voo)
         .eq('periodo', formData.periodo)
-        .in('voo_status', ['rascunho', 'planejado', 'checklist_bloco1', 'checklist_bloco2', 'checklist_concluido']);
+        .in('status', ['rascunho', 'planejado', 'checklist_bloco1', 'checklist_bloco2', 'checklist_concluido']);
 
       if (error) {
         console.error('Erro ao verificar disponibilidade:', error);
         return;
       }
 
-      const baloesOcupados = voosExistentes?.map(v => v.balao_id).filter(Boolean) || [];
+      const baloesOcupados = voosExistentes?.flatMap(voo => 
+        voo.voos_baloes?.map(vb => vb.balao_id) || []
+      ).filter(Boolean) || [];
       setBaloesIndisponiveis(baloesOcupados);
     } catch (error) {
       console.error('Erro:', error);

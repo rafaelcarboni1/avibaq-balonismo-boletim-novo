@@ -43,34 +43,46 @@ interface VooComBaloes extends Voo {
 
 const CHECKLIST_ITEMS = {
   bloco1: [
-    'Condições meteorológicas verificadas e adequadas',
-    'Autorização de voo obtida (quando necessária)',
-    'Equipamentos de segurança verificados',
-    'Balão inspecionado visualmente',
-    'Combustível suficiente verificado',
-    'Área de decolagem adequada e segura',
-    'Passageiros briefados sobre segurança',
-    'Equipamentos de comunicação testados'
+    'Verificação de fixação e estrutura do queimador e tanques',
+    'Verificar os cabos/mosquetões do cesto',
+    'Verificar fitas de tanques bem ajustadas e presas; manter a presilha num local de acesso fácil para remoção rápida',
+    'Verificar válvulas do suspiro cheias',
+    'Garantir mangueiras com folgas para manobra necessária no queimador',
+    'Verificar mangueiras fora da borda do cesto ou em local não apropriado',
+    'Confirmar registros dos tanques devidamente fechados (linha líquida e linha vapor)',
+    'Verificar todas as conexões entre queimador e tanques bem fixadas e sem vazamento',
+    'Caso exista tanque auxiliar para inflagem, mantê-lo dentro do cockpit devidamente fixado',
+    'Verificar pressão do extintor 1 (ponteiro no verde)',
+    'Verificar pressão do extintor 2 (ponteiro no verde)',
+    'Conferir kit de primeiros socorros completo',
+    'Fazer primeiro acionamento do queimador (teste)',
+    'Esgotar (esvaziar) todo o sistema de gás após o teste'
   ],
   bloco2: [
-    'Inflagem do balão iniciada conforme procedimento',
-    'Pressão do envelope verificada',
-    'Queimador testado e funcionando',
-    'Cesta fixada corretamente',
-    'Instrumentos de voo verificados',
-    'Peso total dentro dos limites',
-    'Vento conforme para decolagem',
-    'Área livre de obstáculos confirmada'
+    'Conectar ancoragem em ponto fixo e resistente do veículo (preferir parte frontal, não carreta)',
+    'Usar sistema de desengate rápido apropriado ao tamanho do balão',
+    'Inspecionar cabos do envelope íntegros, sem desfiados, dobras ou entrelaço',
+    'Conectar cabos de forma ordenada, um de cada vez, revisando o anterior, iniciar pelos inferiores centrais',
+    'Garantir mosquetões fechados com meia volta aberta para não travar',
+    'Esticar o envelope no chão para checar integridade do tecido',
+    'Posicionar ventiladores, travar rodas; puxar cordinha para verificar rotação livre das pás',
+    'Colocar cone de segurança delimitando a área',
+    'Acionar ventiladores; atenção a cadarços, rádios, cachecóis',
+    'Orientar equipe de boca sobre cuidados, rajadas e procedimento de desligamento rápido a comando do piloto',
+    'Entrar no envelope, fechar tap, desobstruir cabos e cordins nas roldanas',
+    'Organizar e fixar cabos de tap e janelas de rotação no quadro ou cockpit',
+    'Aguardar inflagem de pelo menos 75% do envelope antes de começar a aquecer'
   ],
   bloco3: [
-    'Passageiros embarcados e posicionados',
-    'Instruções finais de segurança dadas',
-    'Comunicação com solo estabelecida',
-    'Condições finais de vento verificadas',
-    'Equipamentos de emergência a bordo',
-    'Autorização final para decolagem obtida',
-    'Checklist de pré-voo concluído',
-    'Pronto para decolagem'
+    'Rever conexões bem apertadas e posicionadas',
+    'Verificar itens obrigatórios na mala de voo: água, manta anti-chama, luvas de couro, acendedores alternativos, canivete ou faca, alicate',
+    'Instalar instrumentos de voo',
+    'Chamar passageiros para embarque',
+    'Apresentar piloto e equipamento',
+    'Confirmar com todos os passageiros que entenderam a experiência',
+    'Repetir treinamento da posição de pouso (costas para o scoop, pernas flexionadas, mãos nas alças)',
+    'Informar na frequência 142.210 MHz a decolagem da aeronave, identificando o piloto no comando',
+    'Verificar condições de vento; abortar se ultrapassarem limite'
   ]
 };
 

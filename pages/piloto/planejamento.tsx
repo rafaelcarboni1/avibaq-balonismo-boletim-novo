@@ -139,18 +139,23 @@ export default function PlanejamentoVoo() {
     try {
       // Buscar voos já agendados para a data/período
       const { data: voosExistentes, error } = await supabase
-        .from('vw_voos_com_baloes')
-        .select('balao_id')
+        .from('voos')
+        .select(`
+          id,
+          voos_baloes(balao_id)
+        `)
         .eq('data_voo', formData.data_voo)
         .eq('periodo', formData.periodo)
-        .in('voo_status', ['rascunho', 'planejado', 'checklist_bloco1', 'checklist_bloco2', 'checklist_concluido']);
+        .in('status', ['rascunho', 'planejado', 'checklist_bloco1', 'checklist_bloco2', 'checklist_concluido']);
 
       if (error) {
         console.error('Erro ao verificar disponibilidade:', error);
         return;
       }
 
-      const baloesOcupados = voosExistentes?.map(v => v.balao_id).filter(Boolean) || [];
+      const baloesOcupados = voosExistentes?.flatMap(voo => 
+        voo.voos_baloes?.map(vb => vb.balao_id) || []
+      ).filter(Boolean) || [];
       setBaloesIndisponiveis(baloesOcupados);
     } catch (error) {
       console.error('Erro:', error);
@@ -408,7 +413,7 @@ export default function PlanejamentoVoo() {
             </button>
             <button
               type="button"
-              onClick={handleNextStep}
+              onClick={step === 4 ? handleSubmit : handleNextStep}
               disabled={submitting}
               className={`px-5 py-2 rounded-lg text-white bg-primary hover:bg-primary2 disabled:opacity-50 disabled:cursor-not-allowed ${
                 submitting ? 'opacity-70' : ''
@@ -442,7 +447,7 @@ export default function PlanejamentoVoo() {
               type="date"
               id="data_voo"
               value={formData.data_voo}
-              onChange={(e) => setFormData({...formData, data_voo: e.target.value})}
+              onChange={(e) => setFormData({...formData, data_voo: (e.target as HTMLInputElement).value})}
               min={new Date().toISOString().split('T')[0]}
               required
               className="w-full p-3 bg-white text-gray-900 focus:ring-0 focus:outline-none border-0"
@@ -492,7 +497,7 @@ export default function PlanejamentoVoo() {
               type="time"
               id="horario_previsto"
               value={formData.horario_previsto}
-              onChange={(e) => setFormData({...formData, horario_previsto: e.target.value})}
+              onChange={(e) => setFormData({...formData, horario_previsto: (e.target as HTMLInputElement).value})}
               required
               className="w-full p-3 bg-white text-gray-900 focus:ring-0 focus:outline-none border-0"
             />
@@ -512,7 +517,7 @@ export default function PlanejamentoVoo() {
               type="text"
               id="local_decolagem"
               value={formData.local_decolagem_previsto}
-              onChange={(e) => setFormData({...formData, local_decolagem_previsto: e.target.value})}
+              onChange={(e) => setFormData({...formData, local_decolagem_previsto: (e.target as HTMLInputElement).value})}
               placeholder="Ex: Campo Central, Fazenda do Vento..."
               required
               className="w-full p-3 bg-white text-gray-900 focus:ring-0 focus:outline-none border-0"
@@ -528,7 +533,7 @@ export default function PlanejamentoVoo() {
           <textarea
             id="observacoes"
             value={formData.observacoes_planejamento}
-            onChange={(e) => setFormData({...formData, observacoes_planejamento: e.target.value})}
+            onChange={(e) => setFormData({...formData, observacoes_planejamento: (e.target as HTMLTextAreaElement).value})}
             placeholder="Informações adicionais sobre o voo, condições especiais, etc..."
             rows={4}
             className="w-full p-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-primary focus:border-transparent"
@@ -667,7 +672,7 @@ export default function PlanejamentoVoo() {
                       <input
                         type="number"
                         value={bs.adultos_previstos}
-                        onChange={(e) => handleUpdatePassageiros(bs.balao_id, 'adultos_previstos', parseInt(e.target.value) || 0)}
+                        onChange={(e) => handleUpdatePassageiros(bs.balao_id, 'adultos_previstos', parseInt((e.target as HTMLInputElement).value) || 0)}
                         min="0"
                         max={capacidadeEstimada}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
@@ -681,7 +686,7 @@ export default function PlanejamentoVoo() {
                       <input
                         type="number"
                         value={bs.criancas_previstas}
-                        onChange={(e) => handleUpdatePassageiros(bs.balao_id, 'criancas_previstas', parseInt(e.target.value) || 0)}
+                        onChange={(e) => handleUpdatePassageiros(bs.balao_id, 'criancas_previstas', parseInt((e.target as HTMLInputElement).value) || 0)}
                         min="0"
                         max={Math.max(0, capacidadeEstimada - bs.adultos_previstos)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"

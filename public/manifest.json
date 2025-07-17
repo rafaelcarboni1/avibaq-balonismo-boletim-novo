@@ -1,0 +1,213 @@
+{
+  "name": "AVIBAQ - Balonismo Boletim",
+  "short_name": "AVIBAQ",
+  "description": "Sistema de gerenciamento de voos de balão da AVIBAQ - Praia Grande/SC",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "pt-BR",
+  "categories": ["aviation", "business", "productivity"],
+  "icons": [
+    {
+      "src": "/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "maskable any"
+    },
+    {
+      "src": "/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Dashboard Piloto",
+      "short_name": "Dashboard",
+      "description": "Acesso rápido ao dashboard do piloto",
+      "url": "/piloto/dashboard",
+      "icons": [
+        {
+          "src": "/icon-96x96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Novo Voo",
+      "short_name": "Novo Voo",
+      "description": "Planejar novo voo",
+      "url": "/piloto/planejamento",
+      "icons": [
+        {
+          "src": "/icon-96x96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Meus Balões",
+      "short_name": "Balões",
+      "description": "Gerenciar balões cadastrados",
+      "url": "/piloto/meus-baloes",
+      "icons": [
+        {
+          "src": "/icon-96x96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Boletim Atual",
+      "short_name": "Boletim",
+      "description": "Ver boletim meteorológico atual",
+      "url": "/",
+      "icons": [
+        {
+          "src": "/icon-96x96.png",
+          "sizes": "96x96",
+          "type": "image/png"
+        }
+      ]
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-1.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Dashboard do Piloto"
+    },
+    {
+      "src": "/screenshot-2.png",
+      "sizes": "1024x768",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "Planejamento de Voo"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "protocols": [
+    {
+      "protocol": "web+avibaq",
+      "url": "/?action=%s"
+    }
+  ],
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "launch_handler": {
+    "client_mode": ["navigate-existing", "navigate-new"]
+  },
+  "file_handlers": [
+    {
+      "action": "/upload",
+      "accept": {
+        "image/*": [".jpg", ".jpeg", ".png", ".webp"],
+        "application/pdf": [".pdf"],
+        "application/gpx+xml": [".gpx"]
+      }
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "file",
+          "accept": ["image/*", "application/pdf", "application/gpx+xml"]
+        }
+      ]
+    }
+  },
+  "capabilities": [
+    "background-sync",
+    "push-messaging",
+    "local-storage",
+    "geolocation",
+    "camera",
+    "file-system-access"
+  ],
+  "permissions": [
+    "geolocation",
+    "push",
+    "background-sync",
+    "storage"
+  ],
+  "features": [
+    {
+      "name": "offline-support",
+      "description": "Funciona completamente offline com sincronização automática"
+    },
+    {
+      "name": "realtime-weather",
+      "description": "Boletins meteorológicos em tempo real"
+    },
+    {
+      "name": "safety-checklist",
+      "description": "Checklist de segurança obrigatório em 3 blocos"
+    },
+    {
+      "name": "flight-tracking",
+      "description": "Rastreamento completo de voos do planejamento à finalização"
+    },
+    {
+      "name": "multi-balloon",
+      "description": "Suporte a voos com múltiplos balões"
+    }
+  ],
+  "display_override": ["window-controls-overlay", "minimal-ui"],
+  "handle_links": "auto",
+  "iarc_rating_id": "e84b072d-71b3-4d3e-86ae-31a8ce4e53b7",
+  "id": "avibaq-balonismo-boletim"
+}
