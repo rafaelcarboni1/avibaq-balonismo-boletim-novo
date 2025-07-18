@@ -172,9 +172,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     console.log('📦 [UPLOAD] Tipo extraído:', tipo);
     console.log('📦 [UPLOAD] File extraído:', file ? `${file.originalFilename} (${file.size} bytes)` : 'Não encontrado');
+    
+    // Log detalhado do arquivo
+    if (file) {
+      console.log('📦 [UPLOAD] Detalhes completos do arquivo:', {
+        originalFilename: file.originalFilename,
+        mimetype: file.mimetype,
+        size: file.size,
+        filepath: file.filepath,
+        newFilename: file.newFilename,
+        lastModifiedDate: file.lastModifiedDate
+      });
+    }
 
     if (!file || !tipo) {
-      return res.status(400).json({ error: 'Arquivo e tipo são obrigatórios' });
+      console.log('❌ [UPLOAD] Arquivo ou tipo faltando:', { file: !!file, tipo });
+      return res.status(400).json({ 
+        error: 'Arquivo e tipo são obrigatórios',
+        received: { file: !!file, tipo, fields: Object.keys(fields || {}), files: Object.keys(files || {}) }
+      });
     }
 
     // Validar tipo de anexo
@@ -196,16 +212,52 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
+    // Validar se arquivo existe e é legível
+    console.log('📁 [UPLOAD] Verificando arquivo no filesystem...');
+    try {
+      const stats = fs.statSync(file.filepath);
+      console.log('📁 [UPLOAD] Arquivo válido:', {
+        size: stats.size,
+        path: file.filepath,
+        isFile: stats.isFile()
+      });
+    } catch (fsError) {
+      console.error('❌ [UPLOAD] Erro ao acessar arquivo:', fsError);
+      return res.status(400).json({ 
+        error: 'Arquivo não pode ser acessado',
+        details: fsError instanceof Error ? fsError.message : String(fsError)
+      });
+    }
+
     // Ler o arquivo
-    const fileBuffer = fs.readFileSync(file.filepath);
+    console.log('📁 [UPLOAD] Lendo arquivo do filesystem...');
+    let fileBuffer;
+    try {
+      fileBuffer = fs.readFileSync(file.filepath);
+      console.log('📁 [UPLOAD] Arquivo lido com sucesso, tamanho:', fileBuffer.length);
+    } catch (readError) {
+      console.error('❌ [UPLOAD] Erro ao ler arquivo:', readError);
+      return res.status(500).json({ 
+        error: 'Erro ao ler arquivo',
+        details: readError instanceof Error ? readError.message : String(readError)
+      });
+    }
     
     // Gerar nome único
     const fileExt = path.extname(file.originalFilename || '');
     const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}${fileExt}`;
     const storagePath = `voos/${vooId}/${fileName}`;
 
+    console.log('📁 [UPLOAD] Preparando upload para Storage:', {
+      storagePath,
+      fileName,
+      originalName: file.originalFilename,
+      size: fileBuffer.length,
+      contentType: file.mimetype
+    });
+
     // Upload para o Supabase Storage
-    console.log('Iniciando upload para Storage:', storagePath);
+    console.log('☁️ [UPLOAD] Iniciando upload para Storage:', storagePath);
     const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
       .from('voos-anexos')
       .upload(storagePath, fileBuffer, {
@@ -214,19 +266,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
 
     if (uploadError) {
-      console.error('Erro no upload para Storage:', uploadError);
-      console.error('Detalhes do erro:', JSON.stringify(uploadError, null, 2));
-      return res.status(500).json({ error: `Erro no upload: ${uploadError.message}` });
+      console.error('❌ [UPLOAD] Erro no upload para Storage:', uploadError);
+      console.error('❌ [UPLOAD] Detalhes completos do erro:', JSON.stringify(uploadError, null, 2));
+      console.error('❌ [UPLOAD] Código do erro:', uploadError.statusCode);
+      console.error('❌ [UPLOAD] Nome do erro:', uploadError.name);
+      return res.status(500).json({ 
+        error: `Erro no upload para Storage: ${uploadError.message}`,
+        storageError: uploadError
+      });
     }
     
-    console.log('Upload para Storage concluído:', uploadData);
+    console.log('✅ [UPLOAD] Upload para Storage concluído com sucesso:', {
+      path: uploadData?.path,
+      id: uploadData?.id,
+      fullPath: uploadData?.fullPath
+    });
 
     // Obter URL pública
+    console.log('🔗 [UPLOAD] Gerando URL pública...');
     const { data: { publicUrl } } = supabaseAdmin.storage
       .from('voos-anexos')
       .getPublicUrl(storagePath);
+    
+    console.log('🔗 [UPLOAD] URL pública gerada:', publicUrl);
 
-    // Salvar registro no banco
+    // Preparar registro do banco
     const anexoRecord = {
       voo_id: vooId,
       tipo,
@@ -238,7 +302,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       uploaded_por: user.id
     };
     
-    console.log('Salvando anexo no banco:', JSON.stringify(anexoRecord, null, 2));
+    console.log('🗄️ [UPLOAD] Preparando inserção no banco:', JSON.stringify(anexoRecord, null, 2));
+    
+    // Verificar se tabela voos_anexos é acessível
+    try {
+      const { count, error: countError } = await supabaseAdmin
+        .from('voos_anexos')
+        .select('*', { count: 'exact', head: true });
+      
+      if (countError) {
+        console.error('❌ [UPLOAD] Erro ao acessar tabela voos_anexos:', countError);
+        throw countError;
+      }
+      
+      console.log('🗄️ [UPLOAD] Tabela voos_anexos acessível, registros existentes:', count);
+    } catch (tableError) {
+      console.error('❌ [UPLOAD] Erro crítico ao acessar tabela:', tableError);
+      return res.status(500).json({ 
+        error: 'Erro ao acessar tabela de anexos',
+        details: tableError instanceof Error ? tableError.message : String(tableError)
+      });
+    }
+    
+    // Salvar registro no banco
+    console.log('🗄️ [UPLOAD] Iniciando inserção no banco...');
     
     const { data: anexoData, error: anexoError } = await supabaseAdmin
       .from('voos_anexos')
@@ -247,14 +334,34 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .single();
 
     if (anexoError) {
-      console.error('Erro ao salvar anexo no banco:', anexoError);
-      console.error('Detalhes do erro:', JSON.stringify(anexoError, null, 2));
+      console.error('❌ [UPLOAD] ERRO ao salvar anexo no banco:', anexoError);
+      console.error('❌ [UPLOAD] Código do erro do banco:', anexoError.code);
+      console.error('❌ [UPLOAD] Mensagem do erro:', anexoError.message);
+      console.error('❌ [UPLOAD] Detalhes completos:', JSON.stringify(anexoError, null, 2));
+      console.error('❌ [UPLOAD] Hint do erro:', anexoError.hint);
+      
       // Tentar remover o arquivo do storage se falhou ao salvar no banco
-      await supabaseAdmin.storage.from('voos-anexos').remove([storagePath]);
-      return res.status(500).json({ error: `Erro ao salvar anexo: ${anexoError.message}` });
+      console.log('🧹 [UPLOAD] Removendo arquivo do Storage devido ao erro no banco...');
+      try {
+        await supabaseAdmin.storage.from('voos-anexos').remove([storagePath]);
+        console.log('🧹 [UPLOAD] Arquivo removido do Storage');
+      } catch (removeError) {
+        console.error('❌ [UPLOAD] Erro ao remover arquivo do Storage:', removeError);
+      }
+      
+      return res.status(500).json({ 
+        error: `Erro ao salvar anexo no banco: ${anexoError.message}`,
+        code: anexoError.code,
+        hint: anexoError.hint,
+        dbError: anexoError
+      });
     }
     
-    console.log('Anexo salvo no banco com sucesso:', anexoData?.id);
+    console.log('✅ [UPLOAD] Anexo salvo no banco com sucesso!', {
+      id: anexoData?.id,
+      voo_id: anexoData?.voo_id,
+      nome_arquivo: anexoData?.nome_arquivo
+    });
 
     // Limpar arquivo temporário
     fs.unlinkSync(file.filepath);
