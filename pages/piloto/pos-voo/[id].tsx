@@ -4,7 +4,7 @@ import { CloudArrowUpIcon, DocumentIcon, PhotoIcon, MapIcon, ClockIcon, UsersIco
 import { EnhancedDashboardLayout } from '../../../src/components/magicui/enhanced-dashboard-layout';
 import { MagicCard } from '../../../src/components/magicui/magic-card';
 import { supabase } from '../../../src/integrations/supabase/client';
-import { uploadFileSecure, deleteFileSecure } from '../../../src/lib/supabase-upload';
+// Removido import de deleteFileSecure - agora usando API routes
 import { useUser } from '../../../src/hooks/useUser';
 import { useToast } from '../../../src/hooks/use-toast';
 import { formatDateSafe } from '../../../src/utils/dateUtils';
@@ -322,55 +322,44 @@ export default function PosVoo() {
         return;
       }
 
-      // Usar o cliente de upload seguro
-      const result = await uploadFileSecure({
-        file,
-        bucket: 'voos-anexos',
-        path: `voos/${id}/${tipo}`,
-        userId: user.id,
-        allowedTypes: {
-          track_log: ['application/gpx+xml', 'text/xml', 'application/xml', 'text/plain', 'image/png', 'image/jpeg', 'image/jpg'],
-          foto_voo: ['image/jpeg', 'image/png', 'image/webp', 'image/heic'],
-          regulamento_assinado: ['application/pdf', 'image/jpeg', 'image/png', 'image/heic']
-        }[tipo] || [],
-        maxSizeBytes: 10 * 1024 * 1024 // 10MB
-      });
-
-      if (!result.success) {
-        toast({
-          title: "Erro no upload",
-          description: result.error,
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Salvar no banco
-      const { data: anexoData, error: anexoError } = await supabase
-        .from('voos_anexos')
-        .insert([{
-          voo_id: id,
-          tipo,
-          nome_arquivo: file.name,
-          url_storage: result.url,
-          tamanho_bytes: file.size,
-          mime_type: file.type,
-          uploaded_por: user.id
-        }])
-        .select()
-        .single();
-
-      if (anexoError) {
-        console.error('Erro ao salvar anexo:', anexoError);
+      // Obter token de autenticação
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
         toast({
           title: "Erro",
-          description: "Erro ao salvar informações do arquivo",
+          description: "Sessão expirada. Faça login novamente.",
           variant: "destructive"
         });
         return;
       }
 
-      setAnexos(prev => [anexoData, ...prev]);
+      // Criar FormData para envio
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('tipo', tipo);
+
+      // Fazer upload via API route
+      const response = await fetch(`/api/voos/${id}/anexos/upload`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: formData
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        toast({
+          title: "Erro no upload",
+          description: result.error || 'Erro desconhecido',
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Atualizar lista de anexos
+      setAnexos(prev => [result.anexo, ...prev]);
       
       toast({
         title: "Upload concluído",
@@ -401,33 +390,37 @@ export default function PosVoo() {
         return;
       }
 
-      // Usar o cliente de exclusão seguro
-      const result = await deleteFileSecure({
-        url: fileUrl,
-        bucket: 'voos-anexos',
-        userId: user.id
-      });
-
-      if (!result.success) {
-        console.error('Erro ao deletar do storage:', result.error);
-      }
-
-      // Remover do banco
-      const { error: dbError } = await supabase
-        .from('voos_anexos')
-        .delete()
-        .eq('id', anexoId);
-
-      if (dbError) {
-        console.error('Erro ao deletar do banco:', dbError);
+      // Obter token de autenticação
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
         toast({
           title: "Erro",
-          description: "Erro ao deletar arquivo",
+          description: "Sessão expirada. Faça login novamente.",
           variant: "destructive"
         });
         return;
       }
 
+      // Deletar via API route
+      const response = await fetch(`/api/voos/anexos/${anexoId}/delete`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        toast({
+          title: "Erro ao deletar",
+          description: result.error || 'Erro desconhecido',
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Atualizar lista de anexos
       setAnexos(prev => prev.filter(a => a.id !== anexoId));
       
       toast({
@@ -438,6 +431,11 @@ export default function PosVoo() {
 
     } catch (error) {
       console.error('Erro:', error);
+      toast({
+        title: "Erro",
+        description: "Erro inesperado ao deletar arquivo",
+        variant: "destructive"
+      });
     }
   };
 
