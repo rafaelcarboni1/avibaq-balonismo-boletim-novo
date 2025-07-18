@@ -26,20 +26,29 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 const supabase = createClient(supabaseUrl, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  console.log('🚀 [UPLOAD] Iniciando handler de upload');
-  console.log('🚀 [UPLOAD] Método:', req.method);
-  
-  if (req.method !== 'POST') {
-    console.log('❌ [UPLOAD] Método não permitido:', req.method);
-    return res.status(405).json({ error: 'Método não permitido' });
-  }
+  // Garantir que sempre há uma resposta mesmo em caso de timeout
+  const timeoutId = setTimeout(() => {
+    if (!res.headersSent) {
+      console.error('⏰ [UPLOAD] TIMEOUT - Forçando resposta de erro');
+      res.status(504).json({ error: 'Timeout - operação muito lenta' });
+    }
+  }, 8000); // 8 segundos de timeout
 
   try {
+    console.log('🚀 [UPLOAD] Iniciando handler de upload');
+    console.log('🚀 [UPLOAD] Método:', req.method);
+    
+    if (req.method !== 'POST') {
+      console.log('❌ [UPLOAD] Método não permitido:', req.method);
+      clearTimeout(timeoutId);
+      return res.status(405).json({ error: 'Método não permitido' });
+    }
     const { id: vooId } = req.query;
     console.log('🚀 [UPLOAD] Voo ID:', vooId);
 
     if (!vooId || typeof vooId !== 'string') {
       console.log('❌ [UPLOAD] ID do voo inválido:', vooId);
+      clearTimeout(timeoutId);
       return res.status(400).json({ error: 'ID do voo é obrigatório' });
     }
 
@@ -48,6 +57,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       console.log('❌ [UPLOAD] Token não fornecido ou formato inválido');
+      clearTimeout(timeoutId);
       return res.status(401).json({ error: 'Token de autenticação necessário' });
     }
 
@@ -58,6 +68,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (authError || !user) {
       console.log('❌ [UPLOAD] Erro de autenticação:', authError?.message || 'Usuário não encontrado');
+      clearTimeout(timeoutId);
       return res.status(401).json({ error: 'Token inválido' });
     }
     
@@ -312,8 +323,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log('🎉 [UPLOAD] Upload completo com sucesso!');
     console.log('🎉 [UPLOAD] Anexo ID:', anexoData?.id);
-    console.log('🎉 [UPLOAD] URL:', anexoData?.url_storage);
     
+    clearTimeout(timeoutId);
     return res.status(200).json({
       success: true,
       anexo: anexoData
@@ -321,6 +332,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   } catch (error) {
     console.error('💥 [UPLOAD] ERRO CRÍTICO no upload:', error instanceof Error ? error.message : String(error));
+    
+    clearTimeout(timeoutId);
     
     // Evitar que a resposta seja enviada se os headers já foram enviados
     if (!res.headersSent) {
@@ -330,5 +343,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     } else {
       console.error('💥 [UPLOAD] Headers já enviados, não é possível enviar resposta de erro');
     }
+  } finally {
+    // Garantir que o timeout seja sempre limpo
+    clearTimeout(timeoutId);
   }
 }
