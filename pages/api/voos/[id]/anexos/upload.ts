@@ -26,6 +26,18 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 const supabase = createClient(supabaseUrl, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  console.log('🚀 [UPLOAD] INÍCIO ABSOLUTO DA FUNÇÃO');
+  
+  // RESPOSTA IMEDIATA PARA TESTAR
+  if (req.query.test === 'immediate') {
+    console.log('🧪 [UPLOAD] Resposta de teste imediata');
+    return res.status(200).json({ 
+      success: true, 
+      message: 'Resposta imediata funcionando',
+      timestamp: new Date().toISOString()
+    });
+  }
+
   // Garantir que sempre há uma resposta mesmo em caso de timeout
   const timeoutId = setTimeout(() => {
     if (!res.headersSent) {
@@ -37,6 +49,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     console.log('🚀 [UPLOAD] Iniciando handler de upload');
     console.log('🚀 [UPLOAD] Método:', req.method);
+    console.log('🚀 [UPLOAD] URL completa:', req.url);
+    console.log('🚀 [UPLOAD] Content-Length:', req.headers['content-length']);
     
     if (req.method !== 'POST') {
       console.log('❌ [UPLOAD] Método não permitido:', req.method);

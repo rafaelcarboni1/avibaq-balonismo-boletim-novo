@@ -4,5 +4,14 @@
       "path": "/api/send-boletim",
       "schedule": "0 22 * * *"
     }
-  ]
+  ],
+  "functions": {
+    "pages/api/voos/[id]/anexos/upload.ts": {
+      "maxDuration": 30
+    },
+    "pages/api/**/*.ts": {
+      "maxDuration": 15
+    }
+  },
+  "regions": ["gru1"]
 }

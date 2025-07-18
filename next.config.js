@@ -13,6 +13,14 @@ const nextConfig = {
       },
     ],
   },
+  // Configurações de API para evitar timeouts
+  api: {
+    bodyParser: {
+      sizeLimit: '10mb', // Aumenta limite de tamanho
+    },
+    responseLimit: false, // Remove limite de resposta
+    externalResolver: true, // Permite resolvers externos
+  },
 };
 
 module.exports = nextConfig;
