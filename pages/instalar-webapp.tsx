@@ -134,35 +134,67 @@ export default function InstalarWebApp() {
         </div>
 
         <div className="max-w-4xl mx-auto px-4 py-8">
-          {/* Status do App */}
-          {isInstalled && (
-            <div className="mb-8 p-6 bg-green-50 border border-green-200 rounded-xl">
-              <div className="flex items-center gap-3">
-                <ShieldCheckIcon className="h-8 w-8 text-green-600" />
-                <div>
-                  <h2 className="text-lg font-semibold text-green-800">App Já Instalado!</h2>
-                  <p className="text-green-700">O AVIBAQ WebApp já está instalado em seu dispositivo.</p>
+          {/* Hero Section com Botão Principal */}
+          <div className="text-center mb-12">
+            <div className="mb-8">
+              <ArrowDownTrayIcon className="h-20 w-20 text-blue-600 mx-auto mb-6" />
+              <h2 className="text-3xl font-bold text-gray-900 mb-4">Instale o App AVIBAQ</h2>
+              <p className="text-xl text-gray-600 mb-8">Acesso rápido, funciona offline e sempre atualizado</p>
+            </div>
+
+            {/* Status do App */}
+            {isInstalled ? (
+              <div className="mb-8 p-8 bg-green-50 border border-green-200 rounded-2xl">
+                <div className="flex flex-col items-center gap-4">
+                  <ShieldCheckIcon className="h-16 w-16 text-green-600" />
+                  <div>
+                    <h3 className="text-2xl font-semibold text-green-800 mb-2">App Já Instalado!</h3>
+                    <p className="text-green-700 text-lg">O AVIBAQ WebApp já está instalado em seu dispositivo.</p>
+                  </div>
+                  <button
+                    onClick={() => router.back()}
+                    className="mt-4 px-8 py-4 bg-green-600 text-white rounded-xl font-semibold hover:bg-green-700 transition-colors text-lg"
+                  >
+                    Voltar ao App
+                  </button>
                 </div>
               </div>
-            </div>
-          )}
-
-          {/* Botão de Instalação */}
-          {isInstallable && !isInstalled && (
-            <div className="mb-8 p-6 bg-blue-50 border border-blue-200 rounded-xl">
-              <div className="text-center">
-                <ArrowDownTrayIcon className="h-16 w-16 text-blue-600 mx-auto mb-4" />
-                <h2 className="text-xl font-semibold text-blue-800 mb-2">Pronto para Instalar!</h2>
-                <p className="text-blue-700 mb-4">Clique no botão abaixo para instalar o app em seu dispositivo</p>
-                <button
-                  onClick={handleInstallClick}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
-                >
-                  Instalar Agora
-                </button>
+            ) : isInstallable ? (
+              <div className="mb-8 p-8 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-2xl">
+                <div className="text-center">
+                  <div className="mb-6">
+                    <div className="inline-flex items-center justify-center w-20 h-20 bg-blue-100 rounded-full mb-4">
+                      <ArrowDownTrayIcon className="h-12 w-12 text-blue-600" />
+                    </div>
+                    <h3 className="text-2xl font-semibold text-blue-800 mb-2">Pronto para Instalar!</h3>
+                    <p className="text-blue-700 text-lg mb-6">Seu dispositivo suporta instalação automática</p>
+                  </div>
+                  <button
+                    onClick={handleInstallClick}
+                    className="px-12 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all transform hover:scale-105 text-xl shadow-lg"
+                  >
+                    🚀 Instalar Agora
+                  </button>
+                  <p className="text-sm text-gray-600 mt-4">Instalação com um clique • Sem downloads • Seguro</p>
+                </div>
               </div>
-            </div>
-          )}
+            ) : (
+              <div className="mb-8 p-8 bg-yellow-50 border border-yellow-200 rounded-2xl">
+                <div className="text-center">
+                  <div className="mb-6">
+                    <div className="inline-flex items-center justify-center w-20 h-20 bg-yellow-100 rounded-full mb-4">
+                      <DevicePhoneMobileIcon className="h-12 w-12 text-yellow-600" />
+                    </div>
+                    <h3 className="text-2xl font-semibold text-yellow-800 mb-2">Instalação Manual</h3>
+                    <p className="text-yellow-700 text-lg mb-6">Siga as instruções abaixo para instalar em seu dispositivo</p>
+                  </div>
+                  <div className="inline-flex items-center gap-2 px-6 py-3 bg-yellow-100 rounded-lg">
+                    <span className="text-yellow-800 font-semibold">📱 Veja as instruções abaixo</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          }
 
           {/* Benefícios */}
           <div className="mb-8">
