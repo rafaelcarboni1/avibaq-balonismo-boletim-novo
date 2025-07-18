@@ -268,7 +268,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (uploadError) {
       console.error('❌ [UPLOAD] Erro no upload para Storage:', uploadError);
       console.error('❌ [UPLOAD] Detalhes completos do erro:', JSON.stringify(uploadError, null, 2));
-      console.error('❌ [UPLOAD] Código do erro:', uploadError.statusCode);
       console.error('❌ [UPLOAD] Nome do erro:', uploadError.name);
       return res.status(500).json({ 
         error: `Erro no upload para Storage: ${uploadError.message}`,
