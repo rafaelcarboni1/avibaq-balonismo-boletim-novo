@@ -11,24 +11,30 @@ import { Analytics } from '@vercel/analytics/react';
 const queryClient = new QueryClient();
 
 function MyApp({ Component, pageProps }: AppProps) {
-  // Clean up any existing service workers from PWA implementation
+  // Register service worker for PWA
   useEffect(() => {
     if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(function(registrations) {
-        for (let registration of registrations) {
-          registration.unregister().then(function(boolean) {
-            console.log('Service worker unregistered:', boolean);
-          });
-        }
-      });
+      navigator.serviceWorker.register('/sw.js')
+        .then((registration) => {
+          console.log('Service Worker registered:', registration);
+        })
+        .catch((error) => {
+          console.log('Service Worker registration failed:', error);
+        });
     }
   }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <Head>
         <link rel="icon" href="/favicon.ico" />
+        <link rel="manifest" href="/manifest.json" />
         <meta name="description" content="Sistema de registro e controle de voos de balonismo da AVIBAQ" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#2563eb" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="AVIBAQ" />
+        <link rel="apple-touch-icon" href="/icon-192x192.png" />
       </Head>
       <TooltipProvider>
         <Toaster />
@@ -40,4 +46,4 @@ function MyApp({ Component, pageProps }: AppProps) {
   );
 }
 
-export default MyApp; 
+export default MyApp;

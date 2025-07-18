@@ -23,7 +23,8 @@ import {
   CalendarIcon,
   EnvelopeIcon,
   TruckIcon,
-  MapIcon
+  MapIcon,
+  ArrowDownTrayIcon
 } from "@heroicons/react/24/outline";
 
 interface NavigationItem {
@@ -203,13 +204,29 @@ export default function EnhancedSidebar({
         })}
       </nav>
 
-      {/* Logout button */}
+      {/* Install WebApp button */}
       <div className="p-4 border-t border-gray-200/50">
+        <Link
+          href="/instalar-webapp"
+          className={cn(
+            "flex items-center gap-3 px-3 py-3 w-full rounded-xl mb-3",
+            "text-blue-600 hover:bg-blue-50 hover:text-blue-700 transition-all duration-200"
+          )}
+        >
+          <ArrowDownTrayIcon className="h-5 w-5" />
+          {(!isCollapsed || isMobile) && (
+            <span className="text-sm font-medium">
+              Instalar WebApp
+            </span>
+          )}
+        </Link>
+
+        {/* Logout button */}
         <button
           onClick={handleLogout}
           className={cn(
           "flex items-center gap-3 px-3 py-3 w-full rounded-xl",
-          "text-red-600 hover:bg-red-50 hover:text-red-700"
+          "text-red-600 hover:bg-red-50 hover:text-red-700 transition-all duration-200"
         )}
         >
           <ArrowLeftOnRectangleIcon className="h-5 w-5" />
