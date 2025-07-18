@@ -22,8 +22,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(405).json({ error: "Método não permitido" });
     }
 
-    const form = new formidable.IncomingForm();
-    form.maxFileSize = 5 * 1024 * 1024; // 5MB
+    const form = new formidable.IncomingForm({
+      maxTotalFileSize: 5 * 1024 * 1024, // 5MB
+      maxFileSize: 5 * 1024 * 1024 // 5MB por arquivo
+    });
 
     form.parse(req, async (err, fields, files) => {
       if (err) {
@@ -36,7 +38,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const {
           nome_completo, email, telefone, tipo, cpf, cnpj, nome_empresa, rbac103, rbac91, qtd_baloes, volumes_baloes, observacoes
         } = fields;
-        const comprovante = files.comprovante as formidable.File;
+        const comprovante = Array.isArray(files.comprovante) ? files.comprovante[0] : files.comprovante as formidable.File;
         if (!comprovante) {
           console.error('[API] Comprovante não enviado');
           return res.status(400).json({ error: "Comprovante obrigatório" });
@@ -107,4 +109,4 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.error('[API] Erro inesperado externo:', e);
     return res.status(500).json({ error: "Erro inesperado externo" });
   }
-} 
+}
