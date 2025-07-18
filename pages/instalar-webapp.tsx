@@ -194,7 +194,7 @@ export default function InstalarWebApp() {
                 </div>
               </div>
             )}
-          }
+          </div>
 
           {/* Benefícios */}
           <div className="mb-8">
