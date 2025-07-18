@@ -7,6 +7,7 @@ import { BentoGrid, BentoGridItem } from '../../src/components/magicui/bento-gri
 import { supabase } from '../../src/integrations/supabase/client';
 import { useUser } from '../../src/hooks/useUser';
 import { useToast } from '../../src/hooks/use-toast';
+import { formatDateSafe } from '../../src/utils/dateUtils';
 
 interface Balao {
   id: string;
@@ -763,7 +764,7 @@ export default function PlanejamentoVoo() {
               <div>
                 <h4 className="font-semibold text-gray-700">Dados do Voo</h4>
                 <div className="mt-2 space-y-1 text-sm">
-                  <p><strong>Data:</strong> {new Date(formData.data_voo).toLocaleDateString('pt-BR')}</p>
+                  <p><strong>Data:</strong> {formatDateSafe(formData.data_voo)}</p>
                   <p><strong>Período:</strong> {formData.periodo === 'manha' ? 'Manhã' : 'Tarde'}</p>
                   <p><strong>Horário:</strong> {formData.horario_previsto}</p>
                   <p><strong>Local:</strong> {formData.local_decolagem_previsto}</p>

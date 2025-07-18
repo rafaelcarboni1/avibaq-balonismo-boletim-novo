@@ -15,6 +15,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { supabase } from '../integrations/supabase/client';
 import { useToast } from '../hooks/use-toast';
+import { formatDateSafe, isDatePast } from '../utils/dateUtils';
 
 interface VooEmAndamentoProps {
   voo: {
@@ -107,7 +108,7 @@ export default function VooEmAndamento({ voo, showPilotInfo = false, compact = f
   };
 
   const config = statusConfig[voo.status];
-  const isVooPassado = new Date(voo.data_voo) < new Date();
+  const isVooPassado = isDatePast(voo.data_voo);
   const totalPassageiros = (voo.adultos_previstos || 0) + (voo.criancas_previstas || 0);
 
   const handleAction = (action: string) => {
@@ -194,7 +195,7 @@ export default function VooEmAndamento({ voo, showPilotInfo = false, compact = f
             <div className="flex items-center gap-2 mb-1">
               <CalendarIcon className="h-4 w-4 text-gray-500" />
               <span className="font-medium text-sm">
-                {new Date(voo.data_voo).toLocaleDateString('pt-BR')}
+                {formatDateSafe(voo.data_voo)}
               </span>
               <span className="text-sm text-gray-600">
                 {voo.periodo === 'manha' ? 'Manhã' : 'Tarde'}
@@ -299,7 +300,7 @@ export default function VooEmAndamento({ voo, showPilotInfo = false, compact = f
             <CalendarIcon className="h-5 w-5 text-gray-500" />
             <div>
               <span className="font-medium">
-                {new Date(voo.data_voo).toLocaleDateString('pt-BR')}
+                {formatDateSafe(voo.data_voo)}
               </span>
               <span className="text-gray-600 ml-2">
                 {voo.periodo === 'manha' ? 'Manhã' : 'Tarde'}
@@ -409,7 +410,7 @@ export default function VooEmAndamento({ voo, showPilotInfo = false, compact = f
                   Tem certeza que deseja cancelar este voo? Esta ação não pode ser desfeita.
                 </p>
                 <div className="bg-gray-50 p-3 rounded-lg text-sm">
-                  <strong>Voo:</strong> {new Date(voo.data_voo).toLocaleDateString('pt-BR')} - {voo.periodo === 'manha' ? 'Manhã' : 'Tarde'}
+                  <strong>Voo:</strong> {formatDateSafe(voo.data_voo)} - {voo.periodo === 'manha' ? 'Manhã' : 'Tarde'}
                   <br />
                   <strong>Local:</strong> {voo.local_decolagem_previsto}
                   <br />

@@ -17,6 +17,7 @@ import { useRouterDebug } from '../../src/hooks/useRouterDebug';
 import VooEmAndamento from '../../src/components/VooEmAndamento';
 import VoosStatistics from '../../src/components/VoosStatistics';
 import VoosCharts from '../../src/components/VoosCharts';
+import { formatDateSafe } from '../../src/utils/dateUtils';
 
 // Lazy load dos componentes pesados
 const AdvancedKPICard = dynamic(() => import('../../src/components/magicui/advanced-kpi-analytics').then(mod => ({ default: mod.AdvancedKPICard })), {
@@ -372,7 +373,7 @@ export default function PilotoDashboard() {
                         <div className="flex-1">
                           <div className="flex items-center gap-3 mb-2">
                             <h4 className="text-lg font-semibold text-gray-900">
-                              {new Date(voo.data_voo).toLocaleDateString('pt-BR')}
+                              {formatDateSafe(voo.data_voo)}
                             </h4>
                             <span className={`px-3 py-1 rounded-full text-sm font-medium ${
                               voo.status === 'planejado' ? 'bg-blue-100 text-blue-800' :
@@ -460,7 +461,7 @@ export default function PilotoDashboard() {
                     <div className="flex justify-between items-start">
                       <div>
                         <p className="font-medium">
-                          {new Date(stats.proximoVoo.data_voo).toLocaleDateString('pt-BR')}
+                          {formatDateSafe(stats.proximoVoo.data_voo)}
                         </p>
                         <p className="text-sm text-gray-600">
                           {stats.proximoVoo.periodo === 'manha' ? 'Manhã' : 'Tarde'} • {stats.proximoVoo.horario_previsto}
@@ -527,7 +528,7 @@ export default function PilotoDashboard() {
                       <div key={voo.id} className="flex justify-between items-center p-3 bg-white rounded-lg border border-gray-100 hover:shadow-sm transition-shadow">
                         <div>
                           <p className="font-medium text-sm">
-                            {new Date(voo.data_voo).toLocaleDateString('pt-BR')}
+                            {formatDateSafe(voo.data_voo)}
                           </p>
                           <p className="text-xs text-gray-500">
                             {voo.periodo === 'manha' ? 'Manhã' : 'Tarde'} • {voo.local_decolagem_previsto}

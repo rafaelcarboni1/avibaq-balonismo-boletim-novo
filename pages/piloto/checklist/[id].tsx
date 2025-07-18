@@ -6,6 +6,7 @@ import { MagicCard } from '../../../src/components/magicui/magic-card';
 import { supabase } from '../../../src/integrations/supabase/client';
 import { useUser } from '../../../src/hooks/useUser';
 import { useToast } from '../../../src/hooks/use-toast';
+import { formatDateSafe } from '../../../src/utils/dateUtils';
 
 interface ChecklistItem {
   id: string;
@@ -443,7 +444,7 @@ export default function ChecklistVoo() {
             <div>
               <h2 className="text-xl font-semibold">Checklist de Segurança</h2>
               <p className="text-gray-600">
-                {new Date(voo.data_voo).toLocaleDateString('pt-BR')} - {voo.periodo === 'manha' ? 'Manhã' : 'Tarde'}
+                {formatDateSafe(voo.data_voo)} - {voo.periodo === 'manha' ? 'Manhã' : 'Tarde'}
               </p>
             </div>
             <div className="text-right">
