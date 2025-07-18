@@ -9,6 +9,12 @@ const STATIC_CACHE_FILES = [
   '/manifest.json',
   '/favicon.ico',
   '/offline.html',
+  '/piloto/dashboard',
+  '/piloto/login',
+  '/agencia/dashboard',
+  '/agencia/login',
+  '/admin/dashboard',
+  '/admin/login',
   '/_next/static/css/app.css',
   '/_next/static/chunks/polyfills.js',
   '/_next/static/chunks/webpack.js',
@@ -22,8 +28,16 @@ const OFFLINE_ROUTES = [
   '/piloto/checklist',
   '/piloto/pos-voo',
   '/piloto/meus-baloes',
+  '/piloto/planejamento',
+  '/piloto/convites',
   '/agencia/dashboard',
-  '/admin/dashboard'
+  '/agencia/frota',
+  '/agencia/pilotos',
+  '/agencia/planejamento',
+  '/admin/dashboard',
+  '/admin/usuarios',
+  '/admin/boletins',
+  '/admin/associados'
 ];
 
 // Instalar Service Worker
@@ -185,7 +199,12 @@ async function networkFirstWithOfflinePage(request) {
       url.pathname.startsWith(route)
     );
     
-    if (isOfflineRoute) {
+    // Verificar rotas dinâmicas específicas
+    const isDynamicOfflineRoute = 
+      /^\/piloto\/(checklist|pos-voo)\/[^/]+$/.test(url.pathname) ||
+      /^\/admin\/(boletins|usuarios)\/[^/]+/.test(url.pathname);
+    
+    if (isOfflineRoute || isDynamicOfflineRoute) {
       // Retornar página offline customizada
       const offlinePage = await caches.match('/offline.html');
       if (offlinePage) {
