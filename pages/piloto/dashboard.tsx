@@ -78,7 +78,7 @@ export default function PilotoDashboard() {
     if (user.role === 'piloto') {
       carregarDashboard();
     }
-  }, [user, userLoading, router]);
+  }, [user, userLoading]); // Removido router das dependências
 
   const carregarDashboard = async () => {
     try {
@@ -142,7 +142,7 @@ export default function PilotoDashboard() {
         // Próximo voo
         supabase
           .from('voos')
-          .select('*, agencia:membros!voos_agencia_id_fkey(nome)')
+          .select('*, agencia:membros!voos_agencia_id_fkey(nome_completo)')
           .eq('piloto_id', membro.id)
           .gte('data_voo', new Date().toISOString().split('T')[0])
           .order('data_voo', { ascending: true })
@@ -152,7 +152,7 @@ export default function PilotoDashboard() {
         // Voos recentes (últimos 5) - apenas finalizados e cancelados
         supabase
           .from('voos')
-          .select('*, agencia:membros!voos_agencia_id_fkey(nome)')
+          .select('*, agencia:membros!voos_agencia_id_fkey(nome_completo)')
           .eq('piloto_id', membro.id)
           .in('status', ['finalizado', 'cancelado'])
           .order('data_voo', { ascending: false })
@@ -161,13 +161,19 @@ export default function PilotoDashboard() {
         // Voos em andamento (rascunho até checklist_concluido)
         supabase
           .from('voos')
-          .select('*, agencia:membros!voos_agencia_id_fkey(nome)')
+          .select('*, agencia:membros!voos_agencia_id_fkey(nome_completo)')
           .eq('piloto_id', membro.id)
           .in('status', ['rascunho', 'planejado', 'checklist_bloco1', 'checklist_bloco2', 'checklist_concluido'])
           .order('data_voo', { ascending: true })
       ]);
 
-      setStats({
+      // Debug logs para investigar o problema
+      console.log('[Dashboard Debug] Membro ID:', membro.id);
+      console.log('[Dashboard Debug] Voos em andamento result:', voosEmAndamentoResult);
+      console.log('[Dashboard Debug] Voos em andamento data:', voosEmAndamentoResult.data);
+      console.log('[Dashboard Debug] Voos em andamento error:', voosEmAndamentoResult.error);
+      
+      const statsData = {
         totalBaloes: baloesResult.data?.length || 0,
         voosEsteAno: voosAnoResult.data?.length || 0,
         voosEsteMes: voosMesResult.data?.length || 0,
@@ -175,7 +181,10 @@ export default function PilotoDashboard() {
         proximoVoo: proximoVooResult.data || null,
         voosRecentes: voosRecentesResult.data || [],
         voosEmAndamento: voosEmAndamentoResult.data || []
-      });
+      };
+      
+      console.log('[Dashboard Debug] Stats finais:', statsData);
+      setStats(statsData);
 
     } catch (error) {
       console.error('Erro ao carregar dashboard:', error);
@@ -417,13 +426,11 @@ export default function PilotoDashboard() {
                         )}
                         {voo.status === 'rascunho' && (
                           <button
-                            onClick={() => router.push(`/piloto/planejamento?edit=${voo.id}`)}
+                            onClick={() => router.push(`/piloto/checklist/${voo.id}`)}
                             className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors flex items-center gap-2"
                           >
-                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                            Continuar Planejamento
+                            <ClipboardDocumentListIcon className="h-4 w-4" />
+                            Iniciar Checklist
                           </button>
                         )}
                         <button

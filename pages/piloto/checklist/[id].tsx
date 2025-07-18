@@ -9,13 +9,13 @@ import { useToast } from '../../../src/hooks/use-toast';
 
 interface ChecklistItem {
   id: string;
-  bloco: 'bloco1' | 'bloco2' | 'bloco3';
+  bloco: number;
   item_numero: number;
-  item_descricao: string;
+  descricao: string;
   marcado: boolean;
   motivo_nao_marcado: string | null;
-  preenchido_em: string | null;
-  preenchido_por: string | null;
+  marcado_em: string | null;
+  marcado_por: string | null;
 }
 
 interface Voo {
@@ -95,7 +95,7 @@ export default function ChecklistVoo() {
   const [voo, setVoo] = useState<VooComBaloes | null>(null);
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [currentBloco, setCurrentBloco] = useState<'bloco1' | 'bloco2' | 'bloco3'>('bloco1');
+  const [currentBloco, setCurrentBloco] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [autoSaving, setAutoSaving] = useState(false);
 
@@ -105,7 +105,7 @@ export default function ChecklistVoo() {
       router.push('/login');
       return;
     }
-  }, [user, userLoading, router]);
+  }, [user, userLoading]); // Removido router das dependências
 
   // Carregar dados do voo e checklist
   useEffect(() => {
@@ -238,12 +238,13 @@ export default function ChecklistVoo() {
 
       // Criar itens para todos os blocos
       Object.entries(CHECKLIST_ITEMS).forEach(([bloco, items]) => {
+        const blocoNum = bloco === 'bloco1' ? 1 : bloco === 'bloco2' ? 2 : 3;
         items.forEach((descricao, index) => {
           itensParaCriar.push({
             voo_id: id,
-            bloco: bloco as 'bloco1' | 'bloco2' | 'bloco3',
+            bloco: blocoNum,
             item_numero: index + 1,
-            item_descricao: descricao,
+            descricao: descricao,
             marcado: false,
             motivo_nao_marcado: null
           });
@@ -272,8 +273,8 @@ export default function ChecklistVoo() {
 
       const updateData: any = {
         marcado,
-        preenchido_em: new Date().toISOString(),
-        preenchido_por: user?.id
+        marcado_em: new Date().toISOString(),
+        marcado_por: user?.id
       };
 
       if (!marcado && motivo) {
@@ -305,8 +306,8 @@ export default function ChecklistVoo() {
                 ...item, 
                 marcado, 
                 motivo_nao_marcado: updateData.motivo_nao_marcado,
-                preenchido_em: updateData.preenchido_em,
-                preenchido_por: updateData.preenchido_por
+                marcado_em: updateData.marcado_em,
+                marcado_por: updateData.marcado_por
               }
             : item
         )
@@ -340,11 +341,11 @@ export default function ChecklistVoo() {
 
       // Atualizar status do voo
       let novoStatus = '';
-      if (currentBloco === 'bloco1') {
+      if (currentBloco === 1) {
         novoStatus = 'checklist_bloco1';
-      } else if (currentBloco === 'bloco2') {
+      } else if (currentBloco === 2) {
         novoStatus = 'checklist_bloco2';
-      } else if (currentBloco === 'bloco3') {
+      } else if (currentBloco === 3) {
         novoStatus = 'checklist_concluido';
       }
 
@@ -365,15 +366,15 @@ export default function ChecklistVoo() {
 
       toast({
         title: "Bloco concluído",
-        description: `${currentBloco.toUpperCase()} do checklist foi concluído com sucesso`,
+        description: `Bloco ${currentBloco} do checklist foi concluído com sucesso`,
         variant: "default"
       });
 
       // Avançar para próximo bloco ou finalizar
-      if (currentBloco === 'bloco1') {
-        setCurrentBloco('bloco2');
-      } else if (currentBloco === 'bloco2') {
-        setCurrentBloco('bloco3');
+      if (currentBloco === 1) {
+        setCurrentBloco(2);
+      } else if (currentBloco === 2) {
+        setCurrentBloco(3);
       } else {
         // Checklist concluído, redirecionar
         router.push('/piloto/dashboard');
@@ -391,28 +392,28 @@ export default function ChecklistVoo() {
     }
   };
 
-  const getItemsBloco = (bloco: 'bloco1' | 'bloco2' | 'bloco3') => {
+  const getItemsBloco = (bloco: number) => {
     return checklistItems.filter(item => item.bloco === bloco);
   };
 
-  const getBlocoProgress = (bloco: 'bloco1' | 'bloco2' | 'bloco3') => {
+  const getBlocoProgress = (bloco: number) => {
     const items = getItemsBloco(bloco);
     if (items.length === 0) return 0;
     
-    const preenchidos = items.filter(item => item.marcado || item.motivo_nao_marcado?.trim());
-    return Math.round((preenchidos.length / items.length) * 100);
+    const marcados = items.filter(item => item.marcado);
+    return Math.round((marcados.length / items.length) * 100);
   };
 
-  const canCompleteBloco = (bloco: 'bloco1' | 'bloco2' | 'bloco3') => {
+  const canCompleteBloco = (bloco: number) => {
     const items = getItemsBloco(bloco);
     return items.every(item => item.marcado || item.motivo_nao_marcado?.trim());
   };
 
-  const getBlocoTitle = (bloco: 'bloco1' | 'bloco2' | 'bloco3') => {
+  const getBlocoTitle = (bloco: number) => {
     switch (bloco) {
-      case 'bloco1': return 'Bloco 1 - Preparação e Verificações Iniciais';
-      case 'bloco2': return 'Bloco 2 - Preparação do Balão';
-      case 'bloco3': return 'Bloco 3 - Verificações Finais e Decolagem';
+      case 1: return 'Bloco 1 - Preparação e Verificações Iniciais';
+      case 2: return 'Bloco 2 - Preparação do Balão';
+      case 3: return 'Bloco 3 - Verificações Finais e Decolagem';
       default: return '';
     }
   };
@@ -497,7 +498,7 @@ export default function ChecklistVoo() {
         {/* Navegação entre blocos */}
         <div className="bg-white rounded-xl border border-gray-200 p-6">
           <div className="grid md:grid-cols-3 gap-4">
-            {(['bloco1', 'bloco2', 'bloco3'] as const).map((bloco, index) => {
+            {[1, 2, 3].map((bloco, index) => {
               const progress = getBlocoProgress(bloco);
               const isActive = currentBloco === bloco;
               const isCompleted = progress === 100;
@@ -515,7 +516,7 @@ export default function ChecklistVoo() {
                   }`}
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-semibold">Bloco {index + 1}</span>
+                    <span className="font-semibold">Bloco {bloco}</span>
                     {isCompleted && <CheckCircleIcon className="h-5 w-5 text-green-600" />}
                   </div>
                   <div className="text-sm text-gray-600 mb-2">
@@ -566,9 +567,9 @@ export default function ChecklistVoo() {
             >
               {submitting ? 'Salvando...' : (
                 <>
-                  {currentBloco === 'bloco3' ? 'Finalizar Checklist' : 'Concluir Bloco'}
-                  {currentBloco !== 'bloco3' && <ArrowRightIcon className="h-4 w-4" />}
-                  {currentBloco === 'bloco3' && <CheckIcon className="h-4 w-4" />}
+                  {currentBloco === 3 ? 'Finalizar Checklist' : 'Concluir Bloco'}
+                  {currentBloco !== 3 && <ArrowRightIcon className="h-4 w-4" />}
+                  {currentBloco === 3 && <CheckIcon className="h-4 w-4" />}
                 </>
               )}
             </button>
@@ -628,7 +629,7 @@ function ChecklistItemComponent({ item, onChange }: ChecklistItemComponentProps)
             disabled={showMotivoInput}
           />
           <span className={`${item.marcado ? 'line-through text-gray-600' : ''}`}>
-            {item.item_descricao}
+            {item.descricao}
           </span>
         </div>
         

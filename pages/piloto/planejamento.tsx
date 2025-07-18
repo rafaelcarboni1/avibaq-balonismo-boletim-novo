@@ -67,7 +67,7 @@ export default function PlanejamentoVoo() {
         return;
       }
     }
-  }, [user, userLoading, router]);
+  }, [user, userLoading]); // Removido router das dependências
 
   // Carregar balões do piloto
   useEffect(() => {

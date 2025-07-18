@@ -91,7 +91,7 @@ export default function PosVoo() {
       router.push('/login');
       return;
     }
-  }, [user, userLoading, router]);
+  }, [user, userLoading]); // Removido router das dependências
 
   // Carregar dados do voo e anexos
   useEffect(() => {
@@ -251,9 +251,9 @@ export default function PosVoo() {
 
       // Validar tipo de arquivo
       const allowedTypes: Record<string, string[]> = {
-        track_log: ['application/gpx+xml', 'text/xml', 'application/xml', 'text/plain'],
-        foto_voo: ['image/jpeg', 'image/png', 'image/webp'],
-        regulamento_assinado: ['application/pdf']
+        track_log: ['application/gpx+xml', 'text/xml', 'application/xml', 'text/plain', 'image/png', 'image/jpeg', 'image/jpg'],
+        foto_voo: ['image/jpeg', 'image/png', 'image/webp', 'image/heic'],
+        regulamento_assinado: ['application/pdf', 'image/jpeg', 'image/png', 'image/heic']
       };
 
       if (!allowedTypes[tipo].includes(file.type)) {
