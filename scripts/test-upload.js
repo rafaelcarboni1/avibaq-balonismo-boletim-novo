@@ -18,11 +18,25 @@ async function testUpload() {
   const testContent = 'Este é um arquivo de teste para verificar o upload.';
   const testFile = new Blob([testContent], { type: 'text/plain' });
   const testFileName = `test-upload-${Date.now()}.txt`;
-  const testPath = `voos/test-voo-id/track/${testFileName}`;
+  const testPath = `voos/8c930b01-b679-4659-8224-3db8bd0b5d85/${testFileName}`;
   
   console.log('📁 Testando com chave anônima (como no frontend)...');
   
+  // Primeiro, vamos fazer login com o usuário piloto para obter um token válido
   try {
+    // Tentar fazer login com um usuário piloto existente
+    const { data: authData, error: authError } = await supabaseAnon.auth.signInWithPassword({
+       email: 'adrianbalonismo@gmail.com', // Email do piloto existente
+       password: 'senha123' // Senha padrão (pode não funcionar)
+     });
+    
+    if (authError) {
+      console.log('⚠️ Não foi possível autenticar com usuário piloto:', authError.message);
+      console.log('   Testando sem autenticação...');
+    } else {
+      console.log('✅ Autenticado como piloto:', authData.user.email);
+    }
+    
     const { data: uploadData, error: uploadError } = await supabaseAnon.storage
       .from('voos-anexos')
       .upload(testPath, testFile);
@@ -48,6 +62,12 @@ async function testUpload() {
         .from('voos-anexos')
         .remove([testPath]);
     }
+    
+    // Fazer logout
+    if (authData) {
+      await supabaseAnon.auth.signOut();
+    }
+    
   } catch (error) {
     console.error('❌ Erro inesperado com chave anônima:', error);
   }

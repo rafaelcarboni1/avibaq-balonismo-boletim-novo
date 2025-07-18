@@ -121,7 +121,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Gerar nome único
     const fileExt = path.extname(file.originalFilename || '');
     const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}${fileExt}`;
-    const storagePath = `voos/${vooId}/${tipo}/${fileName}`;
+    const storagePath = `voos/${vooId}/${fileName}`;
 
     // Upload para o Supabase Storage
     const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
