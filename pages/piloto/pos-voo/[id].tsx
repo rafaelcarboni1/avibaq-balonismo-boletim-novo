@@ -326,7 +326,7 @@ export default function PosVoo() {
       const result = await uploadFileSecure({
         file,
         bucket: 'voos-anexos',
-        path: `${id}/${tipo}`,
+        path: `voos/${id}/${tipo}`,
         userId: user.id,
         allowedTypes: {
           track_log: ['application/gpx+xml', 'text/xml', 'application/xml', 'text/plain', 'image/png', 'image/jpeg', 'image/jpg'],
@@ -351,8 +351,8 @@ export default function PosVoo() {
         .insert([{
           voo_id: id,
           tipo,
-          nome_arquivo: result.path.split('/').pop() || file.name,
-          url_storage: result.path,
+          nome_arquivo: file.name,
+          url_storage: result.url,
           tamanho_bytes: file.size,
           mime_type: file.type,
           uploaded_por: user.id

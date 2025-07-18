@@ -18,8 +18,9 @@ export function middleware(request: NextRequest) {
   // façam suas próprias verificações de autenticação
   // TODO: Implementar verificação correta de cookies do Supabase
   
-  console.log('[Middleware] Pathname:', pathname);
-  console.log('[Middleware] Cookies:', request.cookies.getAll().map(c => c.name));
+  // Logs desabilitados temporariamente para evitar reload infinito
+  // console.log('[Middleware] Pathname:', pathname);
+  // console.log('[Middleware] Cookies:', request.cookies.getAll().map(c => c.name));
   
   return NextResponse.next();
 }
