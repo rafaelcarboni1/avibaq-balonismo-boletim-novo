@@ -42,6 +42,11 @@ interface DashboardStats {
   voosEmAndamento: any[];
 }
 
+interface OfflineData extends DashboardStats {
+  timestamp: string;
+  userId: string;
+}
+
 export default function PilotoDashboard() {
   const router = useRouterDebug();
   const { user, loading: userLoading } = useUser();
@@ -59,7 +64,7 @@ export default function PilotoDashboard() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'analytics' | 'voos'>('overview');
   const [isOnline, setIsOnline] = useState(true);
-  const [offlineData, setOfflineData] = useState<DashboardStats | null>(null);
+  const [offlineData, setOfflineData] = useState<OfflineData | null>(null);
 
   // Monitorar status de conexão
   useEffect(() => {
@@ -294,7 +299,7 @@ export default function PilotoDashboard() {
       };
 
       setStats(offlineStats);
-      setOfflineData(offlineStats);
+      setOfflineData(parsed); // Usar os dados completos com timestamp
       
       toast({
         title: "Modo offline",
