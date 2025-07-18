@@ -311,9 +311,11 @@ export default function PosVoo() {
 
   const handleFileUpload = async (file: File, tipo: 'track_log' | 'foto_voo' | 'regulamento_assinado') => {
     try {
+      console.log('🎯 [FRONTEND] Iniciando upload:', file.name, tipo);
       setUploading(true);
 
       if (!user?.id) {
+        console.log('❌ [FRONTEND] Usuário não autenticado');
         toast({
           title: "Erro",
           description: "Usuário não autenticado",
@@ -322,9 +324,13 @@ export default function PosVoo() {
         return;
       }
 
+      console.log('✅ [FRONTEND] Usuário autenticado:', user.email);
+
       // Obter token de autenticação
+      console.log('🔐 [FRONTEND] Obtendo session...');
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.access_token) {
+        console.log('❌ [FRONTEND] Sessão não encontrada');
         toast({
           title: "Erro",
           description: "Sessão expirada. Faça login novamente.",
@@ -333,12 +339,23 @@ export default function PosVoo() {
         return;
       }
 
+      console.log('✅ [FRONTEND] Session obtida, token:', session.access_token.substring(0, 20) + '...');
+
       // Criar FormData para envio
+      console.log('📦 [FRONTEND] Criando FormData...');
       const formData = new FormData();
       formData.append('file', file);
       formData.append('tipo', tipo);
 
+      console.log('📦 [FRONTEND] FormData criado:', {
+        file: file.name,
+        tipo: tipo,
+        size: file.size,
+        type: file.type
+      });
+
       // Fazer upload via API route
+      console.log('🚀 [FRONTEND] Enviando requisição para API...');
       const response = await fetch(`/api/voos/${id}/anexos/upload`, {
         method: 'POST',
         headers: {
@@ -347,9 +364,13 @@ export default function PosVoo() {
         body: formData
       });
 
+      console.log('📡 [FRONTEND] Resposta recebida:', response.status, response.statusText);
+
       const result = await response.json();
+      console.log('📡 [FRONTEND] Resultado:', result);
 
       if (!response.ok) {
+        console.log('❌ [FRONTEND] Upload falhou:', response.status, result.error);
         toast({
           title: "Erro no upload",
           description: result.error || 'Erro desconhecido',
@@ -358,6 +379,8 @@ export default function PosVoo() {
         return;
       }
 
+      console.log('✅ [FRONTEND] Upload bem-sucedido!');
+      
       // Atualizar lista de anexos
       setAnexos(prev => [result.anexo, ...prev]);
       
@@ -368,13 +391,15 @@ export default function PosVoo() {
       });
 
     } catch (error) {
-      console.error('Erro:', error);
+      console.error('💥 [FRONTEND] ERRO no upload:', error);
+      console.error('💥 [FRONTEND] Stack:', error.stack);
       toast({
         title: "Erro",
         description: "Erro inesperado no upload",
         variant: "destructive"
       });
     } finally {
+      console.log('🔄 [FRONTEND] Finalizando upload...');
       setUploading(false);
     }
   };
