@@ -99,18 +99,45 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'Voo deve estar com checklist concluído' });
     }
 
+    // Verificar Content-Type
+    const contentType = req.headers['content-type'] || '';
+    console.log('📦 [UPLOAD] Content-Type recebido:', contentType);
+    
+    if (!contentType.includes('multipart/form-data')) {
+      console.log('❌ [UPLOAD] Content-Type inválido, esperado multipart/form-data');
+      return res.status(415).json({ 
+        error: 'Content-Type deve ser multipart/form-data',
+        received: contentType 
+      });
+    }
+
     // Parse do formulário multipart
     console.log('📦 [UPLOAD] Parseando formulário multipart...');
-    const form = formidable({
-      uploadDir: '/tmp',
-      keepExtensions: true,
-      maxFileSize: 10 * 1024 * 1024, // 10MB
-    });
-
-    // Parse do formulário usando Promise
-    const [fields, files] = await form.parse(req);
     
-    console.log('📦 [UPLOAD] Fields recebidos:', fields);
+    let fields, files;
+    try {
+      const form = formidable({
+        uploadDir: '/tmp',
+        keepExtensions: true,
+        maxFileSize: 10 * 1024 * 1024, // 10MB
+        multiples: false,
+        // Configurações adicionais para melhor compatibilidade
+        allowEmptyFiles: false,
+        minFileSize: 1,
+      });
+
+      [fields, files] = await form.parse(req);
+      console.log('📦 [UPLOAD] Parse bem-sucedido');
+      
+    } catch (parseError) {
+      console.log('💥 [UPLOAD] Erro no parse do formidable:', parseError);
+      return res.status(400).json({ 
+        error: 'Erro ao processar formulário multipart',
+        details: parseError.message 
+      });
+    }
+    
+    console.log('📦 [UPLOAD] Fields recebidos:', Object.keys(fields || {}));
     console.log('📦 [UPLOAD] Files recebidos:', Object.keys(files || {}));
     
     const tipo = Array.isArray(fields.tipo) ? fields.tipo[0] : fields.tipo;

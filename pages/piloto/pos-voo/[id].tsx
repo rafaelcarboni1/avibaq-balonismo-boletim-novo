@@ -356,17 +356,35 @@ export default function PosVoo() {
 
       // Fazer upload via API route
       console.log('🚀 [FRONTEND] Enviando requisição para API...');
+      console.log('🚀 [FRONTEND] URL:', `/api/voos/${id}/anexos/upload`);
+      
       const response = await fetch(`/api/voos/${id}/anexos/upload`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`
+          // NÃO definir Content-Type - deixar o navegador definir automaticamente para FormData
         },
         body: formData
       });
 
       console.log('📡 [FRONTEND] Resposta recebida:', response.status, response.statusText);
+      console.log('📡 [FRONTEND] Headers da resposta:', Object.fromEntries(response.headers.entries()));
 
-      const result = await response.json();
+      let result;
+      try {
+        const responseText = await response.text();
+        console.log('📡 [FRONTEND] Texto da resposta:', responseText);
+        
+        if (responseText) {
+          result = JSON.parse(responseText);
+        } else {
+          result = { error: 'Resposta vazia do servidor' };
+        }
+      } catch (jsonError) {
+        console.log('💥 [FRONTEND] Erro ao parsear JSON:', jsonError);
+        result = { error: 'Resposta inválida do servidor' };
+      }
+      
       console.log('📡 [FRONTEND] Resultado:', result);
 
       if (!response.ok) {
