@@ -12,11 +12,11 @@ import { CheckCircle, XCircle, Download, Calendar, User, Building, ChevronLeft, 
 import RequireAdmin from "../../src/components/RequireAdmin";
 import { useUser } from "../../src/hooks/useUser";
 import { Resend } from 'resend';
-import EnhancedDashboardLayout from "@/components/magicui/enhanced-dashboard-layout";
-import EnhancedKpiCard from "@/components/magicui/enhanced-kpi-card";
+import SimpleDashboardLayout from "@/components/SimpleDashboardLayout";
+import SimpleKpiCard from "@/components/SimpleKpiCard";
 import LoadingSkeleton from "@/components/magicui/loading-skeleton";
-import { StaggerContainer, StaggerItem } from "@/components/magicui/smooth-transitions";
-import { motion } from "framer-motion";
+
+
 
 type Membro = {
   id: string;
@@ -515,7 +515,7 @@ export default function AdminAssociados() {
 
   if (loading) {
     return (
-      <EnhancedDashboardLayout title="Associados" breadcrumbs={[{ label: "Associados", icon: Users }]}>
+      <SimpleDashboardLayout title="Associados" breadcrumbs={[{ label: "Associados", icon: Users }]}>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="bg-white rounded-2xl p-6 border border-gray-200/50">
@@ -526,7 +526,7 @@ export default function AdminAssociados() {
         <div className="bg-white rounded-2xl p-6 border border-gray-200/50">
           <LoadingSkeleton variant="table" />
         </div>
-      </EnhancedDashboardLayout>
+      </SimpleDashboardLayout>
     );
   }
 
@@ -536,7 +536,7 @@ export default function AdminAssociados() {
 
   return (
     <RequireAdmin>
-      <EnhancedDashboardLayout 
+      <SimpleDashboardLayout 
         title="Gerenciar Associados"
         breadcrumbs={[
           { label: "Dashboard", href: "/admin/dashboard" },
@@ -551,54 +551,48 @@ export default function AdminAssociados() {
         <div className="space-y-8">
           {/* KPI Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <EnhancedKpiCard 
+            <SimpleKpiCard 
               title="Total de Membros"
               value={membros.length}
               icon={Users}
               color="blue"
-              trend="up"
-              trendValue={`+${membros.filter(m => new Date(m.created_at).getMonth() === new Date().getMonth()).length} este mês`}
+              trend={{
+                value: membros.filter(m => new Date(m.created_at).getMonth() === new Date().getMonth()).length,
+                label: "este mês",
+                direction: "up"
+              }}
               description="Total de associados"
-              delay={0}
             />
-            <EnhancedKpiCard 
+            <SimpleKpiCard 
               title="Pendentes"
               value={membrosPendentes.length}
               icon={CheckCircle}
               color="yellow"
-              trend={membrosPendentes.length > 0 ? "up" : "neutral"}
-              trendValue={membrosPendentes.length > 0 ? "Requer atenção" : "Em dia"}
+              trend={membrosPendentes.length > 0 ? {
+                value: 0,
+                label: "Requer atenção",
+                direction: "neutral"
+              } : undefined}
               description="Aguardando aprovação"
-              delay={0.05}
             />
-            <EnhancedKpiCard 
+            <SimpleKpiCard 
               title="Ativos"
               value={membrosAtivos.length}
               icon={User}
               color="green"
-              trend="up"
-              trendValue="Membros ativos"
               description="Com status ativo"
-              delay={0.1}
             />
-            <EnhancedKpiCard 
+            <SimpleKpiCard 
               title="Empresas"
               value={membros.filter(m => m.tipo === 'agencia').length}
               icon={Building}
               color="purple"
-              trend="neutral"
-              trendValue="Agências"
               description="Empresas parceiras"
-              delay={0.15}
             />
           </div>
 
           {/* Tabs com design moderno */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.2 }}
-          >
+          <div>
             <Tabs defaultValue="pendentes" className="w-full">
               <TabsList className="grid w-full grid-cols-3 bg-gray-100/50 p-1 rounded-xl">
                 <TabsTrigger 
@@ -631,12 +625,7 @@ export default function AdminAssociados() {
               </TabsList>
 
               <TabsContent value="pendentes" className="mt-6">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="bg-white/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 shadow-lg"
-                >
+                <div className="bg-white/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 shadow-lg">
                   <div className="p-6 border-b border-gray-200/50">
                     <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                       <CheckCircle className="h-5 w-5 text-yellow-500" />
@@ -653,13 +642,9 @@ export default function AdminAssociados() {
                         <p className="text-gray-400 text-sm mt-2">Todos os cadastros foram processados</p>
                       </div>
                     ) : (
-                      <StaggerContainer>
+                      <div className="space-y-4">
                         {membrosPendentes.map((membro, index) => (
-                          <StaggerItem key={membro.id}>
-                            <motion.div
-                              whileHover={{ scale: 1.01 }}
-                              className="bg-gradient-to-r from-white to-yellow-50/30 rounded-xl border border-yellow-200/50 p-6 shadow-sm hover:shadow-md transition-all duration-200 mb-4"
-                            >
+                            <div className="bg-gradient-to-r from-white to-yellow-50/30 rounded-xl border border-yellow-200/50 p-6 shadow-sm hover:shadow-md transition-all duration-200 mb-4">
                               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                 <div className="flex items-center space-x-4 min-w-0 flex-1">
                                   <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center flex-shrink-0">
@@ -716,22 +701,16 @@ export default function AdminAssociados() {
                                   </Button>
                                 </div>
                               </div>
-                            </motion.div>
-                          </StaggerItem>
+                            </div>
                         ))}
-                      </StaggerContainer>
+                      </div>
                     )}
                   </div>
-                </motion.div>
+                </div>
               </TabsContent>
 
               <TabsContent value="ativos" className="mt-6">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="bg-white/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 shadow-lg"
-                >
+                <div className="bg-white/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 shadow-lg">
                   <div className="p-6 border-b border-gray-200/50">
                     <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                       <User className="h-5 w-5 text-green-500" />
@@ -747,15 +726,11 @@ export default function AdminAssociados() {
                         <p className="text-gray-500 text-lg">Nenhum associado ativo</p>
                       </div>
                     ) : (
-                      <StaggerContainer>
+                      <div className="space-y-4">
                         {membrosAtivos.map((membro, index) => {
                           const statusMensalidade = getStatusMensalidade(membro);
                           return (
-                            <StaggerItem key={membro.id}>
-                              <motion.div
-                                whileHover={{ scale: 1.01 }}
-                                className="bg-gradient-to-r from-white to-green-50/30 rounded-xl border border-green-200/50 p-6 shadow-sm hover:shadow-md transition-all duration-200 mb-4"
-                              >
+                              <div className="bg-gradient-to-r from-white to-green-50/30 rounded-xl border border-green-200/50 p-6 shadow-sm hover:shadow-md transition-all duration-200 mb-4">
                                 <div className="flex items-center justify-between">
                                   <div className="flex items-center space-x-4">
                                     <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
@@ -805,23 +780,17 @@ export default function AdminAssociados() {
                                     </Button>
                                   </div>
                                 </div>
-                              </motion.div>
-                            </StaggerItem>
+                              </div>
                           );
                         })}
-                      </StaggerContainer>
+                      </div>
                     )}
                   </div>
-                </motion.div>
+                </div>
               </TabsContent>
 
               <TabsContent value="recusados" className="mt-6">
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="bg-white/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 shadow-lg"
-                >
+                <div className="bg-white/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 shadow-lg">
                   <div className="p-6 border-b border-gray-200/50">
                     <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                       <XCircle className="h-5 w-5 text-red-500" />
@@ -837,13 +806,9 @@ export default function AdminAssociados() {
                         <p className="text-gray-500 text-lg">Nenhum associado recusado</p>
                       </div>
                     ) : (
-                      <StaggerContainer>
+                      <div className="space-y-4">
                         {membrosRecusados.map((membro, index) => (
-                          <StaggerItem key={membro.id}>
-                            <motion.div
-                              whileHover={{ scale: 1.01 }}
-                              className="bg-gradient-to-r from-white to-red-50/30 rounded-xl border border-red-200/50 p-6 shadow-sm hover:shadow-md transition-all duration-200 mb-4"
-                            >
+                            <div className="bg-gradient-to-r from-white to-red-50/30 rounded-xl border border-red-200/50 p-6 shadow-sm hover:shadow-md transition-all duration-200 mb-4">
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-4">
                                   <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
@@ -882,16 +847,15 @@ export default function AdminAssociados() {
                                   </Button>
                                 </div>
                               </div>
-                            </motion.div>
-                          </StaggerItem>
+                            </div>
                         ))}
-                      </StaggerContainer>
+                      </div>
                     )}
                   </div>
-                </motion.div>
+                </div>
               </TabsContent>
             </Tabs>
-          </motion.div>
+          </div>
         </div>
 
         {/* Dialog de Recusa */}
@@ -1199,7 +1163,7 @@ export default function AdminAssociados() {
             </div>
           </div>
         )}
-      </EnhancedDashboardLayout>
+      </SimpleDashboardLayout>
     </RequireAdmin>
   );
-} 
+}

@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
-import { motion } from 'framer-motion';
+
 import { PlusIcon, UsersIcon, CalendarIcon, DocumentTextIcon, BriefcaseIcon, ChartBarIcon, CurrencyDollarIcon, BuildingOfficeIcon, ClockIcon } from '@heroicons/react/24/solid';
 import { EnhancedDashboardLayout } from '../../src/components/magicui/enhanced-dashboard-layout';
 import { MagicCard } from '../../src/components/magicui/magic-card';
 import { BentoGrid, BentoGridItem } from '../../src/components/magicui/bento-grid';
-import EnhancedKpiCard from '../../src/components/magicui/enhanced-kpi-card';
+import SimpleKpiCard from '../../src/components/SimpleKpiCard';
 import LoadingSkeleton from '../../src/components/magicui/loading-skeleton';
-import AnimatedChart from '../../src/components/magicui/animated-chart';
+
 import { Button } from '../../src/components/ui/button';
 import { supabase } from '../../src/integrations/supabase/client';
 import { useUser } from '../../src/hooks/useUser';
@@ -261,76 +261,80 @@ export default function AgenciaDashboard() {
           <div className="space-y-8">
             {/* KPI Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <EnhancedKpiCard 
+              <SimpleKpiCard 
                 title="Total Pilotos"
                 value={stats.totalPilotos} 
                 icon={UsersIcon}
                 color="blue"
-                trend="up"
-                trendValue="+2 este mês"
                 description="Pilotos vinculados"
-                delay={0}
               />
 
-              <EnhancedKpiCard 
+              <SimpleKpiCard 
                 title="Pilotos Ativos"
                 value={stats.pilotosAtivos}
                 icon={BriefcaseIcon}
                 color="green"
-                trend="up"
-                trendValue="87% ativo"
                 description="Pilotos trabalhando"
-                delay={0.05}
               />
 
-              <EnhancedKpiCard 
+              <SimpleKpiCard 
                 title="Voos Este Ano"
                 value={stats.voosEsteAno}
                 icon={CalendarIcon}
                 color="purple"
-                trend="up"
-                trendValue="+22% vs 2023"
                 description="Operações anuais"
-                delay={0.1}
               />
 
-              <EnhancedKpiCard 
+              <SimpleKpiCard 
                 title="Voos Este Mês"
                 value={stats.voosEsteMes}
                 icon={DocumentTextIcon}
                 color="yellow"
-                trend={stats.voosEsteMes > 0 ? "up" : "neutral"}
-                trendValue={stats.voosEsteMes > 0 ? "Ativo" : "Inativo"}
                 description="Operações mensais"
-                delay={0.15}
               />
             </div>
 
-            {/* Gráficos e Analytics */}
+            {/* Estatísticas Simples */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <AnimatedChart
-                title="Receita por Mês"
-                type="line"
-                data={[
-                  { name: 'Jan', value: 32000 },
-                  { name: 'Fev', value: 28000 },
-                  { name: 'Mar', value: 35000 },
-                  { name: 'Abr', value: 42000 },
-                  { name: 'Mai', value: 48000 },
-                  { name: 'Jun', value: stats.voosEsteMes * 2500 },
-                ]}
-                colors={["#8b5cf6"]}
-              />
+              <MagicCard className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Resumo de Operações</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Voos Este Ano:</span>
+                    <span className="font-semibold">{stats.voosEsteAno} voos</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Voos Este Mês:</span>
+                    <span className="font-semibold">{stats.voosEsteMes} voos</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Total de Pilotos:</span>
+                    <span className="font-semibold">{stats.totalPilotos}</span>
+                  </div>
+                </div>
+              </MagicCard>
               
-              <AnimatedChart
-                title="Distribuição da Equipe"
-                type="pie"
-                data={[
-                  { name: 'Pilotos Ativos', value: stats.pilotosAtivos },
-                  { name: 'Convites Pendentes', value: stats.totalPilotos - stats.pilotosAtivos },
-                ]}
-                colors={["#10b981", "#f59e0b"]}
-              />
+              <MagicCard className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Status da Equipe</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Pilotos Ativos:</span>
+                    <span className="font-semibold text-green-600">{stats.pilotosAtivos}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Taxa de Atividade:</span>
+                    <span className="font-semibold">
+                      {stats.totalPilotos > 0 ? Math.round((stats.pilotosAtivos / stats.totalPilotos) * 100) : 0}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Convites Pendentes:</span>
+                    <span className={`font-semibold ${(stats.totalPilotos - stats.pilotosAtivos) > 0 ? 'text-yellow-600' : 'text-green-600'}`}>
+                      {stats.totalPilotos - stats.pilotosAtivos}
+                    </span>
+                  </div>
+                </div>
+              </MagicCard>
             </div>
             
             {/* Seção Voos em Andamento da Equipe */}
@@ -359,37 +363,28 @@ export default function AgenciaDashboard() {
         {activeTab === 'team' && (
           <div className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <EnhancedKpiCard 
+              <SimpleKpiCard 
                 title="Pilotos Ativos"
                 value={stats.pilotosAtivos} 
                 icon={UsersIcon}
                 color="green"
-                trend="up"
-                trendValue="87% da equipe"
                 description="Trabalhando ativamente"
-                delay={0}
               />
               
-              <EnhancedKpiCard 
+              <SimpleKpiCard 
                 title="Convites Pendentes"
                 value={stats.totalPilotos - stats.pilotosAtivos}
                 icon={PlusIcon}
                 color="yellow"
-                trend={stats.totalPilotos - stats.pilotosAtivos > 0 ? "up" : "neutral"}
-                trendValue={stats.totalPilotos - stats.pilotosAtivos > 0 ? "Aguardando" : "Em dia"}
                 description="Respostas pendentes"
-                delay={0.05}
               />
               
-              <EnhancedKpiCard 
+              <SimpleKpiCard 
                 title="Voos Este Mês"
                 value={stats.voosEsteMes}
                 icon={CalendarIcon}
                 color="blue"
-                trend={stats.voosEsteMes > 0 ? "up" : "neutral"}
-                trendValue="Por piloto ativo"
                 description="Produtividade da equipe"
-                delay={0.1}
               />
             </div>
           </div>

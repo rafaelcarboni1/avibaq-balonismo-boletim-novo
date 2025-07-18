@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/router";
 import { supabase } from "../../../../src/integrations/supabase/client";
-import EnhancedDashboardLayout from "../../../../src/components/magicui/enhanced-dashboard-layout";
+import SimpleDashboardLayout from "../../../../src/components/SimpleDashboardLayout";
 import LoadingSkeleton from "../../../../src/components/magicui/loading-skeleton";
 import { Button } from "../../../../src/components/ui/button";
 import { Input } from "../../../../src/components/ui/input";
@@ -9,7 +9,7 @@ import { Textarea } from "../../../../src/components/ui/textarea";
 import { Badge } from "../../../../src/components/ui/badge";
 import { toast } from "../../../../src/components/ui/sonner";
 import { Dialog, DialogContent } from "../../../../src/components/ui/dialog";
-import { motion } from "framer-motion";
+
 import { FileText, Save, X, Upload, Mic, Image, ArrowLeft } from "lucide-react";
 import { useUser } from "@/hooks/useUser";
 
@@ -302,7 +302,7 @@ export default function AdminBoletimEditForm() {
 
   if (pageLoading) {
     return (
-      <EnhancedDashboardLayout 
+      <SimpleDashboardLayout 
         title="Editar Boletim" 
         breadcrumbs={[
           { label: "Dashboard", href: "/admin/dashboard" },
@@ -315,12 +315,12 @@ export default function AdminBoletimEditForm() {
             <LoadingSkeleton variant="card" />
           </div>
         </div>
-      </EnhancedDashboardLayout>
+      </SimpleDashboardLayout>
     );
   }
 
   return (
-    <EnhancedDashboardLayout 
+    <SimpleDashboardLayout 
       title="Editar Boletim"
       breadcrumbs={[
         { label: "Dashboard", href: "/admin/dashboard" },
@@ -335,12 +335,7 @@ export default function AdminBoletimEditForm() {
       }
     >
       <div className="max-w-4xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="bg-white/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 shadow-lg"
-        >
+        <div className="bg-white/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 shadow-lg">
           <div className="p-8">
             <div className="text-center mb-8">
               <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -645,8 +640,8 @@ export default function AdminBoletimEditForm() {
               </div>
             </form>
           </div>
-        </motion.div>
+        </div>
       </div>
-    </EnhancedDashboardLayout>
+    </SimpleDashboardLayout>
   );
-} 
+}

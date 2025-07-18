@@ -5,7 +5,7 @@ import { EnhancedDashboardLayout } from '../../src/components/magicui/enhanced-d
 import { MagicCard } from '../../src/components/magicui/magic-card';
 import { NumberTicker } from '../../src/components/magicui/number-ticker';
 import { BentoGrid, BentoGridItem } from '../../src/components/magicui/bento-grid';
-import { AnimatedChart } from '../../src/components/magicui/animated-chart';
+
 import { supabase } from '../../src/integrations/supabase/client';
 import { useUser } from '../../src/hooks/useUser';
 import { useToast } from '../../src/hooks/use-toast';
@@ -452,26 +452,52 @@ export default function Frota() {
           </BentoGridItem>
         </BentoGrid>
 
-        {/* Gráficos */}
+        {/* Estatísticas da Frota */}
         {baloes.length > 0 && (
           <BentoGrid className="grid-cols-1 lg:grid-cols-2 gap-6">
             <BentoGridItem className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Distribuição de Volumes</h3>
-              <AnimatedChart
-                type="pie"
-                data={volumeChartData}
-                colors={["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6"]}
-              />
+              <h3 className="text-lg font-semibold mb-4">Resumo da Frota</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Total de Balões:</span>
+                  <span className="font-semibold">{baloes.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Balões Ativos:</span>
+                  <span className="font-semibold text-green-600">{baloesAtivos.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Balões Inativos:</span>
+                  <span className="font-semibold text-gray-600">{baloesInativos.length}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Volume Total:</span>
+                  <span className="font-semibold">{baloes.reduce((sum, b) => sum + b.volume_m3, 0).toLocaleString()} m³</span>
+                </div>
+              </div>
             </BentoGridItem>
 
             {vooStats.length > 0 && (
               <BentoGridItem className="p-6">
-                <h3 className="text-lg font-semibold mb-4">Voos por Balão</h3>
-                <AnimatedChart
-                  type="bar"
-                  data={vooChartData}
-                  colors={["#06b6d4"]}
-                />
+                <h3 className="text-lg font-semibold mb-4">Estatísticas de Voos</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Total de Voos:</span>
+                    <span className="font-semibold">{vooStats.reduce((sum, s) => sum + s.total_voos, 0)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Balão Mais Usado:</span>
+                    <span className="font-semibold">
+                      {vooStats.length > 0 ? vooStats.sort((a, b) => b.total_voos - a.total_voos)[0]?.balao_prefixo : 'N/A'}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Média por Balão:</span>
+                    <span className="font-semibold">
+                      {vooStats.length > 0 ? Math.round(vooStats.reduce((sum, s) => sum + s.total_voos, 0) / vooStats.length) : 0} voos
+                    </span>
+                  </div>
+                </div>
               </BentoGridItem>
             )}
           </BentoGrid>

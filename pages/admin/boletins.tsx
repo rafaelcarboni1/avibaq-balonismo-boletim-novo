@@ -5,15 +5,15 @@ import { Button } from "../../src/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../../src/components/ui/card";
 import { Badge } from "../../src/components/ui/badge";
 import { toast } from "../../src/components/ui/sonner";
-import { Plus, Edit, Trash2, Users, Eye, FileText } from "lucide-react";
+import { Plus, Edit, Trash2, Users, Eye, FileText, CheckCircle, Clock, Calendar } from "lucide-react";
 import RequireAdmin from "../../src/components/RequireAdmin";
 import { useUser } from "@/hooks/useUser";
-import EnhancedDashboardLayout from "@/components/magicui/enhanced-dashboard-layout";
+import SimpleDashboardLayout from "@/components/SimpleDashboardLayout";
 import { BentoGrid, BentoGridItem } from "@/components/magicui/bento-grid";
-import EnhancedKpiCard from "@/components/magicui/enhanced-kpi-card";
+import SimpleKpiCard from "@/components/SimpleKpiCard";
 import LoadingSkeleton from "@/components/magicui/loading-skeleton";
-import { StaggerContainer, StaggerItem } from "@/components/magicui/smooth-transitions";
-import { motion } from "framer-motion";
+
+
 
 type Boletim = {
   id: string;
@@ -111,7 +111,7 @@ export default function AdminBoletinsList() {
 
   if (loading) {
     return (
-      <EnhancedDashboardLayout title="Boletins" breadcrumbs={[{ label: "Boletins", icon: FileText }]}>
+      <SimpleDashboardLayout title="Boletins" breadcrumbs={[{ label: "Boletins", icon: FileText }]}>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="bg-white rounded-2xl p-6 border border-gray-200/50">
@@ -119,7 +119,7 @@ export default function AdminBoletinsList() {
             </div>
           ))}
         </div>
-      </EnhancedDashboardLayout>
+      </SimpleDashboardLayout>
     );
   }
   
@@ -129,7 +129,7 @@ export default function AdminBoletinsList() {
 
   return (
     <RequireAdmin>
-      <EnhancedDashboardLayout 
+      <SimpleDashboardLayout 
         title="Gerenciar Boletins"
         breadcrumbs={[
           { label: "Dashboard", href: "/admin/dashboard" },
@@ -150,55 +150,38 @@ export default function AdminBoletinsList() {
         <div className="space-y-8">
           {/* KPI Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <EnhancedKpiCard 
-              title="Total de Boletins"
-              value={total}
-              icon={FileText}
-              color="blue"
-              trend="neutral"
-              trendValue="Total registrado"
-              description="Boletins meteorológicos"
-              delay={0}
-            />
-            <EnhancedKpiCard 
-              title="Publicados"
-              value={boletins.filter(b => b.publicado).length}
-              icon={Eye}
-              color="green"
-              trend="up"
-              trendValue="Ativos"
-              description="Visíveis publicamente"
-              delay={0.05}
-            />
-            <EnhancedKpiCard 
-              title="Rascunhos"
-              value={boletins.filter(b => !b.publicado).length}
-              icon={Edit}
-              color="yellow"
-              trend="neutral"
-              trendValue="Pendentes"
-              description="Aguardando publicação"
-              delay={0.1}
-            />
-            <EnhancedKpiCard 
-              title="Este Mês"
-              value={boletins.filter(b => new Date(b.created_at).getMonth() === new Date().getMonth()).length}
-              icon={Plus}
-              color="purple"
-              trend="up"
-              trendValue="Recentes"
-              description="Criados recentemente"
-              delay={0.15}
-            />
+            <SimpleKpiCard 
+               title="Total de Boletins"
+               value={total}
+               icon={FileText}
+               color="blue"
+               description="Boletins meteorológicos"
+             />
+             <SimpleKpiCard 
+               title="Publicados"
+               value={boletins.filter(b => b.publicado).length}
+               icon={CheckCircle}
+               color="green"
+               description="Visíveis publicamente"
+             />
+             <SimpleKpiCard 
+               title="Rascunhos"
+               value={boletins.filter(b => !b.publicado).length}
+               icon={Clock}
+               color="yellow"
+               description="Aguardando publicação"
+             />
+             <SimpleKpiCard 
+               title="Este Mês"
+               value={boletins.filter(b => new Date(b.created_at).getMonth() === new Date().getMonth()).length}
+               icon={Calendar}
+               color="purple"
+               description="Criados recentemente"
+             />
           </div>
 
           {/* Lista de Boletins */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.2 }}
-            className="bg-white/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 shadow-lg"
-          >
+          <div className="bg-white/60 backdrop-blur-xl rounded-2xl border border-gray-200/50 shadow-lg">
             <div className="p-6 border-b border-gray-200/50">
               <h2 className="text-xl font-semibold text-gray-900">Boletins Meteorológicos</h2>
               <p className="text-gray-600 mt-1">Gerencie todos os boletins meteorológicos</p>
@@ -212,13 +195,9 @@ export default function AdminBoletinsList() {
                   <p className="text-gray-400 text-sm mt-2">Crie seu primeiro boletim meteorológico</p>
                 </div>
               ) : (
-                <StaggerContainer className="space-y-4">
+                <div className="space-y-4">
                   {boletins.map((boletim, index) => (
-                    <StaggerItem key={boletim.id}>
-                      <motion.div
-                        whileHover={{ scale: 1.01 }}
-                        className="bg-gradient-to-r from-white to-gray-50/50 rounded-xl border border-gray-200/50 p-6 shadow-sm hover:shadow-md transition-all duration-200"
-                      >
+                      <div className="bg-gradient-to-r from-white to-gray-50/50 rounded-xl border border-gray-200/50 p-6 shadow-sm hover:shadow-md transition-all duration-200">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-4">
                             <div className={`w-3 h-3 rounded-full ${getBandeiraColor(boletim.bandeira).replace('bg-', 'bg-').replace(' text-', ' ').split(' ')[0]}`} />
@@ -258,10 +237,9 @@ export default function AdminBoletinsList() {
                             </div>
                           </div>
                         </div>
-                      </motion.div>
-                    </StaggerItem>
+                      </div>
                   ))}
-                </StaggerContainer>
+                </div>
               )}
               
               {/* Paginação */}
@@ -291,22 +269,12 @@ export default function AdminBoletinsList() {
                 </div>
               )}
             </div>
-          </motion.div>
+          </div>
         </div>
         {/* Modal de Confirmação de Exclusão */}
         {showModal && boletimSelecionado && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm"
-          >
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4"
-            >
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Confirmar Exclusão</h3>
               <p className="text-gray-600 mb-6">
                 Tem certeza que deseja excluir o boletim "{boletimSelecionado.titulo_curto}"? Esta ação não pode ser desfeita.
@@ -322,10 +290,10 @@ export default function AdminBoletinsList() {
                   Excluir
                 </Button>
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         )}
-      </EnhancedDashboardLayout>
+      </SimpleDashboardLayout>
     </RequireAdmin>
   );
-} 
+}

@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
-import { motion } from 'framer-motion';
+
 import { PlusIcon, ClipboardDocumentListIcon, CalendarIcon, DocumentTextIcon, ShieldCheckIcon, ChartBarIcon, UserIcon, ClockIcon } from '@heroicons/react/24/solid';
 import { EnhancedDashboardLayout } from '../../src/components/magicui/enhanced-dashboard-layout';
 import { MagicCard } from '../../src/components/magicui/magic-card';
 import { BentoGrid, BentoGridItem } from '../../src/components/magicui/bento-grid';
-import EnhancedKpiCard from '../../src/components/magicui/enhanced-kpi-card';
+import SimpleKpiCard from '../../src/components/SimpleKpiCard';
 import LoadingSkeleton from '../../src/components/magicui/loading-skeleton';
-import AnimatedChart from '../../src/components/magicui/animated-chart';
+
 import { Button } from '../../src/components/ui/button';
 import { supabase } from '../../src/integrations/supabase/client';
 import { useUser } from '../../src/hooks/useUser';
@@ -344,24 +344,105 @@ export default function PilotoDashboard() {
 
         {activeTab === 'voos' && (
           <div className="space-y-8">
-            {/* Seção Voos em Andamento */}
-            {stats.voosEmAndamento.length > 0 && (
+            {/* Seção Voos Pendentes - Destaque para voos que precisam ser continuados */}
+            {stats.voosEmAndamento.filter(voo => ['rascunho', 'planejado', 'checklist_bloco1', 'checklist_bloco2', 'checklist_concluido'].includes(voo.status)).length > 0 && (
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-                  <ClockIcon className="h-6 w-6 text-blue-500" />
-                  Voos em Andamento ({stats.voosEmAndamento.length})
+                  <ClipboardDocumentListIcon className="h-6 w-6 text-orange-500" />
+                  Voos Pendentes ({stats.voosEmAndamento.filter(voo => ['rascunho', 'planejado', 'checklist_bloco1', 'checklist_bloco2', 'checklist_concluido'].includes(voo.status)).length})
                 </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Voos que precisam ser continuados ou finalizados
+                </p>
                 <div className="grid gap-4">
-                  {stats.voosEmAndamento.map((voo) => (
-                    <VooEmAndamento 
-                      key={voo.id} 
-                      voo={voo} 
-                      compact={false}
-                    />
+                  {stats.voosEmAndamento
+                    .filter(voo => ['rascunho', 'planejado', 'checklist_bloco1', 'checklist_bloco2', 'checklist_concluido'].includes(voo.status))
+                    .map((voo) => (
+                    <div key={voo.id} className="bg-white rounded-xl border border-orange-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h4 className="text-lg font-semibold text-gray-900">
+                              {new Date(voo.data_voo).toLocaleDateString('pt-BR')}
+                            </h4>
+                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                              voo.status === 'planejado' ? 'bg-blue-100 text-blue-800' :
+                              voo.status === 'checklist_bloco1' ? 'bg-yellow-100 text-yellow-800' :
+                              voo.status === 'checklist_bloco2' ? 'bg-yellow-100 text-yellow-800' :
+                              voo.status === 'checklist_concluido' ? 'bg-green-100 text-green-800' :
+                              'bg-gray-100 text-gray-800'
+                            }`}>
+                              {getStatusDisplay(voo.status).label}
+                            </span>
+                          </div>
+                          <div className="space-y-1 text-sm text-gray-600">
+                            <p><strong>Período:</strong> {voo.periodo === 'manha' ? 'Manhã' : 'Tarde'} • {voo.horario_previsto}</p>
+                            <p><strong>Local:</strong> {voo.local_decolagem_previsto}</p>
+                            {voo.agencia && (
+                              <p><strong>Agência:</strong> {voo.agencia.nome}</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex gap-3">
+                        {voo.status === 'checklist_concluido' && (
+                          <button
+                            onClick={() => router.push(`/piloto/pos-voo/${voo.id}`)}
+                            className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors flex items-center gap-2"
+                          >
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Finalizar Voo
+                          </button>
+                        )}
+                        {['checklist_bloco1', 'checklist_bloco2'].includes(voo.status) && (
+                          <button
+                            onClick={() => router.push(`/piloto/checklist/${voo.id}`)}
+                            className="bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-yellow-700 transition-colors flex items-center gap-2"
+                          >
+                            <ClipboardDocumentListIcon className="h-4 w-4" />
+                            Continuar Checklist
+                          </button>
+                        )}
+                        {voo.status === 'planejado' && (
+                          <button
+                            onClick={() => router.push(`/piloto/checklist/${voo.id}`)}
+                            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"
+                          >
+                            <ClipboardDocumentListIcon className="h-4 w-4" />
+                            Iniciar Checklist
+                          </button>
+                        )}
+                        {voo.status === 'rascunho' && (
+                          <button
+                            onClick={() => router.push(`/piloto/planejamento?edit=${voo.id}`)}
+                            className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors flex items-center gap-2"
+                          >
+                            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            Continuar Planejamento
+                          </button>
+                        )}
+                        <button
+                          onClick={() => router.push(`/piloto/planejamento?edit=${voo.id}`)}
+                          className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors flex items-center gap-2"
+                        >
+                          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                          Editar
+                        </button>
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
             )}
+
+
 
             <div className="grid lg:grid-cols-2 gap-6">
               {/* Próximo voo */}
@@ -477,77 +558,76 @@ export default function PilotoDashboard() {
           <div className="space-y-8">
             {/* KPI Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <EnhancedKpiCard 
+              <SimpleKpiCard 
+                title="Voos Pendentes"
+                value={stats.voosEmAndamento.filter(voo => ['rascunho', 'planejado', 'checklist_bloco1', 'checklist_bloco2', 'checklist_concluido'].includes(voo.status)).length}
+                icon={ClipboardDocumentListIcon}
+                color="orange"
+                description="Precisam ser continuados"
+              />
+
+              <SimpleKpiCard 
                 title="Balões Ativos"
                 value={stats.totalBaloes} 
                 icon={UserIcon}
                 color="blue"
-                trend="neutral"
-                trendValue="Frota pessoal"
                 description="Balões cadastrados"
-                delay={0}
               />
 
-              <EnhancedKpiCard 
+              <SimpleKpiCard 
                 title="Voos Este Ano"
                 value={stats.voosEsteAno}
                 icon={CalendarIcon}
                 color="green"
-                trend="up"
-                trendValue="+15% vs 2023"
                 description="Total de voos realizados"
-                delay={0.05}
               />
 
-              <EnhancedKpiCard 
-                title="Voos Este Mês"
-                value={stats.voosEsteMes}
-                icon={DocumentTextIcon}
-                color="purple"
-                trend={stats.voosEsteMes > 0 ? "up" : "neutral"}
-                trendValue={stats.voosEsteMes > 0 ? "Ativo" : "Inativo"}
-                description="Atividade mensal"
-                delay={0.1}
-              />
-
-              <EnhancedKpiCard 
+              <SimpleKpiCard 
                 title="Convites Pendentes"
                 value={stats.convitesPendentes}
                 icon={ClipboardDocumentListIcon}
                 color="yellow"
-                trend={stats.convitesPendentes > 0 ? "up" : "neutral"}
-                trendValue={stats.convitesPendentes > 0 ? "Requer atenção" : "Em dia"}
                 description="Convites de agências"
-                delay={0.15}
               />
             </div>
 
-            {/* Gráficos e Analytics */}
+            {/* Estatísticas Simples */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <AnimatedChart
-                title="Voos por Mês"
-                type="line"
-                data={[
-                  { name: 'Jan', value: Math.floor(stats.voosEsteAno * 0.15) },
-                  { name: 'Fev', value: Math.floor(stats.voosEsteAno * 0.12) },
-                  { name: 'Mar', value: Math.floor(stats.voosEsteAno * 0.18) },
-                  { name: 'Abr', value: Math.floor(stats.voosEsteAno * 0.14) },
-                  { name: 'Mai', value: Math.floor(stats.voosEsteAno * 0.22) },
-                  { name: 'Jun', value: stats.voosEsteMes },
-                ]}
-                colors={["#3b82f6"]}
-              />
+              <MagicCard className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Resumo de Voos</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Este Ano:</span>
+                    <span className="font-semibold">{stats.voosEsteAno} voos</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Este Mês:</span>
+                    <span className="font-semibold">{stats.voosEsteMes} voos</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Balões Ativos:</span>
+                    <span className="font-semibold">{stats.totalBaloes}</span>
+                  </div>
+                </div>
+              </MagicCard>
               
-              <AnimatedChart
-                title="Distribuição de Status"
-                type="pie"
-                data={[
-                  { name: 'Finalizados', value: Math.floor(stats.voosEsteAno * 0.8) },
-                  { name: 'Planejados', value: Math.floor(stats.voosEsteAno * 0.15) },
-                  { name: 'Cancelados', value: Math.floor(stats.voosEsteAno * 0.05) },
-                ]}
-                colors={["#10b981", "#3b82f6", "#ef4444"]}
-              />
+              <MagicCard className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Status Atual</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Convites Pendentes:</span>
+                    <span className={`font-semibold ${stats.convitesPendentes > 0 ? 'text-yellow-600' : 'text-green-600'}`}>
+                      {stats.convitesPendentes}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Status:</span>
+                    <span className={`font-semibold ${stats.voosEsteMes > 0 ? 'text-green-600' : 'text-gray-600'}`}>
+                      {stats.voosEsteMes > 0 ? 'Ativo' : 'Inativo'}
+                    </span>
+                  </div>
+                </div>
+              </MagicCard>
             </div>
 
             {/* Bento Grid Layout */}

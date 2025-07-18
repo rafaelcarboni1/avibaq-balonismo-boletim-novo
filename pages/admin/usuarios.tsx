@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import EnhancedDashboardLayout from "@/components/magicui/enhanced-dashboard-layout";
+import SimpleDashboardLayout from "@/components/SimpleDashboardLayout";
 import LoadingSkeleton from "@/components/magicui/loading-skeleton";
 import { AdvancedUserManagement } from "@/components/magicui/advanced-user-management";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/components/ui/sonner";
 import { useUser } from "@/hooks/useUser";
 import { Users, UserPlus, Copy, Eye, EyeOff } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+
 import bcrypt from "bcryptjs";
 
 const ROLES = ["admin", "meteo", "tesouraria", "piloto", "agencia"];
@@ -205,7 +205,7 @@ export default function UsuariosAdmin() {
 
   if (loading) {
     return (
-      <EnhancedDashboardLayout title="Usuários" breadcrumbs={[{ label: "Usuários", icon: Users }]}>
+      <SimpleDashboardLayout title="Usuários" breadcrumbs={[{ label: "Usuários", icon: Users }]}>
         <div className="space-y-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {[1, 2, 3, 4].map((i) => (
@@ -218,7 +218,7 @@ export default function UsuariosAdmin() {
             <LoadingSkeleton variant="table" />
           </div>
         </div>
-      </EnhancedDashboardLayout>
+      </SimpleDashboardLayout>
     );
   }
 
@@ -232,7 +232,7 @@ export default function UsuariosAdmin() {
 
   return (
     <ProtectedRoute allowedRoles={["admin"]}>
-      <EnhancedDashboardLayout 
+      <SimpleDashboardLayout 
         title="Gerenciar Usuários"
         breadcrumbs={[
           { label: "Dashboard", href: "/admin/dashboard" },
@@ -259,7 +259,6 @@ export default function UsuariosAdmin() {
         />
 
         {/* Modal de criação/edição */}
-        <AnimatePresence>
           {showModal && (
             <Dialog open={showModal} onOpenChange={closeModal}>
               <DialogContent className="sm:max-w-md">
@@ -269,10 +268,8 @@ export default function UsuariosAdmin() {
                   </DialogTitle>
                 </DialogHeader>
                 
-                <motion.form 
+                <form 
                   onSubmit={handleSalvar}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
                   className="space-y-4"
                 >
                   <div>
@@ -322,14 +319,12 @@ export default function UsuariosAdmin() {
                       {saving ? 'Salvando...' : 'Salvar'}
                     </Button>
                   </div>
-                </motion.form>
+                </form>
               </DialogContent>
             </Dialog>
           )}
-        </AnimatePresence>
 
         {/* Modal de senha gerada */}
-        <AnimatePresence>
           {showPasswordModal && (
             <Dialog open={showPasswordModal} onOpenChange={setShowPasswordModal}>
               <DialogContent className="sm:max-w-md">
@@ -337,11 +332,7 @@ export default function UsuariosAdmin() {
                   <DialogTitle>Senha Temporária Gerada</DialogTitle>
                 </DialogHeader>
                 
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="space-y-4"
-                >
+                <div className="space-y-4">
                   <p className="text-sm text-gray-600">
                     Uma senha temporária foi gerada. O usuário deverá alterá-la no primeiro login.
                   </p>
@@ -377,12 +368,11 @@ export default function UsuariosAdmin() {
                       Fechar
                     </Button>
                   </div>
-                </motion.div>
+                </div>
               </DialogContent>
             </Dialog>
           )}
-        </AnimatePresence>
-      </EnhancedDashboardLayout>
+      </SimpleDashboardLayout>
     </ProtectedRoute>
   );
 }

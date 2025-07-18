@@ -41,13 +41,13 @@ export function DashboardLayout({ children, title }) {
         {/* Direita: Install Badge + Saudação + Avatar */}
         <div className="flex items-center gap-3 relative">
           <span className="text-sm text-gray-600">Bem-vindo, {userName}</span>
-          <button className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center border border-gray-300 hover:ring-2 hover:ring-primary transition" onClick={() => setAvatarOpen(v => !v)}>
+          <button className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center border border-gray-300 hover:ring-2 hover:ring-primary" onClick={() => setAvatarOpen(v => !v)}>
             <UserCircleIcon className="w-7 h-7 text-primary" />
           </button>
           {avatarOpen && (
             <div className="absolute right-0 top-12 bg-white shadow-lg ring-1 ring-black/10 rounded-lg py-2 w-44 z-50">
-              <Link href="/admin/minha-conta" className="block px-4 py-2 text-gray-700 hover:bg-primary hover:text-white transition-colors">Minha Conta</Link>
-              <button className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-red-100 hover:text-red-700 transition-colors" onClick={() => { setAvatarOpen(false); router.push("/admin/logout"); }}>
+              <Link href="/admin/minha-conta" className="block px-4 py-2 text-gray-700 hover:bg-primary hover:text-white">Minha Conta</Link>
+              <button className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-red-100 hover:text-red-700" onClick={() => { setAvatarOpen(false); router.push("/admin/logout"); }}>
                 <ArrowLeftOnRectangleIcon className="w-5 h-5 inline mr-2" /> Logout
               </button>
             </div>
@@ -69,7 +69,7 @@ export function DashboardLayout({ children, title }) {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-primary hover:text-white transition-colors ${active ? "bg-primary text-white" : ""}`}
+                className={`flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-primary hover:text-white ${active ? "bg-primary text-white" : ""}`}
                 onClick={() => setDrawerOpen(false)}
               >
                 <Icon className="w-6 h-6" />
@@ -85,7 +85,7 @@ export function DashboardLayout({ children, title }) {
           {/* Overlay */}
           <div className="fixed inset-0 bg-black bg-opacity-30" onClick={() => setDrawerOpen(false)} />
           {/* Drawer */}
-          <div className="relative w-64 bg-white h-full shadow-lg p-6 transition-transform duration-300 transform translate-x-0">
+          <div className="relative w-64 bg-white h-full shadow-lg p-6">
             <button className="absolute top-2 right-2 p-2" onClick={() => setDrawerOpen(false)} aria-label="Fechar menu">
               <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
@@ -98,7 +98,7 @@ export function DashboardLayout({ children, title }) {
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-primary hover:text-white transition-colors ${active ? "bg-primary text-white" : ""}`}
+                    className={`flex items-center gap-3 px-4 py-2 rounded-lg text-gray-700 hover:bg-primary hover:text-white ${active ? "bg-primary text-white" : ""}`}
                     onClick={() => setDrawerOpen(false)}
                   >
                     <Icon className="w-6 h-6" />
@@ -114,4 +114,4 @@ export function DashboardLayout({ children, title }) {
       <main className="flex-1 lg:ml-[220px] pt-20 max-w-7xl mx-auto px-4 w-full">{children}</main>
     </div>
   );
-} 
+}

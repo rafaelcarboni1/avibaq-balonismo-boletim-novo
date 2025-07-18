@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import EnhancedDashboardLayout from "@/components/magicui/enhanced-dashboard-layout";
-import EnhancedKpiCard from "@/components/magicui/enhanced-kpi-card";
+import SimpleDashboardLayout from "@/components/SimpleDashboardLayout";
+import SimpleKpiCard from "@/components/SimpleKpiCard";
 import LoadingSkeleton from "@/components/magicui/loading-skeleton";
-import { StaggerContainer, StaggerItem } from "@/components/magicui/smooth-transitions";
+
 import { BentoGrid, BentoGridItem } from "@/components/magicui/bento-grid";
 import AnimatedChart from "@/components/magicui/animated-chart";
 import { PermissionTabs, PermissionMatrix, ModuleManager, AuditLogViewer } from "@/components/magicui/advanced-permissions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/sonner";
-import { motion } from "framer-motion";
+
 import { Shield, ShieldCheck, Settings, Users, CheckCircle, XCircle, KeyIcon, History, FileText, Eye, Download, Clock, AlertTriangle } from "lucide-react";
 import { useUser } from "@/hooks/useUser";
 
@@ -263,7 +263,7 @@ export default function PermissoesAdmin() {
 
   if (loading) {
     return (
-      <EnhancedDashboardLayout title="Permissões" breadcrumbs={[{ label: "Permissões", icon: KeyIcon }]}>
+      <SimpleDashboardLayout title="Permissões" breadcrumbs={[{ label: "Permissões", icon: KeyIcon }]}>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="bg-white rounded-2xl p-6 border border-gray-200/50">
@@ -274,7 +274,7 @@ export default function PermissoesAdmin() {
         <div className="bg-white rounded-2xl p-6 border border-gray-200/50">
           <LoadingSkeleton variant="table" />
         </div>
-      </EnhancedDashboardLayout>
+      </SimpleDashboardLayout>
     );
   }
 
@@ -286,7 +286,7 @@ export default function PermissoesAdmin() {
 
   return (
     <ProtectedRoute allowedRoles={["admin"]}>
-      <EnhancedDashboardLayout 
+      <SimpleDashboardLayout 
         title="Gerenciar Permissões"
         breadcrumbs={[
           { label: "Dashboard", href: "/admin/dashboard" },
@@ -322,137 +322,101 @@ export default function PermissoesAdmin() {
           {/* KPI Cards baseados na aba ativa */}
           {activeTab === 'permissions' && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            <EnhancedKpiCard 
+            <SimpleKpiCard 
               title="Total de Permissões"
               value={stats.totalPermissions}
               icon={Shield}
               color="blue"
-              trend="neutral"
-              trendValue="Sistema"
               description="Permissões configuradas"
-              delay={0}
             />
-            <EnhancedKpiCard 
+            <SimpleKpiCard 
               title="Permitidas"
               value={stats.allowedPermissions}
               icon={CheckCircle}
               color="green"
-              trend="up"
-              trendValue="Ativas"
               description="Permissões habilitadas"
-              delay={0.05}
             />
-            <EnhancedKpiCard 
+            <SimpleKpiCard 
               title="Negadas"
               value={stats.deniedPermissions}
               icon={XCircle}
               color="red"
-              trend="down"
-              trendValue="Bloqueadas"
               description="Permissões desabilitadas"
-              delay={0.1}
             />
-            <EnhancedKpiCard 
+            <SimpleKpiCard 
               title="Roles Ativas"
               value={roles.length}
               icon={Users}
               color="purple"
-              trend="neutral"
-              trendValue="Configuradas"
               description="Funções de usuário"
-              delay={0.15}
             />
             </div>
           )}
 
           {activeTab === 'modules' && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <EnhancedKpiCard 
+              <SimpleKpiCard 
                 title="Módulos Ativos"
                 value={modules.filter(m => m.ativo).length}
                 icon={CheckCircle}
                 color="green"
-                trend="neutral"
-                trendValue="Funcionais"
                 description="Módulos habilitados"
-                delay={0}
               />
-              <EnhancedKpiCard 
+              <SimpleKpiCard 
                 title="Módulos Inativos"
                 value={modules.filter(m => !m.ativo).length}
                 icon={XCircle}
                 color="red"
-                trend="neutral"
-                trendValue="Desabilitados"
                 description="Módulos desativados"
-                delay={0.05}
               />
-              <EnhancedKpiCard 
+              <SimpleKpiCard 
                 title="Total de Módulos"
                 value={modules.length}
                 icon={Settings}
                 color="blue"
-                trend="neutral"
-                trendValue="Sistema"
                 description="Módulos do sistema"
-                delay={0.1}
               />
-              <EnhancedKpiCard 
+              <SimpleKpiCard 
                 title="Módulos Críticos"
                 value={modules.filter(m => m.critico).length}
                 icon={AlertTriangle}
                 color="yellow"
-                trend="neutral"
-                trendValue="Essenciais"
                 description="Módulos críticos"
-                delay={0.15}
               />
             </div>
           )}
 
           {activeTab === 'audit' && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              <EnhancedKpiCard 
+              <SimpleKpiCard 
                 title="Ações Hoje"
                 value={auditLogs.filter(log => 
                   new Date(log.data_acao).toDateString() === new Date().toDateString()
                 ).length}
                 icon={Clock}
                 color="blue"
-                trend="neutral"
-                trendValue="Hoje"
                 description="Ações registradas"
-                delay={0}
               />
-              <EnhancedKpiCard 
+              <SimpleKpiCard 
                 title="Total de Logs"
                 value={auditLogs.length}
                 icon={FileText}
                 color="purple"
-                trend="neutral"
-                trendValue="Histórico"
                 description="Registros de auditoria"
-                delay={0.05}
               />
-              <EnhancedKpiCard 
+              <SimpleKpiCard 
                 title="Usuários Ativos"
                 value={new Set(auditLogs.map(log => log.usuario_id)).size}
                 icon={Users}
                 color="green"
-                trend="neutral"
-                trendValue="Únicos"
                 description="Usuários com atividade"
-                delay={0.1}
               />
-              <EnhancedKpiCard 
+              <SimpleKpiCard 
                 title="Alterações Permissões"
                 value={auditLogs.filter(log => log.acao.includes('permission')).length}
                 icon={Shield}
                 color="yellow"
-                trend="neutral"
-                trendValue="Históricas"
                 description="Mudanças de permissões"
-                delay={0.15}
               />
             </div>
           )}
@@ -569,7 +533,7 @@ export default function PermissoesAdmin() {
           )}
 
         </div>
-      </EnhancedDashboardLayout>
+      </SimpleDashboardLayout>
     </ProtectedRoute>
   );
-} 
+}

@@ -1,13 +1,12 @@
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import EnhancedDashboardLayout from "@/components/magicui/enhanced-dashboard-layout";
-import EnhancedKpiCard from "@/components/magicui/enhanced-kpi-card";
+import SimpleDashboardLayout from "@/components/SimpleDashboardLayout";
+import SimpleKpiCard from "@/components/SimpleKpiCard";
 import { BentoGrid, BentoGridItem } from "@/components/magicui/bento-grid";
 import AnimatedChart from "@/components/magicui/animated-chart";
 import LoadingSkeleton from "@/components/magicui/loading-skeleton";
 import { SafetyKPIPanel, OperationalKPIPanel, AdvancedKPICard } from "@/components/magicui/advanced-kpi-analytics";
 import { AdvancedLineChart, GaugeChart, HeatmapChart } from "@/components/magicui/advanced-charts";
 import { ComparativeAnalyticsDashboard } from "@/components/magicui/comparative-analytics";
-import { motion } from "framer-motion";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getDashboardStats } from "@/helpers/getDashboardStats";
@@ -251,7 +250,7 @@ export default function AdminDashboard() {
   // DASHBOARD REAL RESTAURADO
   return (
     <ProtectedRoute allowedRoles={["admin", "meteo", "tesouraria"]}>
-      <EnhancedDashboardLayout 
+      <SimpleDashboardLayout 
         title="Dashboard Avançado"
         breadcrumbs={[
           { label: "Dashboard", icon: DocumentTextIcon }
@@ -301,45 +300,48 @@ export default function AdminDashboard() {
             ) : (
               // Actual KPI cards
               <>
-            <EnhancedKpiCard 
+            <SimpleKpiCard 
               title="Cadastros Ativos"
               value={parseInt(stats.cadastrosAtivos)} 
               icon={CheckCircleIcon}
               color="green"
-              trend="up"
-              trendValue="+12%"
+              trend={{
+                value: 12,
+                label: "este mês",
+                direction: "up"
+              }}
               description="Membros com status ativo"
-              delay={0}
             />
-            <EnhancedKpiCard 
+            <SimpleKpiCard 
               title="Cadastros Pendentes"
               value={parseInt(stats.cadastrosPendentes)}
               icon={ClockIcon}
               color="yellow"
-              trend={parseInt(stats.cadastrosPendentes) > 0 ? "up" : "neutral"}
-              trendValue={parseInt(stats.cadastrosPendentes) > 0 ? "Requer atenção" : "Em dia"}
+              trend={parseInt(stats.cadastrosPendentes) > 0 ? {
+                value: 0,
+                label: "Requer atenção",
+                direction: "neutral"
+              } : undefined}
               description="Aguardando aprovação"
-              delay={0.05}
             />
-            <EnhancedKpiCard 
+            <SimpleKpiCard 
               title="Pilotos"
               value={parseInt(stats.totalPilotos)}
               icon={UserIcon}
               color="blue"
-              trend="up"
-              trendValue="+3 este mês"
+              trend={{
+                value: 3,
+                label: "este mês",
+                direction: "up"
+              }}
               description="Pilotos cadastrados"
-              delay={0.1}
             />
-            <EnhancedKpiCard 
+            <SimpleKpiCard 
               title="Empresas"
               value={parseInt(stats.totalEmpresas)}
               icon={BuildingOfficeIcon}
               color="purple"
-              trend="neutral"
-              trendValue="Estável"
               description="Agências parceiras"
-              delay={0.15}
             />
               </>
             )}
@@ -380,14 +382,10 @@ export default function AdminDashboard() {
               title="Boletim de Amanhã"
               description={
                 loadingBoletimAmanha ? (
-                  <motion.div 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="flex items-center gap-2"
-                  >
+                  <div className="flex items-center gap-2">
                     <div className="w-4 h-4 bg-blue-500 rounded-full animate-pulse" />
                     <span>Carregando boletim...</span>
-                  </motion.div>
+                  </div>
                 ) : boletimAmanha ? (
                   <div className="space-y-4">
                     <div className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
@@ -474,18 +472,15 @@ export default function AdminDashboard() {
                   ) : (
                     <div className="space-y-3 max-h-40 overflow-y-auto">
                       {logs.slice(0, 5).map((log, index) => (
-                        <motion.div
+                        <div
                           key={log.id}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.1 }}
                           className="border-l-2 border-blue-200 pl-3 py-1"
                         >
                           <p className="text-sm font-medium text-gray-900">{log.acao}</p>
                           <p className="text-xs text-gray-500">
                             {log.created_at && new Date(log.created_at).toLocaleString('pt-BR')}
                           </p>
-                        </motion.div>
+                        </div>
                       ))}
                     </div>
                   )}
@@ -589,37 +584,28 @@ export default function AdminDashboard() {
 
               {/* Estatísticas de Voos */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <EnhancedKpiCard 
+                <SimpleKpiCard 
                   title="Voos em Andamento"
                   value={voosData.voosEmAndamento.length} 
                   icon={ClockIcon}
                   color="blue"
-                  trend="neutral"
-                  trendValue="Ativos"
                   description="Rascunho até checklist"
-                  delay={0}
                 />
-                <EnhancedKpiCard 
+                <SimpleKpiCard 
                   title="Finalizados"
                   value={voosData.estatisticasVoos.finalizado || 0}
                   icon={CheckCircleIcon}
                   color="green"
-                  trend="up"
-                  trendValue="Completos"
                   description="Voos executados"
-                  delay={0.05}
                 />
-                <EnhancedKpiCard 
+                <SimpleKpiCard 
                   title="Cancelados"
                   value={voosData.estatisticasVoos.cancelado || 0}
                   icon={ExclamationTriangleIcon}
                   color="red"
-                  trend="neutral"
-                  trendValue="Cancelados"
                   description="Voos não executados"
-                  delay={0.1}
                 />
-                <EnhancedKpiCard 
+                <SimpleKpiCard 
                   title="Total Geral"
                   value={
                     (voosData.estatisticasVoos.finalizado || 0) + 
@@ -632,10 +618,7 @@ export default function AdminDashboard() {
                   }
                   icon={DocumentTextIcon}
                   color="purple"
-                  trend="up"
-                  trendValue="Crescendo"
                   description="Todos os voos"
-                  delay={0.15}
                 />
               </div>
 
@@ -701,7 +684,7 @@ export default function AdminDashboard() {
             </div>
           )}
         </div>
-      </EnhancedDashboardLayout>
+      </SimpleDashboardLayout>
     </ProtectedRoute>
   );
-} 
+}
