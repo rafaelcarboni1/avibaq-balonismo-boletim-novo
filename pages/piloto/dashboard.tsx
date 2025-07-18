@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
 
-import { PlusIcon, ClipboardDocumentListIcon, CalendarIcon, DocumentTextIcon, ShieldCheckIcon, ChartBarIcon, UserIcon, ClockIcon } from '@heroicons/react/24/solid';
+import { PlusIcon, ClipboardDocumentListIcon, CalendarIcon, DocumentTextIcon, ShieldCheckIcon, ChartBarIcon, UserIcon, ClockIcon, WifiIcon, SignalSlashIcon } from '@heroicons/react/24/solid';
 import { EnhancedDashboardLayout } from '../../src/components/magicui/enhanced-dashboard-layout';
 import { MagicCard } from '../../src/components/magicui/magic-card';
 import { BentoGrid, BentoGridItem } from '../../src/components/magicui/bento-grid';
@@ -58,6 +58,36 @@ export default function PilotoDashboard() {
   });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'analytics' | 'voos'>('overview');
+  const [isOnline, setIsOnline] = useState(true);
+  const [offlineData, setOfflineData] = useState<DashboardStats | null>(null);
+
+  // Monitorar status de conexão
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOnline(true);
+      // Recarregar dados quando voltar online
+      if (user?.role === 'piloto') {
+        carregarDashboard();
+      }
+    };
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    setIsOnline(navigator.onLine);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, [user]);
+
+  // Carregar dados offline do localStorage
+  useEffect(() => {
+    if (!isOnline) {
+      loadOfflineData();
+    }
+  }, [isOnline]);
 
   // Verificar autenticação e carregar dados
   useEffect(() => {
@@ -77,9 +107,13 @@ export default function PilotoDashboard() {
 
     // Se chegou até aqui, usuário está autenticado e é piloto
     if (user.role === 'piloto') {
-      carregarDashboard();
+      if (isOnline) {
+        carregarDashboard();
+      } else {
+        loadOfflineData();
+      }
     }
-  }, [user, userLoading]); // Removido router das dependências
+  }, [user, userLoading, isOnline]); // Removido router das dependências
 
   const carregarDashboard = async () => {
     try {
@@ -186,14 +220,90 @@ export default function PilotoDashboard() {
       
       console.log('[Dashboard Debug] Stats finais:', statsData);
       setStats(statsData);
+      
+      // Salvar dados offline para uso posterior
+      saveOfflineData(statsData);
 
     } catch (error) {
       console.error('Erro ao carregar dashboard:', error);
+      
+      // Se falhou e estamos offline, tentar carregar dados salvos
+      if (!isOnline) {
+        loadOfflineData();
+      } else {
+        toast({
+          title: "Erro",
+          description: "Erro ao carregar dados do dashboard",
+          variant: "destructive"
+        });
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Funções de gerenciamento offline
+  const saveOfflineData = (data: DashboardStats) => {
+    try {
+      const offlineData = {
+        ...data,
+        timestamp: new Date().toISOString(),
+        userId: user?.id
+      };
+      localStorage.setItem('piloto_dashboard_offline', JSON.stringify(offlineData));
+    } catch (error) {
+      console.error('Erro ao salvar dados offline:', error);
+    }
+  };
+
+  const loadOfflineData = () => {
+    try {
+      const savedData = localStorage.getItem('piloto_dashboard_offline');
+      if (!savedData) {
+        setLoading(false);
+        return;
+      }
+
+      const parsed = JSON.parse(savedData);
+      
+      // Verificar se os dados são do usuário atual
+      if (parsed.userId !== user?.id) {
+        setLoading(false);
+        return;
+      }
+
+      // Verificar idade dos dados (máximo 24 horas)
+      const dataAge = new Date().getTime() - new Date(parsed.timestamp).getTime();
+      const maxAge = 24 * 60 * 60 * 1000; // 24 horas
+
+      if (dataAge > maxAge) {
+        localStorage.removeItem('piloto_dashboard_offline');
+        setLoading(false);
+        return;
+      }
+
+      // Carregar dados offline
+      const offlineStats = {
+        totalBaloes: parsed.totalBaloes || 0,
+        voosEsteAno: parsed.voosEsteAno || 0,
+        voosEsteMes: parsed.voosEsteMes || 0,
+        convitesPendentes: parsed.convitesPendentes || 0,
+        proximoVoo: parsed.proximoVoo || null,
+        voosRecentes: parsed.voosRecentes || [],
+        voosEmAndamento: parsed.voosEmAndamento || []
+      };
+
+      setStats(offlineStats);
+      setOfflineData(offlineStats);
+      
       toast({
-        title: "Erro",
-        description: "Erro ao carregar dados do dashboard",
-        variant: "destructive"
+        title: "Modo offline",
+        description: "Dados carregados do cache local. Algumas informações podem estar desatualizadas.",
+        variant: "default"
       });
+
+    } catch (error) {
+      console.error('Erro ao carregar dados offline:', error);
     } finally {
       setLoading(false);
     }
@@ -244,6 +354,67 @@ export default function PilotoDashboard() {
       ]}
     >
       <div className="space-y-8">
+        
+        {/* Notificação de modo offline */}
+        {!isOnline && (
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+            <div className="flex items-center space-x-3">
+              <SignalSlashIcon className="h-5 w-5 text-amber-600" />
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-amber-800">
+                  Modo Offline Ativo
+                </h3>
+                <p className="text-sm text-amber-700 mt-1">
+                  Você pode continuar trabalhando nos checklists e pós-voo. Os dados serão sincronizados automaticamente quando a conexão for restaurada.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Header com status de conexão */}
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center space-x-3">
+              <h1 className="text-3xl font-bold text-gray-900">Dashboard do Piloto</h1>
+              <div className={`flex items-center space-x-1 px-2 py-1 rounded-full text-xs font-medium ${
+                isOnline 
+                  ? 'bg-green-100 text-green-800' 
+                  : 'bg-red-100 text-red-800'
+              }`}>
+                {isOnline ? (
+                  <WifiIcon className="h-3 w-3" />
+                ) : (
+                  <SignalSlashIcon className="h-3 w-3" />
+                )}
+                <span>{isOnline ? 'Online' : 'Offline'}</span>
+              </div>
+            </div>
+            <p className="text-gray-600 mt-1">
+              Bem-vindo de volta, {user?.nome || 'Piloto'}!
+              {!isOnline && offlineData && (
+                <span className="text-amber-600 ml-2">
+                  (Dados em cache - última atualização: {new Date(offlineData.timestamp || '').toLocaleString()})
+                </span>
+              )}
+            </p>
+          </div>
+          <div className="flex space-x-4">
+            <button
+              onClick={() => router.push('/piloto/planejamento')}
+              className={`px-4 py-2 rounded-lg flex items-center space-x-2 transition-colors ${
+                isOnline 
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white' 
+                  : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+              }`}
+              disabled={!isOnline}
+              title={!isOnline ? 'Funcionalidade disponível apenas online' : ''}
+            >
+              <PlusIcon className="h-5 w-5" />
+              <span>Novo Voo</span>
+            </button>
+          </div>
+        </div>
         
         {/* Navegação por abas */}
         <div className="flex gap-4 border-b border-gray-200">
@@ -399,44 +570,74 @@ export default function PilotoDashboard() {
                         {voo.status === 'checklist_concluido' && (
                           <button
                             onClick={() => router.push(`/piloto/pos-voo/${voo.id}`)}
-                            className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-700 transition-colors flex items-center gap-2"
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                              isOnline 
+                                ? 'bg-green-600 text-white hover:bg-green-700' 
+                                : 'bg-green-600 text-white hover:bg-green-700'
+                            }`}
+                            title={!isOnline ? 'Funciona offline - dados serão sincronizados quando voltar online' : ''}
                           >
                             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
                             Finalizar Voo
+                            {!isOnline && <SignalSlashIcon className="h-3 w-3 opacity-70" />}
                           </button>
                         )}
                         {['checklist_bloco1', 'checklist_bloco2'].includes(voo.status) && (
                           <button
                             onClick={() => router.push(`/piloto/checklist/${voo.id}`)}
-                            className="bg-yellow-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-yellow-700 transition-colors flex items-center gap-2"
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                              isOnline 
+                                ? 'bg-yellow-600 text-white hover:bg-yellow-700' 
+                                : 'bg-yellow-600 text-white hover:bg-yellow-700'
+                            }`}
+                            title={!isOnline ? 'Funciona offline - dados serão sincronizados quando voltar online' : ''}
                           >
                             <ClipboardDocumentListIcon className="h-4 w-4" />
                             Continuar Checklist
+                            {!isOnline && <SignalSlashIcon className="h-3 w-3 opacity-70" />}
                           </button>
                         )}
                         {voo.status === 'planejado' && (
                           <button
                             onClick={() => router.push(`/piloto/checklist/${voo.id}`)}
-                            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                              isOnline 
+                                ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                                : 'bg-blue-600 text-white hover:bg-blue-700'
+                            }`}
+                            title={!isOnline ? 'Funciona offline - dados serão sincronizados quando voltar online' : ''}
                           >
                             <ClipboardDocumentListIcon className="h-4 w-4" />
                             Iniciar Checklist
+                            {!isOnline && <SignalSlashIcon className="h-3 w-3 opacity-70" />}
                           </button>
                         )}
                         {voo.status === 'rascunho' && (
                           <button
                             onClick={() => router.push(`/piloto/checklist/${voo.id}`)}
-                            className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors flex items-center gap-2"
+                            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                              isOnline 
+                                ? 'bg-purple-600 text-white hover:bg-purple-700' 
+                                : 'bg-purple-600 text-white hover:bg-purple-700'
+                            }`}
+                            title={!isOnline ? 'Funciona offline - dados serão sincronizados quando voltar online' : ''}
                           >
                             <ClipboardDocumentListIcon className="h-4 w-4" />
                             Iniciar Checklist
+                            {!isOnline && <SignalSlashIcon className="h-3 w-3 opacity-70" />}
                           </button>
                         )}
                         <button
                           onClick={() => router.push(`/piloto/planejamento?edit=${voo.id}`)}
-                          className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors flex items-center gap-2"
+                          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${
+                            isOnline 
+                              ? 'bg-gray-100 text-gray-700 hover:bg-gray-200' 
+                              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          }`}
+                          disabled={!isOnline}
+                          title={!isOnline ? 'Edição disponível apenas online' : ''}
                         >
                           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -482,25 +683,43 @@ export default function PilotoDashboard() {
                       {stats.proximoVoo.status === 'checklist_concluido' && (
                         <button
                           onClick={() => router.push(`/piloto/pos-voo/${stats.proximoVoo.id}`)}
-                          className="bg-green-600 text-white px-3 py-1 rounded text-sm hover:bg-green-700 transition-colors"
+                          className={`px-3 py-1 rounded text-sm transition-colors flex items-center gap-1 ${
+                            isOnline 
+                              ? 'bg-green-600 text-white hover:bg-green-700' 
+                              : 'bg-green-600 text-white hover:bg-green-700'
+                          }`}
+                          title={!isOnline ? 'Funciona offline - dados serão sincronizados quando voltar online' : ''}
                         >
                           Finalizar Voo
+                          {!isOnline && <SignalSlashIcon className="h-3 w-3 opacity-70" />}
                         </button>
                       )}
                       {['checklist_bloco1', 'checklist_bloco2'].includes(stats.proximoVoo.status) && (
                         <button
                           onClick={() => router.push(`/piloto/checklist/${stats.proximoVoo.id}`)}
-                          className="bg-yellow-600 text-white px-3 py-1 rounded text-sm hover:bg-yellow-700 transition-colors"
+                          className={`px-3 py-1 rounded text-sm transition-colors flex items-center gap-1 ${
+                            isOnline 
+                              ? 'bg-yellow-600 text-white hover:bg-yellow-700' 
+                              : 'bg-yellow-600 text-white hover:bg-yellow-700'
+                          }`}
+                          title={!isOnline ? 'Funciona offline - dados serão sincronizados quando voltar online' : ''}
                         >
                           Continuar Checklist
+                          {!isOnline && <SignalSlashIcon className="h-3 w-3 opacity-70" />}
                         </button>
                       )}
                       {stats.proximoVoo.status === 'planejado' && (
                         <button
                           onClick={() => router.push(`/piloto/checklist/${stats.proximoVoo.id}`)}
-                          className="bg-primary text-white px-3 py-1 rounded text-sm hover:bg-primary/90 transition-colors"
+                          className={`px-3 py-1 rounded text-sm transition-colors flex items-center gap-1 ${
+                            isOnline 
+                              ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                              : 'bg-blue-600 text-white hover:bg-blue-700'
+                          }`}
+                          title={!isOnline ? 'Funciona offline - dados serão sincronizados quando voltar online' : ''}
                         >
                           Iniciar Checklist
+                          {!isOnline && <SignalSlashIcon className="h-3 w-3 opacity-70" />}
                         </button>
                       )}
                     </div>

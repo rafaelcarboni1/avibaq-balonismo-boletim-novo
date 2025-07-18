@@ -4,6 +4,7 @@ import { CloudArrowUpIcon, DocumentIcon, PhotoIcon, MapIcon, ClockIcon, UsersIco
 import { EnhancedDashboardLayout } from '../../../src/components/magicui/enhanced-dashboard-layout';
 import { MagicCard } from '../../../src/components/magicui/magic-card';
 import { supabase } from '../../../src/integrations/supabase/client';
+import { uploadFileSecure, deleteFileSecure } from '../../../src/lib/supabase-upload';
 import { useUser } from '../../../src/hooks/useUser';
 import { useToast } from '../../../src/hooks/use-toast';
 import { formatDateSafe } from '../../../src/utils/dateUtils';
@@ -85,6 +86,7 @@ export default function PosVoo() {
   });
 
   const [baloesPassageiros, setBaloesPassageiros] = useState<BalaoPassageiros[]>([]);
+  const [autoSaving, setAutoSaving] = useState(false);
 
   // Verificar se usuário está autenticado e é piloto
   useEffect(() => {
@@ -99,8 +101,69 @@ export default function PosVoo() {
     if (id && user) {
       carregarVoo();
       carregarAnexos();
+      loadDraftFromStorage();
     }
   }, [id, user]);
+
+  // Auto-save para localStorage a cada mudança nos dados
+  useEffect(() => {
+    if (voo && formData && baloesPassageiros.length > 0) {
+      saveDraftToStorage();
+    }
+  }, [formData, baloesPassageiros]);
+
+  const saveDraftToStorage = () => {
+    if (!id) return;
+    
+    const draftData = {
+      formData,
+      baloesPassageiros,
+      timestamp: new Date().toISOString()
+    };
+    
+    try {
+      localStorage.setItem(`pos-voo-draft-${id}`, JSON.stringify(draftData));
+    } catch (error) {
+      console.error('Erro ao salvar rascunho local:', error);
+    }
+  };
+
+  const loadDraftFromStorage = () => {
+    if (!id) return;
+    
+    try {
+      const draftData = localStorage.getItem(`pos-voo-draft-${id}`);
+      if (draftData) {
+        const parsed = JSON.parse(draftData);
+        
+        // Verificar se o rascunho não é muito antigo (7 dias)
+        const draftAge = Date.now() - new Date(parsed.timestamp).getTime();
+        const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 dias
+        
+        if (draftAge < maxAge && parsed.formData && parsed.baloesPassageiros) {
+          setFormData(prev => ({ ...prev, ...parsed.formData }));
+          setBaloesPassageiros(parsed.baloesPassageiros);
+          
+          toast({
+            title: "Rascunho recuperado",
+            description: "Dados salvos localmente foram restaurados.",
+            variant: "default"
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao carregar rascunho local:', error);
+    }
+  };
+
+  const clearDraftFromStorage = () => {
+    if (!id) return;
+    try {
+      localStorage.removeItem(`pos-voo-draft-${id}`);
+    } catch (error) {
+      console.error('Erro ao limpar rascunho local:', error);
+    }
+  };
 
   const carregarVoo = async () => {
     try {
@@ -250,55 +313,37 @@ export default function PosVoo() {
     try {
       setUploading(true);
 
-      // Validar tipo de arquivo
-      const allowedTypes: Record<string, string[]> = {
-        track_log: ['application/gpx+xml', 'text/xml', 'application/xml', 'text/plain', 'image/png', 'image/jpeg', 'image/jpg'],
-        foto_voo: ['image/jpeg', 'image/png', 'image/webp', 'image/heic'],
-        regulamento_assinado: ['application/pdf', 'image/jpeg', 'image/png', 'image/heic']
-      };
-
-      if (!allowedTypes[tipo].includes(file.type)) {
+      if (!user?.id) {
         toast({
-          title: "Tipo de arquivo inválido",
-          description: `Para ${tipo}, use: ${allowedTypes[tipo].join(', ')}`,
+          title: "Erro",
+          description: "Usuário não autenticado",
           variant: "destructive"
         });
         return;
       }
 
-      // Validar tamanho (10MB max)
-      if (file.size > 10 * 1024 * 1024) {
-        toast({
-          title: "Arquivo muito grande",
-          description: "O arquivo deve ter no máximo 10MB",
-          variant: "destructive"
-        });
-        return;
-      }
+      // Usar o cliente de upload seguro
+      const result = await uploadFileSecure({
+        file,
+        bucket: 'voos-anexos',
+        path: `voos/${id}/${tipo}`,
+        userId: user.id,
+        allowedTypes: {
+          track_log: ['application/gpx+xml', 'text/xml', 'application/xml', 'text/plain', 'image/png', 'image/jpeg', 'image/jpg'],
+          foto_voo: ['image/jpeg', 'image/png', 'image/webp', 'image/heic'],
+          regulamento_assinado: ['application/pdf', 'image/jpeg', 'image/png', 'image/heic']
+        }[tipo] || [],
+        maxSizeBytes: 10 * 1024 * 1024 // 10MB
+      });
 
-      // Upload para Supabase Storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const filePath = `voos/${id}/${tipo}/${fileName}`;
-
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('voos-anexos')
-        .upload(filePath, file);
-
-      if (uploadError) {
-        console.error('Erro no upload:', uploadError);
+      if (!result.success) {
         toast({
           title: "Erro no upload",
-          description: "Erro ao fazer upload do arquivo",
+          description: result.error,
           variant: "destructive"
         });
         return;
       }
-
-      // Obter URL pública
-      const { data: { publicUrl } } = supabase.storage
-        .from('voos-anexos')
-        .getPublicUrl(filePath);
 
       // Salvar no banco
       const { data: anexoData, error: anexoError } = await supabase
@@ -307,10 +352,10 @@ export default function PosVoo() {
           voo_id: id,
           tipo,
           nome_arquivo: file.name,
-          url_storage: publicUrl,
+          url_storage: result.url,
           tamanho_bytes: file.size,
           mime_type: file.type,
-          uploaded_por: user?.id
+          uploaded_por: user.id
         }])
         .select()
         .single();
@@ -345,15 +390,26 @@ export default function PosVoo() {
     }
   };
 
-  const handleDeleteAnexo = async (anexoId: string, filePath: string) => {
+  const handleDeleteAnexo = async (anexoId: string, fileUrl: string) => {
     try {
-      // Remover do storage
-      const { error: storageError } = await supabase.storage
-        .from('voos-anexos')
-        .remove([filePath]);
+      if (!user?.id) {
+        toast({
+          title: "Erro",
+          description: "Usuário não autenticado",
+          variant: "destructive"
+        });
+        return;
+      }
 
-      if (storageError) {
-        console.error('Erro ao deletar do storage:', storageError);
+      // Usar o cliente de exclusão seguro
+      const result = await deleteFileSecure({
+        url: fileUrl,
+        bucket: 'voos-anexos',
+        userId: user.id
+      });
+
+      if (!result.success) {
+        console.error('Erro ao deletar do storage:', result.error);
       }
 
       // Remover do banco
@@ -411,6 +467,74 @@ export default function PosVoo() {
     }));
   };
 
+  const handleSaveDraft = async () => {
+    try {
+      setSubmitting(true);
+
+      // Salvar dados como rascunho (sem validações obrigatórias)
+      const { error: vooError } = await supabase
+        .from('voos')
+        .update({
+          adultos_transportados: formData.adultos_transportados,
+          criancas_transportadas: formData.criancas_transportadas,
+          local_pouso: formData.local_pouso.trim() || null,
+          duracao_minutos: formData.duracao_minutos > 0 ? formData.duracao_minutos : null,
+          altitude_maxima: formData.altitude_maxima > 0 ? formData.altitude_maxima : null,
+          observacoes_pos_voo: formData.observacoes_pos_voo.trim() || null
+          // Não altera o status - mantém como 'checklist_concluido'
+        })
+        .eq('id', id);
+
+      if (vooError) {
+        console.error('Erro ao salvar rascunho:', vooError);
+        toast({
+          title: "Erro",
+          description: "Erro ao salvar rascunho",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Atualizar passageiros por balão
+      for (const bp of baloesPassageiros) {
+        const { error: balaoError } = await supabase
+          .from('voos_baloes')
+          .update({
+            adultos_transportados: bp.adultos_transportados,
+            criancas_transportadas: bp.criancas_transportadas
+          })
+          .eq('voo_id', id)
+          .eq('balao_id', bp.balao_id);
+
+        if (balaoError) {
+          console.error('Erro ao atualizar balão:', balaoError);
+        }
+      }
+
+      // Limpar rascunho local após salvar no servidor
+      clearDraftFromStorage();
+
+      toast({
+        title: "Rascunho salvo",
+        description: "Dados salvos como rascunho. Você pode finalizar posteriormente.",
+        variant: "default"
+      });
+
+      // Redirecionar para dashboard
+      router.push('/piloto/dashboard');
+
+    } catch (error) {
+      console.error('Erro:', error);
+      toast({
+        title: "Erro",
+        description: "Erro inesperado ao salvar rascunho",
+        variant: "destructive"
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const handleSubmit = async () => {
     try {
       setSubmitting(true);
@@ -463,6 +587,9 @@ export default function PosVoo() {
           console.error('Erro ao atualizar balão:', balaoError);
         }
       }
+
+      // Limpar rascunho local após finalizar
+      clearDraftFromStorage();
 
       toast({
         title: "Sucesso",
@@ -532,6 +659,12 @@ export default function PosVoo() {
               <p className="text-gray-600">
                 {formatDateSafe(voo.data_voo)} - {voo.periodo === 'manha' ? 'Manhã' : 'Tarde'}
               </p>
+              {!isReadOnly && (
+                <div className="flex items-center gap-2 mt-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="text-xs text-gray-500">Salvamento automático ativo</span>
+                </div>
+              )}
             </div>
             <div className="text-right">
               <p className="text-sm text-gray-600">Status:</p>
@@ -868,10 +1001,12 @@ export default function PosVoo() {
         {!isReadOnly && (
           <div className="flex justify-between">
             <button
-              onClick={() => router.push('/piloto/dashboard')}
-              className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors"
+              onClick={handleSaveDraft}
+              disabled={submitting}
+              className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
-              Salvar como Rascunho
+              {submitting ? 'Salvando...' : 'Salvar como Rascunho'}
+              <CloudArrowUpIcon className="h-4 w-4" />
             </button>
             <button
               onClick={handleSubmit}

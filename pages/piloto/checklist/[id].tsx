@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { CheckCircleIcon, XCircleIcon, ExclamationTriangleIcon, ArrowLeftIcon, ArrowRightIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { CheckCircleIcon, XCircleIcon, ExclamationTriangleIcon, ArrowLeftIcon, ArrowRightIcon, CheckIcon, CloudArrowUpIcon } from '@heroicons/react/24/outline';
 import { EnhancedDashboardLayout } from '../../../src/components/magicui/enhanced-dashboard-layout';
 import { MagicCard } from '../../../src/components/magicui/magic-card';
 import { supabase } from '../../../src/integrations/supabase/client';
@@ -99,6 +99,8 @@ export default function ChecklistVoo() {
   const [currentBloco, setCurrentBloco] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [autoSaving, setAutoSaving] = useState(false);
+  const [isOnline, setIsOnline] = useState(true);
+  const [savingDraft, setSavingDraft] = useState(false);
 
   // Verificar se usuário está autenticado e é piloto
   useEffect(() => {
@@ -113,8 +115,35 @@ export default function ChecklistVoo() {
     if (id && user) {
       carregarVoo();
       carregarChecklist();
+      loadDraftFromStorage();
     }
   }, [id, user]);
+
+  // Monitorar status de conexão
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+    setIsOnline(navigator.onLine);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  // Auto-save no localStorage
+  useEffect(() => {
+    if (checklistItems.length > 0 && id) {
+      const timeoutId = setTimeout(() => {
+        saveDraftToStorage();
+      }, 1000);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [checklistItems, id]);
 
   const carregarVoo = async () => {
     try {
@@ -269,55 +298,175 @@ export default function ChecklistVoo() {
   };
 
   const handleItemChange = async (itemId: string, marcado: boolean, motivo?: string) => {
-    try {
-      setAutoSaving(true);
+    const updateData: any = {
+      marcado,
+      marcado_em: new Date().toISOString(),
+      marcado_por: user?.id
+    };
 
-      const updateData: any = {
-        marcado,
-        marcado_em: new Date().toISOString(),
-        marcado_por: user?.id
+    if (!marcado && motivo) {
+      updateData.motivo_nao_marcado = motivo;
+    } else if (marcado) {
+      updateData.motivo_nao_marcado = null;
+    }
+
+    // Atualizar estado local primeiro
+    setChecklistItems(items => 
+      items.map(item => 
+        item.id === itemId 
+          ? { 
+              ...item, 
+              marcado, 
+              motivo_nao_marcado: updateData.motivo_nao_marcado,
+              marcado_em: updateData.marcado_em,
+              marcado_por: updateData.marcado_por
+            }
+          : item
+      )
+    );
+
+    // Tentar salvar no servidor se online
+    if (isOnline) {
+      try {
+        setAutoSaving(true);
+
+        const { error } = await supabase
+          .from('checklist_itens')
+          .update(updateData)
+          .eq('id', itemId);
+
+        if (error) {
+          console.error('Erro ao atualizar item:', error);
+          toast({
+            title: "Erro",
+            description: "Erro ao salvar item do checklist",
+            variant: "destructive"
+          });
+          return;
+        }
+
+      } catch (error) {
+        console.error('Erro:', error);
+      } finally {
+        setAutoSaving(false);
+      }
+    } else {
+      toast({
+        title: "Modo offline",
+        description: "Item salvo localmente. Será sincronizado quando voltar online.",
+        variant: "default"
+      });
+    }
+  };
+
+  // Funções de salvamento offline
+  const saveDraftToStorage = () => {
+    if (!id || checklistItems.length === 0) return;
+
+    try {
+      const draftData = {
+        checklistItems,
+        currentBloco,
+        timestamp: new Date().toISOString(),
+        vooId: id
       };
 
-      if (!marcado && motivo) {
-        updateData.motivo_nao_marcado = motivo;
-      } else if (marcado) {
-        updateData.motivo_nao_marcado = null;
-      }
+      localStorage.setItem(`checklist_draft_${id}`, JSON.stringify(draftData));
+    } catch (error) {
+      console.error('Erro ao salvar rascunho:', error);
+    }
+  };
 
-      const { error } = await supabase
-        .from('checklist_itens')
-        .update(updateData)
-        .eq('id', itemId);
+  const loadDraftFromStorage = () => {
+    if (!id) return;
 
-      if (error) {
-        console.error('Erro ao atualizar item:', error);
-        toast({
-          title: "Erro",
-          description: "Erro ao salvar item do checklist",
-          variant: "destructive"
-        });
+    try {
+      const draftData = localStorage.getItem(`checklist_draft_${id}`);
+      if (!draftData) return;
+
+      const parsed = JSON.parse(draftData);
+      const draftAge = new Date().getTime() - new Date(parsed.timestamp).getTime();
+      const maxAge = 7 * 24 * 60 * 60 * 1000; // 7 dias
+
+      if (draftAge > maxAge) {
+        localStorage.removeItem(`checklist_draft_${id}`);
         return;
       }
 
-      // Atualizar estado local
-      setChecklistItems(items => 
-        items.map(item => 
-          item.id === itemId 
-            ? { 
-                ...item, 
-                marcado, 
-                motivo_nao_marcado: updateData.motivo_nao_marcado,
-                marcado_em: updateData.marcado_em,
-                marcado_por: updateData.marcado_por
-              }
-            : item
-        )
-      );
+      // Só carregar se não temos dados do servidor ainda
+      if (checklistItems.length === 0 && parsed.checklistItems) {
+        setChecklistItems(parsed.checklistItems);
+        setCurrentBloco(parsed.currentBloco || 1);
+        
+        toast({
+          title: "Rascunho carregado",
+          description: "Dados salvos localmente foram restaurados.",
+          variant: "default"
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao carregar rascunho:', error);
+    }
+  };
+
+  const clearDraftFromStorage = () => {
+    if (!id) return;
+    localStorage.removeItem(`checklist_draft_${id}`);
+  };
+
+  const handleSaveDraft = async () => {
+    if (!id || !user) return;
+
+    try {
+      setSavingDraft(true);
+
+      if (isOnline) {
+        // Salvar no servidor se online
+        const { error } = await supabase
+          .from('voos')
+          .update({ 
+            status: 'checklist_em_andamento',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', id);
+
+        if (error) {
+          console.error('Erro ao salvar rascunho:', error);
+          toast({
+            title: "Erro",
+            description: "Erro ao salvar rascunho no servidor",
+            variant: "destructive"
+          });
+          return;
+        }
+
+        clearDraftFromStorage();
+        
+        toast({
+          title: "Rascunho salvo",
+          description: "Checklist salvo como rascunho com sucesso",
+          variant: "default"
+        });
+      } else {
+        // Salvar apenas localmente se offline
+        saveDraftToStorage();
+        
+        toast({
+          title: "Rascunho salvo offline",
+          description: "Checklist salvo localmente. Será sincronizado quando voltar online.",
+          variant: "default"
+        });
+      }
 
     } catch (error) {
       console.error('Erro:', error);
+      toast({
+        title: "Erro",
+        description: "Erro inesperado ao salvar rascunho",
+        variant: "destructive"
+      });
     } finally {
-      setAutoSaving(false);
+      setSavingDraft(false);
     }
   };
 
@@ -377,7 +526,8 @@ export default function ChecklistVoo() {
       } else if (currentBloco === 2) {
         setCurrentBloco(3);
       } else {
-        // Checklist concluído, redirecionar
+        // Checklist concluído, limpar rascunho e redirecionar
+        clearDraftFromStorage();
         router.push('/piloto/dashboard');
       }
 
@@ -488,12 +638,29 @@ export default function ChecklistVoo() {
             </div>
           )}
 
-          {autoSaving && (
-            <div className="mt-4 text-sm text-blue-600 flex items-center gap-2">
-              <div className="animate-spin h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
-              Salvando automaticamente...
-            </div>
-          )}
+          {/* Indicadores de status */}
+          <div className="mt-4 flex flex-wrap gap-4 text-sm">
+            {autoSaving && (
+              <div className="text-blue-600 flex items-center gap-2">
+                <div className="animate-spin h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+                Salvando automaticamente...
+              </div>
+            )}
+            
+            {!isOnline && (
+              <div className="text-amber-600 flex items-center gap-2">
+                <div className="h-2 w-2 bg-amber-600 rounded-full"></div>
+                Modo offline - dados salvos localmente
+              </div>
+            )}
+            
+            {isOnline && !autoSaving && (
+              <div className="text-green-600 flex items-center gap-2">
+                <div className="h-2 w-2 bg-green-600 rounded-full animate-pulse"></div>
+                Salvamento automático ativo
+              </div>
+            )}
+          </div>
         </MagicCard>
 
         {/* Navegação entre blocos */}
@@ -561,19 +728,34 @@ export default function ChecklistVoo() {
               Voltar ao Dashboard
             </button>
 
-            <button
-              onClick={handleBlocoComplete}
-              disabled={!canCompleteBloco(currentBloco) || submitting}
-              className="flex items-center gap-2 bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {submitting ? 'Salvando...' : (
-                <>
-                  {currentBloco === 3 ? 'Finalizar Checklist' : 'Concluir Bloco'}
-                  {currentBloco !== 3 && <ArrowRightIcon className="h-4 w-4" />}
-                  {currentBloco === 3 && <CheckIcon className="h-4 w-4" />}
-                </>
-              )}
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={handleSaveDraft}
+                disabled={savingDraft}
+                className="flex items-center gap-2 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {savingDraft ? (
+                  <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                ) : (
+                  <CloudArrowUpIcon className="h-4 w-4" />
+                )}
+                {savingDraft ? 'Salvando...' : 'Salvar como Rascunho'}
+              </button>
+
+              <button
+                onClick={handleBlocoComplete}
+                disabled={!canCompleteBloco(currentBloco) || submitting}
+                className="flex items-center gap-2 bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {submitting ? 'Salvando...' : (
+                  <>
+                    {currentBloco === 3 ? 'Finalizar Checklist' : 'Concluir Bloco'}
+                    {currentBloco !== 3 && <ArrowRightIcon className="h-4 w-4" />}
+                    {currentBloco === 3 && <CheckIcon className="h-4 w-4" />}
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </MagicCard>
       </div>

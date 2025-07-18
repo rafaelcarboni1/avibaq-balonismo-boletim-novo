@@ -14,6 +14,7 @@ const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 // Lista de migrações em ordem
 const migrations = [
+  '20250111000000_create_exec_sql_function.sql',
   '20250111000001_create_baloes_table.sql',
   '20250111000002_create_vinculos_agencia_piloto.sql', 
   '20250111000003_create_voos_table.sql',
