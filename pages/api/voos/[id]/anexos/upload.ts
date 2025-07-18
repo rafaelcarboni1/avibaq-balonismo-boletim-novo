@@ -280,7 +280,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         name: error.name,
         message: error.message,
         stack: error.stack,
-        cause: error.cause,
+        cause: (error as any).cause || undefined, // Safe access to cause
       };
     } else {
       errorMessage = 'Ocorreu um erro inesperado.';
