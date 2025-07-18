@@ -111,29 +111,56 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
+    // Verificar se /tmp existe e é gravável (ambiente serverless)
+    console.log('📦 [UPLOAD] Verificando diretório /tmp...');
+    try {
+      const fs = require('fs');
+      if (!fs.existsSync('/tmp')) {
+        console.log('⚠️ [UPLOAD] /tmp não existe, usando os.tmpdir()');
+      } else {
+        console.log('✅ [UPLOAD] /tmp existe');
+      }
+    } catch (tmpError) {
+      console.log('⚠️ [UPLOAD] Erro ao verificar /tmp:', tmpError);
+    }
+
     // Parse do formulário multipart
     console.log('📦 [UPLOAD] Parseando formulário multipart...');
     
     let fields, files;
     try {
+      // Configuração robusta para ambiente serverless
       const form = formidable({
-        uploadDir: '/tmp',
+        uploadDir: require('os').tmpdir(), // Usa o tmpdir do sistema
         keepExtensions: true,
         maxFileSize: 10 * 1024 * 1024, // 10MB
+        maxFields: 10,
         multiples: false,
-        // Configurações adicionais para melhor compatibilidade
         allowEmptyFiles: false,
         minFileSize: 1,
+        // Timeout para evitar travamentos
+        maxFieldsSize: 2 * 1024 * 1024, // 2MB para fields
       });
 
+      // Adicionar listener de erro direto no form
+      form.on('error', (err) => {
+        console.error('💥 [UPLOAD] Erro do formidable (event):', err);
+      });
+
+      console.log('📦 [UPLOAD] Iniciando parse...');
       [fields, files] = await form.parse(req);
       console.log('📦 [UPLOAD] Parse bem-sucedido');
       
     } catch (parseError) {
-      console.log('💥 [UPLOAD] Erro no parse do formidable:', parseError);
+      console.error('💥 [UPLOAD] Erro no parse do formidable:', parseError);
+      console.error('💥 [UPLOAD] Stack do parseError:', parseError?.stack);
+      console.error('💥 [UPLOAD] Tipo do parseError:', typeof parseError);
+      console.error('💥 [UPLOAD] Nome do parseError:', parseError?.constructor?.name);
+      
       return res.status(400).json({ 
         error: 'Erro ao processar formulário multipart',
-        details: parseError.message 
+        details: parseError instanceof Error ? parseError.message : String(parseError),
+        errorType: parseError?.constructor?.name || 'Unknown'
       });
     }
     
@@ -243,13 +270,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   } catch (error) {
     console.error('💥 [UPLOAD] ERRO CRÍTICO no upload:', error);
-    console.error('💥 [UPLOAD] Stack trace:', error instanceof Error ? error.stack : 'N/A');
-    console.error('💥 [UPLOAD] Tipo do erro:', typeof error);
-    console.error('💥 [UPLOAD] Construtor:', error?.constructor?.name || 'N/A');
     
-    return res.status(500).json({ 
-      error: error instanceof Error ? error.message : 'Erro interno do servidor',
-      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
-    });
+    let errorMessage = 'Erro interno do servidor';
+    let errorDetails: any = {};
+
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      errorDetails = {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+        cause: error.cause,
+      };
+    } else {
+      errorMessage = 'Ocorreu um erro inesperado.';
+      errorDetails = error;
+    }
+    
+    console.error('💥 [UPLOAD] Detalhes do erro:', JSON.stringify(errorDetails, null, 2));
+    
+    // Evitar que a resposta seja enviada se os headers já foram enviados
+    if (!res.headersSent) {
+      return res.status(500).json({ 
+        error: errorMessage,
+        details: process.env.NODE_ENV === 'development' ? errorDetails : undefined
+      });
+    } else {
+      console.error('💥 [UPLOAD] Headers já enviados, não é possível enviar resposta de erro');
+    }
   }
 }
