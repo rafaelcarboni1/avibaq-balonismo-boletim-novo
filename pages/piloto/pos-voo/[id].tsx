@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { CloudArrowUpIcon, DocumentIcon, PhotoIcon, MapIcon, ClockIcon, UsersIcon, CheckIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { CloudArrowUpIcon, DocumentIcon, PhotoIcon, MapIcon, ClockIcon, UsersIcon, CheckIcon, XMarkIcon, EyeIcon, TrashIcon } from '@heroicons/react/24/outline';
 import { EnhancedDashboardLayout } from '../../../src/components/magicui/enhanced-dashboard-layout';
 import { MagicCard } from '../../../src/components/magicui/magic-card';
 import { supabase } from '../../../src/integrations/supabase/client';
@@ -87,6 +87,8 @@ export default function PosVoo() {
 
   const [baloesPassageiros, setBaloesPassageiros] = useState<BalaoPassageiros[]>([]);
   const [autoSaving, setAutoSaving] = useState(false);
+  const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<{anexoId: string, fileUrl: string} | null>(null);
 
   // Verificar se usuário está autenticado e é piloto
   useEffect(() => {
@@ -285,6 +287,18 @@ export default function PosVoo() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Funções helper para modal e delete
+  const isImageFile = (filename: string) => {
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.heic'];
+    return imageExtensions.some(ext => filename.toLowerCase().endsWith(ext));
+  };
+
+  const confirmDelete = () => {
+    if (deleteConfirm) {
+      handleDeleteAnexo(deleteConfirm.anexoId, deleteConfirm.fileUrl);
     }
   };
 
@@ -1010,20 +1024,32 @@ export default function PosVoo() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <a
-                      href={anexo.url_storage}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:text-primary/80 text-sm underline"
-                    >
-                      Visualizar
-                    </a>
+                    {isImageFile(anexo.nome_arquivo) ? (
+                      <button
+                        onClick={() => setModalImageUrl(anexo.url_storage)}
+                        className="text-primary hover:text-primary/80 text-sm underline flex items-center gap-1"
+                      >
+                        <EyeIcon className="h-4 w-4" />
+                        Visualizar
+                      </button>
+                    ) : (
+                      <a
+                        href={anexo.url_storage}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:text-primary/80 text-sm underline flex items-center gap-1"
+                      >
+                        <EyeIcon className="h-4 w-4" />
+                        Visualizar
+                      </a>
+                    )}
                     {!isReadOnly && (
                       <button
-                        onClick={() => handleDeleteAnexo(anexo.id, anexo.url_storage)}
-                        className="text-red-600 hover:text-red-800 p-1"
+                        onClick={() => setDeleteConfirm({ anexoId: anexo.id, fileUrl: anexo.url_storage })}
+                        className="text-red-600 hover:text-red-800 p-1 flex items-center gap-1"
+                        title="Excluir anexo"
                       >
-                        <XMarkIcon className="h-4 w-4" />
+                        <TrashIcon className="h-4 w-4" />
                       </button>
                     )}
                   </div>
@@ -1071,6 +1097,57 @@ export default function PosVoo() {
           </div>
         )}
       </div>
+
+      {/* Modal para visualizar imagem */}
+      {modalImageUrl && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4"
+          onClick={() => setModalImageUrl(null)}
+        >
+          <div className="relative max-w-4xl max-h-full">
+            <button
+              onClick={() => setModalImageUrl(null)}
+              className="absolute top-4 right-4 text-white bg-black bg-opacity-50 rounded-full p-2 hover:bg-opacity-75"
+            >
+              <XMarkIcon className="h-6 w-6" />
+            </button>
+            <img
+              src={modalImageUrl}
+              alt="Visualização da imagem"
+              className="max-w-full max-h-full object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmação de exclusão */}
+      {deleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Confirmar exclusão
+            </h3>
+            <p className="text-gray-600 mb-6">
+              Tem certeza que deseja excluir este anexo? Esta ação não pode ser desfeita.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setDeleteConfirm(null)}
+                className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+              >
+                Excluir
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </EnhancedDashboardLayout>
   );
 }
