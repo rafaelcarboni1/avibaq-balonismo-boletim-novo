@@ -143,27 +143,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     let fields, files;
     try {
-      // Configuração robusta para ambiente serverless
+      // Configuração simplificada para compatibilidade
       const form = formidable({
-        uploadDir: require('os').tmpdir(), // Usa o tmpdir do sistema
+        uploadDir: require('os').tmpdir(),
         keepExtensions: true,
         maxFileSize: 10 * 1024 * 1024, // 10MB
-        maxFields: 10,
-        multiples: false,
-        allowEmptyFiles: false,
-        minFileSize: 1,
-        // Timeout para evitar travamentos
-        maxFieldsSize: 2 * 1024 * 1024, // 2MB para fields
-      });
-
-      // Adicionar listener de erro direto no form
-      form.on('error', (err) => {
-        console.error('[UPLOAD] Erro do formidable (event):', err);
+        multiples: false
       });
 
       console.log('[UPLOAD] Iniciando parse...');
-      [fields, files] = await form.parse(req);
-      console.log('[UPLOAD] Parse bem-sucedido');
+      
+      // Usar callback em vez de destructuring para compatibilidade
+      const parseResult = await new Promise((resolve, reject) => {
+        form.parse(req, (err, fields, files) => {
+          if (err) {
+            console.error('[UPLOAD] Erro no parse callback:', err);
+            reject(err);
+          } else {
+            console.log('[UPLOAD] Parse bem-sucedido via callback');
+            resolve({ fields, files });
+          }
+        });
+      });
+      
+      fields = (parseResult as any).fields;
+      files = (parseResult as any).files;
       
     } catch (parseError) {
       console.error('[UPLOAD] Erro no parse do formidable:', parseError);
