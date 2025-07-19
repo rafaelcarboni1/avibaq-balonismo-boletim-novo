@@ -26,67 +26,68 @@ const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
 const supabase = createClient(supabaseUrl, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-  console.log('🚀 [UPLOAD] INÍCIO ABSOLUTO DA FUNÇÃO');
+  console.log('[UPLOAD] Function started');
   
   // RESPOSTA IMEDIATA PARA TESTAR
   if (req.query.test === 'immediate') {
-    console.log('🧪 [UPLOAD] Resposta de teste imediata');
+    console.log('[UPLOAD] Immediate test response');
     return res.status(200).json({ 
       success: true, 
-      message: 'Resposta imediata funcionando',
+      message: 'Immediate response working',
       timestamp: new Date().toISOString()
     });
   }
 
-  // Garantir que sempre há uma resposta mesmo em caso de timeout
+  // Set proper headers immediately
+  res.setHeader('Content-Type', 'application/json');
+  
+  // Timeout handling without emojis
   const timeoutId = setTimeout(() => {
     if (!res.headersSent) {
-      console.error('⏰ [UPLOAD] TIMEOUT - Forçando resposta de erro');
-      res.status(504).json({ error: 'Timeout - operação muito lenta' });
+      console.error('[UPLOAD] TIMEOUT - Forcing error response');
+      res.status(504).json({ error: 'Timeout - operation too slow' });
     }
-  }, 8000); // 8 segundos de timeout
+  }, 8000);
 
   try {
-    console.log('🚀 [UPLOAD] Iniciando handler de upload');
-    console.log('🚀 [UPLOAD] Método:', req.method);
-    console.log('🚀 [UPLOAD] URL completa:', req.url);
-    console.log('🚀 [UPLOAD] Content-Length:', req.headers['content-length']);
+    console.log('[UPLOAD] Method:', req.method);
+    console.log('[UPLOAD] Content-Length:', req.headers['content-length']);
     
     if (req.method !== 'POST') {
-      console.log('❌ [UPLOAD] Método não permitido:', req.method);
+      console.log('[UPLOAD] Method not allowed:', req.method);
       clearTimeout(timeoutId);
-      return res.status(405).json({ error: 'Método não permitido' });
+      return res.status(405).json({ error: 'Method not allowed' });
     }
     const { id: vooId } = req.query;
-    console.log('🚀 [UPLOAD] Voo ID:', vooId);
+    console.log('[UPLOAD] Voo ID:', vooId);
 
     if (!vooId || typeof vooId !== 'string') {
-      console.log('❌ [UPLOAD] ID do voo inválido:', vooId);
+      console.log('[UPLOAD] ID do voo inválido:', vooId);
       clearTimeout(timeoutId);
       return res.status(400).json({ error: 'ID do voo é obrigatório' });
     }
 
     // Verificar autenticação
-    console.log('🔐 [UPLOAD] Verificando autenticação...');
+    console.log('[UPLOAD] Verificando autenticação...');
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      console.log('❌ [UPLOAD] Token não fornecido ou formato inválido');
+      console.log('[UPLOAD] Token não fornecido ou formato inválido');
       clearTimeout(timeoutId);
       return res.status(401).json({ error: 'Token de autenticação necessário' });
     }
 
     const token = authHeader.split(' ')[1];
-    console.log('🔐 [UPLOAD] Token recebido:', token.substring(0, 20) + '...');
+    console.log('[UPLOAD] Token recebido:', token.substring(0, 20) + '...');
     
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
 
     if (authError || !user) {
-      console.log('❌ [UPLOAD] Erro de autenticação:', authError?.message || 'Usuário não encontrado');
+      console.log('[UPLOAD] Erro de autenticação:', authError?.message || 'Usuário não encontrado');
       clearTimeout(timeoutId);
       return res.status(401).json({ error: 'Token inválido' });
     }
     
-    console.log('✅ [UPLOAD] Usuário autenticado:', user.email);
+    console.log('[UPLOAD] Usuário autenticado:', user.email);
 
     // Verificar se o usuário é piloto e tem acesso ao voo
     console.log('👤 [UPLOAD] Verificando se usuário é piloto...');
@@ -98,11 +99,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .single();
 
     if (membroError || !membro) {
-      console.log('❌ [UPLOAD] Usuário não é piloto:', membroError?.message || 'Membro não encontrado');
+      console.log('[UPLOAD] Usuário não é piloto:', membroError?.message || 'Membro não encontrado');
       return res.status(403).json({ error: 'Acesso negado: usuário não é piloto' });
     }
     
-    console.log('✅ [UPLOAD] Usuário é piloto, ID:', membro.id);
+    console.log('[UPLOAD] Usuário é piloto, ID:', membro.id);
 
     // Verificar se o voo pertence ao piloto
     const { data: voo, error: vooError } = await supabaseAdmin
@@ -125,10 +126,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Verificar Content-Type
     const contentType = req.headers['content-type'] || '';
-    console.log('📦 [UPLOAD] Content-Type recebido:', contentType);
+    console.log('[UPLOAD] Content-Type recebido:', contentType);
     
     if (!contentType.includes('multipart/form-data')) {
-      console.log('❌ [UPLOAD] Content-Type inválido, esperado multipart/form-data');
+      console.log('[UPLOAD] Content-Type inválido, esperado multipart/form-data');
       return res.status(415).json({ 
         error: 'Content-Type deve ser multipart/form-data',
         received: contentType 
@@ -138,7 +139,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Ambiente serverless - usar tmpdir do sistema
 
     // Parse do formulário multipart
-    console.log('📦 [UPLOAD] Parseando formulário multipart...');
+    console.log('[UPLOAD] Parseando formulário multipart...');
     
     let fields, files;
     try {
@@ -157,18 +158,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       // Adicionar listener de erro direto no form
       form.on('error', (err) => {
-        console.error('💥 [UPLOAD] Erro do formidable (event):', err);
+        console.error('[UPLOAD] Erro do formidable (event):', err);
       });
 
-      console.log('📦 [UPLOAD] Iniciando parse...');
+      console.log('[UPLOAD] Iniciando parse...');
       [fields, files] = await form.parse(req);
-      console.log('📦 [UPLOAD] Parse bem-sucedido');
+      console.log('[UPLOAD] Parse bem-sucedido');
       
     } catch (parseError) {
-      console.error('💥 [UPLOAD] Erro no parse do formidable:', parseError);
-      console.error('💥 [UPLOAD] Stack do parseError:', parseError?.stack);
-      console.error('💥 [UPLOAD] Tipo do parseError:', typeof parseError);
-      console.error('💥 [UPLOAD] Nome do parseError:', parseError?.constructor?.name);
+      console.error('[UPLOAD] Erro no parse do formidable:', parseError);
+      console.error('[UPLOAD] Stack do parseError:', parseError?.stack);
+      console.error('[UPLOAD] Tipo do parseError:', typeof parseError);
+      console.error('[UPLOAD] Nome do parseError:', parseError?.constructor?.name);
       
       return res.status(400).json({ 
         error: 'Erro ao processar formulário multipart',
@@ -177,17 +178,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
     
-    console.log('📦 [UPLOAD] Fields recebidos:', Object.keys(fields || {}));
-    console.log('📦 [UPLOAD] Files recebidos:', Object.keys(files || {}));
+    console.log('[UPLOAD] Fields recebidos:', Object.keys(fields || {}));
+    console.log('[UPLOAD] Files recebidos:', Object.keys(files || {}));
     
     const tipo = Array.isArray(fields.tipo) ? fields.tipo[0] : fields.tipo;
     const file = Array.isArray(files.file) ? files.file[0] : files.file;
     
-    console.log('📦 [UPLOAD] Tipo extraído:', tipo);
-    console.log('📦 [UPLOAD] File extraído:', file ? `${file.originalFilename} (${file.size} bytes)` : 'Não encontrado');
+    console.log('[UPLOAD] Tipo extraído:', tipo);
+    console.log('[UPLOAD] File extraído:', file ? `${file.originalFilename} (${file.size} bytes)` : 'Não encontrado');
 
     if (!file || !tipo) {
-      console.log('❌ [UPLOAD] Arquivo ou tipo faltando:', { file: !!file, tipo });
+      console.log('[UPLOAD] Arquivo ou tipo faltando:', { file: !!file, tipo });
       return res.status(400).json({ 
         error: 'Arquivo e tipo são obrigatórios',
         received: { file: !!file, tipo, fields: Object.keys(fields || {}), files: Object.keys(files || {}) }
@@ -214,16 +215,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Validar se arquivo existe e é legível
-    console.log('📁 [UPLOAD] Verificando arquivo no filesystem...');
+    console.log('[UPLOAD] Verificando arquivo no filesystem...');
     try {
       const stats = fs.statSync(file.filepath);
-      console.log('📁 [UPLOAD] Arquivo válido:', {
+      console.log('[UPLOAD] Arquivo válido:', {
         size: stats.size,
         path: file.filepath,
         isFile: stats.isFile()
       });
     } catch (fsError) {
-      console.error('❌ [UPLOAD] Erro ao acessar arquivo:', fsError);
+      console.error('[UPLOAD] Erro ao acessar arquivo:', fsError);
       return res.status(400).json({ 
         error: 'Arquivo não pode ser acessado',
         details: fsError instanceof Error ? fsError.message : String(fsError)
@@ -231,13 +232,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Ler o arquivo
-    console.log('📁 [UPLOAD] Lendo arquivo do filesystem...');
+    console.log('[UPLOAD] Lendo arquivo do filesystem...');
     let fileBuffer;
     try {
       fileBuffer = fs.readFileSync(file.filepath);
-      console.log('📁 [UPLOAD] Arquivo lido com sucesso, tamanho:', fileBuffer.length);
+      console.log('[UPLOAD] Arquivo lido com sucesso, tamanho:', fileBuffer.length);
     } catch (readError) {
-      console.error('❌ [UPLOAD] Erro ao ler arquivo:', readError);
+      console.error('[UPLOAD] Erro ao ler arquivo:', readError);
       return res.status(500).json({ 
         error: 'Erro ao ler arquivo',
         details: readError instanceof Error ? readError.message : String(readError)
@@ -249,7 +250,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}${fileExt}`;
     const storagePath = `voos/${vooId}/${fileName}`;
 
-    console.log('📁 [UPLOAD] Preparando upload para Storage:', {
+    console.log('[UPLOAD] Preparando upload para Storage:', {
       storagePath,
       fileName,
       originalName: file.originalFilename,
@@ -258,7 +259,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
     // Upload para o Supabase Storage
-    console.log('☁️ [UPLOAD] Iniciando upload para Storage:', storagePath);
+    console.log('[UPLOAD] Iniciando upload para Storage:', storagePath);
     const { data: uploadData, error: uploadError } = await supabaseAdmin.storage
       .from('voos-anexos')
       .upload(storagePath, fileBuffer, {
@@ -267,25 +268,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
 
     if (uploadError) {
-      console.error('❌ [UPLOAD] Erro no upload para Storage:', uploadError.message);
+      console.error('[UPLOAD] Erro no upload para Storage:', uploadError.message);
       return res.status(500).json({ 
         error: `Erro no upload para Storage: ${uploadError.message}`
       });
     }
     
-    console.log('✅ [UPLOAD] Upload para Storage concluído com sucesso:', {
+    console.log('[UPLOAD] Upload para Storage concluído com sucesso:', {
       path: uploadData?.path,
       id: uploadData?.id,
       fullPath: uploadData?.fullPath
     });
 
     // Obter URL pública
-    console.log('🔗 [UPLOAD] Gerando URL pública...');
+    console.log('[UPLOAD] Gerando URL pública...');
     const { data: { publicUrl } } = supabaseAdmin.storage
       .from('voos-anexos')
       .getPublicUrl(storagePath);
     
-    console.log('🔗 [UPLOAD] URL pública gerada:', publicUrl);
+    console.log('[UPLOAD] URL pública gerada:', publicUrl);
 
     // Preparar registro do banco
     const anexoRecord = {
@@ -299,7 +300,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       uploaded_por: user.id
     };
     
-    console.log('🗄️ [UPLOAD] Salvando anexo no banco...');
+    console.log('[UPLOAD] Salvando anexo no banco...');
     
     const { data: anexoData, error: anexoError } = await supabaseAdmin
       .from('voos_anexos')
@@ -308,15 +309,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .single();
 
     if (anexoError) {
-      console.error('❌ [UPLOAD] Erro ao salvar anexo no banco:', anexoError.message);
-      console.error('❌ [UPLOAD] Código:', anexoError.code, 'Hint:', anexoError.hint);
+      console.error('[UPLOAD] Erro ao salvar anexo no banco:', anexoError.message);
+      console.error('[UPLOAD] Código:', anexoError.code, 'Hint:', anexoError.hint);
       
       // Tentar remover o arquivo do storage se falhou ao salvar no banco
       try {
         await supabaseAdmin.storage.from('voos-anexos').remove([storagePath]);
-        console.log('🧹 [UPLOAD] Arquivo removido do Storage');
+        console.log('[UPLOAD] Arquivo removido do Storage');
       } catch (removeError) {
-        console.error('❌ [UPLOAD] Erro ao remover arquivo do Storage:', removeError);
+        console.error('[UPLOAD] Erro ao remover arquivo do Storage:', removeError);
       }
       
       return res.status(500).json({ 
@@ -326,7 +327,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
     
-    console.log('✅ [UPLOAD] Anexo salvo no banco com sucesso!', {
+    console.log('[UPLOAD] Anexo salvo no banco com sucesso!', {
       id: anexoData?.id,
       voo_id: anexoData?.voo_id,
       nome_arquivo: anexoData?.nome_arquivo
@@ -335,8 +336,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Limpar arquivo temporário
     fs.unlinkSync(file.filepath);
 
-    console.log('🎉 [UPLOAD] Upload completo com sucesso!');
-    console.log('🎉 [UPLOAD] Anexo ID:', anexoData?.id);
+    console.log('[UPLOAD] Upload completo com sucesso!');
+    console.log('[UPLOAD] Anexo ID:', anexoData?.id);
     
     clearTimeout(timeoutId);
     return res.status(200).json({
@@ -345,7 +346,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
   } catch (error) {
-    console.error('💥 [UPLOAD] ERRO CRÍTICO no upload:', error instanceof Error ? error.message : String(error));
+    console.error('[UPLOAD] ERRO CRÍTICO no upload:', error instanceof Error ? error.message : String(error));
     
     clearTimeout(timeoutId);
     
@@ -355,7 +356,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         error: error instanceof Error ? error.message : 'Erro interno do servidor'
       });
     } else {
-      console.error('💥 [UPLOAD] Headers já enviados, não é possível enviar resposta de erro');
+      console.error('[UPLOAD] Headers já enviados, não é possível enviar resposta de erro');
     }
   } finally {
     // Garantir que o timeout seja sempre limpo
