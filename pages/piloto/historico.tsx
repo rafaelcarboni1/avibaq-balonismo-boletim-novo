@@ -132,7 +132,7 @@ export default function PilotoHistorico() {
           observacoes_cancelamento,
           created_at,
           voos_baloes (
-            balao:baloes (
+            baloes (
               id,
               nome
             )
@@ -178,7 +178,7 @@ export default function PilotoHistorico() {
       // Processar dados dos voos
       const voosProcessados = voosData?.map(voo => ({
         ...voo,
-        baloes: voo.voos_baloes?.map(vb => vb.balao).filter(Boolean) || [],
+        baloes: voo.voos_baloes?.map(vb => vb.baloes).filter(Boolean).flat() || [],
         anexos: voo.voos_anexos || []
       })) || [];
 
@@ -238,7 +238,7 @@ export default function PilotoHistorico() {
 
   if (userLoading || loading) {
     return (
-      <EnhancedDashboardLayout userRole="piloto">
+      <EnhancedDashboardLayout>
         <div className="space-y-6">
           <LoadingSkeleton height="h-32" />
           <LoadingSkeleton height="h-64" />
@@ -249,7 +249,7 @@ export default function PilotoHistorico() {
   }
 
   return (
-    <EnhancedDashboardLayout userRole="piloto">
+    <EnhancedDashboardLayout>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
