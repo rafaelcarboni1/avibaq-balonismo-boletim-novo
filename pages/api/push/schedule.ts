@@ -36,25 +36,33 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const scheduledDate = new Date(scheduledFor);
-    const nowBrasilia = new Date();
+    const now = new Date();
     
-    // Adicionar 2 minutos de tolerância para processamento
-    const minAllowedTime = new Date(nowBrasilia.getTime() + 2 * 60 * 1000);
+    // Debug: vamos ver as datas que estão chegando
+    console.log('[SCHEDULE DEBUG] Data recebida:', scheduledFor);
+    console.log('[SCHEDULE DEBUG] Data parseada:', scheduledDate.toISOString());
+    console.log('[SCHEDULE DEBUG] Data atual:', now.toISOString());
+    console.log('[SCHEDULE DEBUG] Diferença em minutos:', (scheduledDate.getTime() - now.getTime()) / (60 * 1000));
+    
+    // Validar se é uma data válida
+    if (isNaN(scheduledDate.getTime())) {
+      return res.status(400).json({ error: 'Data inválida fornecida' });
+    }
+    
+    // Adicionar apenas 1 minuto de tolerância - SIMPLIFICANDO
+    const minAllowedTime = new Date(now.getTime() + 1 * 60 * 1000);
     
     if (scheduledDate <= minAllowedTime) {
-      const nowFormatted = nowBrasilia.toLocaleString('pt-BR', {
-        timeZone: 'America/Sao_Paulo',
-        day: '2-digit',
-        month: '2-digit', 
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
+      const nowFormatted = now.toLocaleString('pt-BR');
+      const scheduledFormatted = scheduledDate.toLocaleString('pt-BR');
       
       return res.status(400).json({ 
-        error: `Data deve ser pelo menos 2 minutos no futuro. Agora: ${nowFormatted} (horário de Brasília)`,
-        currentTime: nowFormatted,
-        receivedTime: scheduledDate.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
+        error: `Data deve ser pelo menos 1 minuto no futuro.`,
+        debug: {
+          agora: nowFormatted,
+          agendadoPara: scheduledFormatted,
+          diferencaMinutos: Math.round((scheduledDate.getTime() - now.getTime()) / (60 * 1000))
+        }
       });
     }
 
