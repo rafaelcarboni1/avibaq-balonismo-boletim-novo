@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { CloudArrowUpIcon, DocumentIcon, PhotoIcon, MapIcon, ClockIcon, UsersIcon, CheckIcon, XMarkIcon, EyeIcon, TrashIcon } from '@heroicons/react/24/outline';
+import { CloudArrowUpIcon, DocumentIcon, PhotoIcon, MapIcon, ClockIcon, UsersIcon, CheckIcon, XMarkIcon, EyeIcon, TrashIcon, ArchiveBoxIcon } from '@heroicons/react/24/outline';
 import { EnhancedDashboardLayout } from '../../../src/components/magicui/enhanced-dashboard-layout';
 import { MagicCard } from '../../../src/components/magicui/magic-card';
 import { supabase } from '../../../src/integrations/supabase/client';
@@ -89,6 +89,7 @@ export default function PosVoo() {
   const [autoSaving, setAutoSaving] = useState(false);
   const [modalImageUrl, setModalImageUrl] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{anexoId: string, fileUrl: string} | null>(null);
+  const [downloading, setDownloading] = useState<'zip' | 'pdf' | null>(null);
 
   // Verificar se usuário está autenticado e é piloto
   useEffect(() => {
@@ -294,6 +295,110 @@ export default function PosVoo() {
   const isImageFile = (filename: string) => {
     const imageExtensions = ['.jpg', '.jpeg', '.png', '.webp', '.heic'];
     return imageExtensions.some(ext => filename.toLowerCase().endsWith(ext));
+  };
+
+  // Função para baixar ZIP
+  const handleDownloadZIP = async () => {
+    try {
+      setDownloading('zip');
+      
+      const response = await fetch(`/api/voos/${id}/export-zip`);
+      
+      if (!response.ok) {
+        throw new Error('Erro ao gerar ZIP');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      
+      // Extrair nome do arquivo do header Content-Disposition
+      const contentDisposition = response.headers.get('content-disposition');
+      let filename = `voo-${id}.zip`;
+      
+      if (contentDisposition) {
+        const matches = /filename="([^"]*)"/.exec(contentDisposition);
+        if (matches?.[1]) {
+          filename = matches[1];
+        }
+      }
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Download concluído",
+        description: "Arquivo ZIP baixado com sucesso",
+        variant: "default"
+      });
+
+    } catch (error) {
+      console.error('Erro ao baixar ZIP:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao baixar arquivo ZIP",
+        variant: "destructive"
+      });
+    } finally {
+      setDownloading(null);
+    }
+  };
+
+  // Função para baixar PDF
+  const handleDownloadPDF = async () => {
+    try {
+      setDownloading('pdf');
+      
+      const response = await fetch(`/api/voos/${id}/export-pdf`);
+      
+      if (!response.ok) {
+        throw new Error('Erro ao gerar PDF');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      
+      // Extrair nome do arquivo do header Content-Disposition
+      const contentDisposition = response.headers.get('content-disposition');
+      let filename = `relatorio-voo-${id}.pdf`;
+      
+      if (contentDisposition) {
+        const matches = /filename="([^"]*)"/.exec(contentDisposition);
+        if (matches?.[1]) {
+          filename = matches[1];
+        }
+      }
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      window.URL.revokeObjectURL(url);
+
+      toast({
+        title: "Download concluído",
+        description: "Relatório PDF baixado com sucesso",
+        variant: "default"
+      });
+
+    } catch (error) {
+      console.error('Erro ao baixar PDF:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao baixar relatório PDF",
+        variant: "destructive"
+      });
+    } finally {
+      setDownloading(null);
+    }
   };
 
   const confirmDelete = () => {
@@ -1084,16 +1189,111 @@ export default function PosVoo() {
               <CheckIcon className="h-4 w-4" />
             </button>
           </div>
+
+          {/* Botões de Download */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <h4 className="text-sm font-medium text-gray-700 mb-3">Exportar Dados do Voo</h4>
+            <div className="flex flex-wrap gap-3">
+              <button
+                onClick={handleDownloadZIP}
+                disabled={downloading !== null}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {downloading === 'zip' ? (
+                  <>
+                    <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                    Gerando ZIP...
+                  </>
+                ) : (
+                  <>
+                    <ArchiveBoxIcon className="h-4 w-4" />
+                    Baixar ZIP Completo
+                  </>
+                )}
+              </button>
+              
+              <button
+                onClick={handleDownloadPDF}
+                disabled={downloading !== null}
+                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {downloading === 'pdf' ? (
+                  <>
+                    <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                    Gerando PDF...
+                  </>
+                ) : (
+                  <>
+                    <DocumentIcon className="h-4 w-4" />
+                    Baixar Relatório PDF
+                  </>
+                )}
+              </button>
+            </div>
+            
+            <p className="text-xs text-gray-500 mt-2">
+              ZIP: Backup completo com todos os arquivos • PDF: Relatório profissional formatado
+            </p>
+          </div>
         )}
 
         {isReadOnly && (
-          <div className="text-center">
-            <button
-              onClick={() => router.push('/piloto/dashboard')}
-              className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors"
-            >
-              Voltar ao Dashboard
-            </button>
+          <div className="space-y-6">
+            {/* Botões de Download para voos finalizados */}
+            <div className="pt-6 border-t border-gray-200">
+              <h4 className="text-sm font-medium text-gray-700 mb-3">Exportar Dados do Voo</h4>
+              <div className="flex flex-wrap gap-3 justify-center">
+                <button
+                  onClick={handleDownloadZIP}
+                  disabled={downloading !== null}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {downloading === 'zip' ? (
+                    <>
+                      <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                      Gerando ZIP...
+                    </>
+                  ) : (
+                    <>
+                      <ArchiveBoxIcon className="h-4 w-4" />
+                      Baixar ZIP Completo
+                    </>
+                  )}
+                </button>
+                
+                <button
+                  onClick={handleDownloadPDF}
+                  disabled={downloading !== null}
+                  className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {downloading === 'pdf' ? (
+                    <>
+                      <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                      Gerando PDF...
+                    </>
+                  ) : (
+                    <>
+                      <DocumentIcon className="h-4 w-4" />
+                      Baixar Relatório PDF
+                    </>
+                  )}
+                </button>
+              </div>
+              
+              <p className="text-xs text-gray-500 mt-2 text-center">
+                ZIP: Backup completo com todos os arquivos • PDF: Relatório profissional formatado
+              </p>
+            </div>
+
+            {/* Botão voltar */}
+            <div className="text-center">
+              <button
+                onClick={() => router.push('/piloto/dashboard')}
+                className="bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors"
+              >
+                Voltar ao Dashboard
+              </button>
+            </div>
           </div>
         )}
       </div>
