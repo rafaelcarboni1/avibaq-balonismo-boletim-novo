@@ -71,6 +71,13 @@ export default function PushCenter() {
     dateTo: ''
   });
   const [activeTab, setActiveTab] = useState('editor');
+  const [showScheduleModal, setShowScheduleModal] = useState(false);
+  const [scheduleData, setScheduleData] = useState({
+    scheduledFor: '',
+    recurring: false,
+    recurringPattern: 'daily'
+  });
+  const [scheduling, setScheduling] = useState(false);
 
   // Mock data para preview - em produção virá do banco
   const [stats, setStats] = useState({
@@ -262,6 +269,99 @@ export default function PushCenter() {
       return 'Adicione pelo menos um email para envio direcionado';
     }
     return null;
+  };
+
+  const scheduleNotification = async () => {
+    const validationError = validateForm();
+    if (validationError) {
+      toast({
+        title: "Erro de Validação",
+        description: validationError,
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!scheduleData.scheduledFor) {
+      toast({
+        title: "Erro de Validação",
+        description: "Data e hora de agendamento são obrigatórias",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Verificar se a data é no futuro
+    const scheduledDate = new Date(scheduleData.scheduledFor);
+    if (scheduledDate <= new Date()) {
+      toast({
+        title: "Erro de Validação",
+        description: "Data de agendamento deve ser no futuro",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setScheduling(true);
+    try {
+      const response = await fetch('/api/push/schedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          adminUserId: user?.id,
+          title: formData.title,
+          message: formData.message,
+          internalLink: formData.internalLink || undefined,
+          targetAudience: formData.targetAudience,
+          scheduledFor: scheduleData.scheduledFor,
+          recurring: scheduleData.recurring,
+          recurringPattern: scheduleData.recurring ? scheduleData.recurringPattern : undefined
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Erro ao agendar notificação');
+      }
+
+      const result = await response.json();
+
+      toast({
+        title: "Notificação Agendada! 📅",
+        description: result.message,
+        duration: 6000
+      });
+
+      // Fechar modal e limpar formulário
+      setShowScheduleModal(false);
+      setScheduleData({
+        scheduledFor: '',
+        recurring: false,
+        recurringPattern: 'daily'
+      });
+      setFormData({
+        title: '',
+        message: '',
+        internalLink: '',
+        targetAudience: { type: 'all' }
+      });
+      setSelectedEmails([]);
+      setEmailInput('');
+
+      // Atualizar lista de agendadas se estiver na aba
+      if (activeTab === 'scheduled') {
+        fetchScheduledJobs();
+      }
+
+    } catch (error: any) {
+      toast({
+        title: "Erro ao Agendar",
+        description: error.message || "Erro interno do servidor",
+        variant: "destructive"
+      });
+    } finally {
+      setScheduling(false);
+    }
   };
 
   const sendImmediateNotification = async () => {
@@ -670,13 +770,7 @@ export default function PushCenter() {
                         <Button 
                           variant="outline"
                           disabled={!formData.title || !formData.message}
-                          onClick={() => {
-                            // TODO: Abrir modal de agendamento
-                            toast({
-                              title: "Agendamento",
-                              description: "Interface de agendamento será implementada em breve",
-                            });
-                          }}
+                          onClick={() => setShowScheduleModal(true)}
                         >
                           <CalendarIcon className="h-4 w-4 mr-2" />
                           Agendar
@@ -1142,6 +1236,119 @@ export default function PushCenter() {
           </Tabs>
         </div>
       </EnhancedDashboardLayout>
+
+      {/* Modal de Agendamento */}
+      {showScheduleModal && (
+        <div className="fixed inset-0 bg-gray-900/30 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">Agendar Notificação</h3>
+                <button
+                  onClick={() => setShowScheduleModal(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg"
+                >
+                  <XMarkIcon className="h-5 w-5 text-gray-500" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {/* Resumo da notificação */}
+                <div className="bg-gray-50 p-3 rounded-lg">
+                  <p className="text-sm font-medium text-gray-700 mb-1">Notificação:</p>
+                  <p className="text-sm text-gray-900 font-medium">{formData.title}</p>
+                  <p className="text-sm text-gray-600">{formData.message}</p>
+                </div>
+
+                {/* Data e Hora */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">
+                    Data e Hora <span className="text-red-500">*</span>
+                  </label>
+                  <Input
+                    type="datetime-local"
+                    value={scheduleData.scheduledFor}
+                    onChange={(e) => setScheduleData(prev => ({ ...prev, scheduledFor: e.target.value }))}
+                    min={new Date().toISOString().slice(0, 16)}
+                    className="w-full"
+                  />
+                </div>
+
+                {/* Recorrência */}
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="checkbox"
+                      id="recurring"
+                      checked={scheduleData.recurring}
+                      onChange={(e) => setScheduleData(prev => ({ ...prev, recurring: e.target.checked }))}
+                      className="h-4 w-4 text-blue-600"
+                    />
+                    <label htmlFor="recurring" className="text-sm text-gray-700">
+                      Notificação recorrente
+                    </label>
+                  </div>
+
+                  {scheduleData.recurring && (
+                    <div className="ml-7">
+                      <label className="text-sm font-medium text-gray-700 block mb-2">
+                        Padrão de Recorrência
+                      </label>
+                      <select
+                        value={scheduleData.recurringPattern}
+                        onChange={(e) => setScheduleData(prev => ({ ...prev, recurringPattern: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                      >
+                        <option value="daily">Diário</option>
+                        <option value="weekly">Semanal</option>
+                        <option value="biweekly">Quinzenal</option>
+                        <option value="monthly">Mensal</option>
+                        <option value="quarterly">Trimestral</option>
+                      </select>
+                    </div>
+                  )}
+                </div>
+
+                {/* Informações */}
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <div className="flex items-start space-x-2">
+                    <div className="text-blue-600 mt-0.5">
+                      <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                    <div className="text-blue-800 text-xs">
+                      <p className="font-medium mb-1">Sobre o Agendamento:</p>
+                      <ul className="space-y-1 text-xs">
+                        <li>• A notificação será enviada automaticamente na data/hora especificada</li>
+                        <li>• Recorrências criam múltiplas notificações futuras</li>
+                        <li>• Você pode cancelar notificações agendadas na aba "Agendadas"</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Botões */}
+              <div className="flex justify-end space-x-3 mt-6 pt-4 border-t">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowScheduleModal(false)}
+                  disabled={scheduling}
+                >
+                  Cancelar
+                </Button>
+                <Button
+                  onClick={scheduleNotification}
+                  disabled={scheduling || !scheduleData.scheduledFor}
+                >
+                  {scheduling ? 'Agendando...' : 'Agendar Notificação'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </RequireAdmin>
   );
 }

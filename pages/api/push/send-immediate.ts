@@ -39,22 +39,30 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'Mensagem deve ter no máximo 120 caracteres' });
     }
 
-    // Verificar se o usuário é admin
+    // Verificar se o usuário é admin (admin, meteo ou tesouraria)
     const { data: adminUser, error: adminError } = await supabaseService
       .from('users')
       .select('id, role, nome')
       .eq('id', adminUserId)
       .single();
 
-    if (adminError || !adminUser || adminUser.role !== 'admin') {
-      return res.status(403).json({ error: 'Acesso negado - apenas administradores' });
+    const adminRoles = ['admin', 'meteo', 'tesouraria'];
+    if (adminError || !adminUser || !adminRoles.includes(adminUser.role)) {
+      console.error('[PUSH] Erro de autenticação:', { adminError, adminUser: adminUser?.role });
+      return res.status(403).json({ 
+        error: 'Acesso negado - apenas administradores',
+        details: `Role atual: ${adminUser?.role || 'não encontrado'}`,
+        userId: adminUserId
+      });
     }
+
+    console.log(`[PUSH] Admin autenticado: ${adminUser.nome} (${adminUser.role})`);
 
     // Criar registro da notificação
     const { data: notification, error: notificationError } = await supabaseService
       .from('push_notifications')
       .insert({
-        created_by: adminUserId,
+        admin_user_id: adminUserId,
         title,
         message,
         internal_link: internalLink || null,
