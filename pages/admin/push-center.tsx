@@ -291,12 +291,26 @@ export default function PushCenter() {
       return;
     }
 
-    // Verificar se a data é no futuro
+    // Verificar se a data é no futuro (considerando fuso horário de Brasília)
     const scheduledDate = new Date(scheduleData.scheduledFor);
-    if (scheduledDate <= new Date()) {
+    const nowBrasilia = new Date();
+    
+    // Adicionar 5 minutos de tolerância para compensação de fuso horário
+    const minAllowedTime = new Date(nowBrasilia.getTime() + 5 * 60 * 1000);
+    
+    if (scheduledDate <= minAllowedTime) {
+      const nowFormatted = nowBrasilia.toLocaleString('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        day: '2-digit',
+        month: '2-digit', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      
       toast({
         title: "Erro de Validação",
-        description: "Data de agendamento deve ser no futuro",
+        description: `Data deve ser pelo menos 5 minutos no futuro. Agora são ${nowFormatted} (horário de Brasília)`,
         variant: "destructive"
       });
       return;
@@ -1264,12 +1278,21 @@ export default function PushCenter() {
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">
                     Data e Hora <span className="text-red-500">*</span>
+                    <span className="text-xs text-gray-500 ml-2">(Horário de Brasília)</span>
                   </label>
                   <Input
                     type="datetime-local"
                     value={scheduleData.scheduledFor}
                     onChange={(e) => setScheduleData(prev => ({ ...prev, scheduledFor: e.target.value }))}
-                    min={new Date().toISOString().slice(0, 16)}
+                    min={(() => {
+                      // Criar data atual em fuso horário de Brasília + 5 minutos
+                      const now = new Date();
+                      const brasiliaOffset = -3 * 60; // Brasília UTC-3
+                      const localOffset = now.getTimezoneOffset();
+                      const offsetDiff = (brasiliaOffset - localOffset) * 60 * 1000;
+                      const brasiliaTime = new Date(now.getTime() + offsetDiff + 5 * 60 * 1000); // +5 min
+                      return brasiliaTime.toISOString().slice(0, 16);
+                    })()}
                     className="w-full"
                   />
                 </div>
@@ -1321,6 +1344,7 @@ export default function PushCenter() {
                       <p className="font-medium mb-1">Sobre o Agendamento:</p>
                       <ul className="space-y-1 text-xs">
                         <li>• A notificação será enviada automaticamente na data/hora especificada</li>
+                        <li>• Todos os horários são baseados no fuso de Brasília (UTC-3)</li>
                         <li>• Recorrências criam múltiplas notificações futuras</li>
                         <li>• Você pode cancelar notificações agendadas na aba "Agendadas"</li>
                       </ul>

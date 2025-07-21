@@ -36,8 +36,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     const scheduledDate = new Date(scheduledFor);
-    if (scheduledDate <= new Date()) {
-      return res.status(400).json({ error: 'Data de agendamento deve ser no futuro' });
+    const nowBrasilia = new Date();
+    
+    // Adicionar 2 minutos de tolerância para processamento
+    const minAllowedTime = new Date(nowBrasilia.getTime() + 2 * 60 * 1000);
+    
+    if (scheduledDate <= minAllowedTime) {
+      const nowFormatted = nowBrasilia.toLocaleString('pt-BR', {
+        timeZone: 'America/Sao_Paulo',
+        day: '2-digit',
+        month: '2-digit', 
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      
+      return res.status(400).json({ 
+        error: `Data deve ser pelo menos 2 minutos no futuro. Agora: ${nowFormatted} (horário de Brasília)`,
+        currentTime: nowFormatted,
+        receivedTime: scheduledDate.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
+      });
     }
 
     // Validar padrão de recorrência se especificado
