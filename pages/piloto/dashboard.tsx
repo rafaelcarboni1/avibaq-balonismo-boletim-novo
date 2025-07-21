@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import dynamic from 'next/dynamic';
 
-import { PlusIcon, ClipboardDocumentListIcon, CalendarIcon, DocumentTextIcon, ShieldCheckIcon, ChartBarIcon, UserIcon, ClockIcon, WifiIcon, SignalSlashIcon } from '@heroicons/react/24/solid';
+import { PlusIcon, ClipboardDocumentListIcon, CalendarIcon, DocumentTextIcon, ShieldCheckIcon, ChartBarIcon, UserIcon, ClockIcon, WifiIcon, SignalSlashIcon, ArrowTrendingUpIcon, UsersIcon, SunIcon, MoonIcon, MapPinIcon } from '@heroicons/react/24/solid';
 import { EnhancedDashboardLayout } from '../../src/components/magicui/enhanced-dashboard-layout';
 import { MagicCard } from '../../src/components/magicui/magic-card';
 import { BentoGrid, BentoGridItem } from '../../src/components/magicui/bento-grid';
@@ -255,6 +255,14 @@ export default function PilotoDashboard() {
           .reduce((sum, voo) => sum + (voo.duracao_minutos || 0), 0) / 60 * 10) / 10
       };
       
+      // Dados adicionais para analytics
+      const voosFinalizados = (voosRecentesResult.data || []).filter(voo => voo.status === 'finalizado');
+      const voosComAltitude = voosFinalizados.filter(voo => voo.altitude_maxima && voo.altitude_maxima > 0);
+      const totalPassageirosPrevistos = voosFinalizados.reduce((sum, voo) => 
+        sum + (voo.adultos_previstos || 0) + (voo.criancas_previstas || 0), 0);
+      const totalPassageirosTransportados = voosFinalizados.reduce((sum, voo) => 
+        sum + (voo.adultos_transportados || 0) + (voo.criancas_transportadas || 0), 0);
+
       const statsData = {
         totalBaloes: baloesResult.data?.length || 0,
         voosEsteAno: voosAnoResult.data?.length || 0,
@@ -263,6 +271,7 @@ export default function PilotoDashboard() {
         proximoVoo: proximoVooResult.data || null,
         voosRecentes: voosRecentesResult.data || [],
         voosEmAndamento: voosEmAndamentoResult.data || [],
+        voosFinalizados,
         horasVoo
       };
       
@@ -400,6 +409,15 @@ export default function PilotoDashboard() {
     );
   }
 
+  // Variáveis derivadas para analytics
+  const statsData = stats as any;
+  const voosComDuracao = (statsData?.voosFinalizados || []).filter((voo: any) => voo.duracao_minutos && voo.duracao_minutos > 0);
+  const voosComAltitude = (statsData?.voosFinalizados || []).filter((voo: any) => voo.altitude_maxima && voo.altitude_maxima > 0);
+  const totalPassageirosPrevistos = (statsData?.voosFinalizados || []).reduce((sum: number, voo: any) => 
+    sum + (voo.adultos_previstos || 0) + (voo.criancas_previstas || 0), 0);
+  const totalPassageirosTransportados = (statsData?.voosFinalizados || []).reduce((sum: number, voo: any) => 
+    sum + (voo.adultos_transportados || 0) + (voo.criancas_transportadas || 0), 0);
+
   return (
     <EnhancedDashboardLayout 
       title="Dashboard do Piloto"
@@ -497,82 +515,201 @@ export default function PilotoDashboard() {
         {/* Conteúdo das abas */}
         {activeTab === 'analytics' && (
           <div className="space-y-8">
-            {/* Estatísticas Avançadas */}
-            <VoosStatistics periodo="mes" />
-            
-            {/* Gráficos e Visualizações */}
-            <VoosCharts />
-
-            {/* KPIs Avançados de Performance do Piloto */}
+            {/* Métricas de Performance Reais */}
             <div className="space-y-6">
               <h2 className="text-xl font-bold text-gray-800 flex items-center gap-2">
                 <ChartBarIcon className="h-6 w-6 text-blue-500" />
-                Performance Analytics
+                Análise de Performance
               </h2>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* Taxa de Sucesso dos Voos */}
                 <AdvancedKPICard
-                  title="Safety Score"
+                  title="Taxa de Sucesso"
                   metric={{
-                    value: 96.8,
-                    target: 95,
-                    previousValue: 94.2,
+                    value: statsData?.voosRecentes?.length > 0 ? 
+                      Math.round((statsData.voosFinalizados.length / statsData.voosRecentes.length) * 100 * 10) / 10 
+                      : 0,
                     format: 'percentage'
                   }}
                   icon={ShieldCheckIcon}
                   color="green"
-                  description="Score de segurança"
+                  description="Voos finalizados vs total"
                 />
                 
+                {/* Duração Média dos Voos */}
                 <AdvancedKPICard
-                  title="Tempo Médio de Voo"
+                  title="Duração Média"
                   metric={{
-                    value: 2.4,
-                    previousValue: 2.1,
-                    format: 'time'
+                    value: voosComDuracao.length > 0 ? 
+                      Math.round(voosComDuracao.reduce((sum, voo) => sum + (voo.duracao_minutos || 0), 0) / voosComDuracao.length) 
+                      : 0,
+                    format: 'number'
                   }}
-                  icon={CalendarIcon}
+                  icon={ClockIcon}
                   color="blue"
-                  description="Duração média"
+                  description="Minutos por voo"
                 />
                 
+                {/* Altitude Média */}
                 <AdvancedKPICard
-                  title="Taxa de Compliance"
+                  title="Altitude Média"
                   metric={{
-                    value: 98.5,
-                    target: 95,
-                    previousValue: 97.8,
+                    value: voosComAltitude.length > 0 ? 
+                      Math.round(voosComAltitude.reduce((sum, voo) => sum + (voo.altitude_maxima || 0), 0) / voosComAltitude.length) 
+                      : 0,
+                    format: 'number'
+                  }}
+                  icon={ArrowTrendingUpIcon}
+                  color="purple"
+                  description="Metros de altitude"
+                />
+                
+                {/* Eficiência de Passageiros */}
+                <AdvancedKPICard
+                  title="Eficiência"
+                  metric={{
+                    value: totalPassageirosPrevistos > 0 ? 
+                      Math.round((totalPassageirosTransportados / totalPassageirosPrevistos) * 100 * 10) / 10 
+                      : 0,
                     format: 'percentage'
                   }}
-                  icon={ClipboardDocumentListIcon}
-                  color="purple"
-                  description="Checklists completos"
+                  icon={UsersIcon}
+                  color="yellow"
+                  description="Passageiros transportados vs previstos"
                 />
               </div>
-              
+
+              {/* Estatísticas por Período */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <GaugeChart
-                  title="Performance Geral"
-                  value={94.2}
-                  max={100}
-                  colors={['#ef4444', '#f59e0b', '#10b981']}
-                />
-                
-                <AdvancedLineChart
-                  title="Voos por Mês - Últimos 6 Meses"
-                  data={[
-                    { name: 'Jan', value: 8 },
-                    { name: 'Fev', value: 12 },
-                    { name: 'Mar', value: 15 },
-                    { name: 'Abr', value: 18 },
-                    { name: 'Mai', value: 22 },
-                    { name: 'Jun', value: 25 }
-                  ]}
-                  type="line"
-                  colors={['#3b82f6']}
-                  height={250}
-                />
+                {/* Voos por Período do Dia */}
+                <MagicCard className="p-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    <SunIcon className="h-5 w-5 text-yellow-500" />
+                    Distribuição por Período
+                  </h3>
+                  <div className="space-y-4">
+                    {['manha', 'tarde'].map((periodo) => {
+                      const voosPeriodo = statsData.voosFinalizados.filter(v => v.periodo === periodo).length;
+                      const percentual = statsData.voosFinalizados.length > 0 ? 
+                        Math.round((voosPeriodo / statsData.voosFinalizados.length) * 100) : 0;
+                      
+                      return (
+                        <div key={periodo} className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            {periodo === 'manha' ? 
+                              <SunIcon className="h-5 w-5 text-yellow-500" /> : 
+                              <MoonIcon className="h-5 w-5 text-indigo-500" />
+                            }
+                            <span className="font-medium">
+                              {periodo === 'manha' ? 'Manhã' : 'Tarde'}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <div className="w-24 bg-gray-200 rounded-full h-2">
+                              <div 
+                                className={`h-2 rounded-full ${periodo === 'manha' ? 'bg-yellow-500' : 'bg-indigo-500'}`}
+                                style={{ width: `${percentual}%` }}
+                              />
+                            </div>
+                            <span className="text-sm font-medium text-gray-700 w-8 text-right">
+                              {voosPeriodo}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </MagicCard>
+
+                {/* Locais de Decolagem Mais Utilizados */}
+                <MagicCard className="p-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    <MapPinIcon className="h-5 w-5 text-red-500" />
+                    Locais Mais Utilizados
+                  </h3>
+                  <div className="space-y-3">
+                    {Object.entries(
+                      statsData.voosFinalizados.reduce((acc: Record<string, number>, voo) => {
+                        const local = voo.local_decolagem_previsto || 'Não informado';
+                        acc[local] = (acc[local] || 0) + 1;
+                        return acc;
+                      }, {})
+                    )
+                      .sort(([,a], [,b]) => (b as number) - (a as number))
+                      .slice(0, 5)
+                      .map(([local, count]) => (
+                        <div key={local} className="flex items-center justify-between">
+                          <span className="text-sm text-gray-700 truncate flex-1 mr-2">
+                            {local}
+                          </span>
+                          <div className="flex items-center gap-2">
+                            <div className="w-16 bg-gray-200 rounded-full h-2">
+                              <div 
+                                className="h-2 rounded-full bg-red-500"
+                                style={{ width: `${Math.min(100, Math.max(20, (count as number) * 20))}%` }}
+                              />
+                            </div>
+                            <span className="text-sm font-medium text-gray-700 w-6 text-right">
+                              {count as number}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </MagicCard>
               </div>
+
+              {/* Tendências Mensais */}
+              {statsData.voosFinalizados.length > 0 && (
+                <MagicCard className="p-6">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                    <CalendarIcon className="h-5 w-5 text-blue-500" />
+                    Tendência de Voos - Últimos 6 Meses
+                  </h3>
+                  <div className="h-64 flex items-end justify-between gap-2 px-4">
+                    {Array.from({ length: 6 }, (_, i) => {
+                      const data = new Date();
+                      data.setMonth(data.getMonth() - (5 - i));
+                      const mes = data.toLocaleDateString('pt-BR', { month: 'short' });
+                      const voosMes = statsData.voosFinalizados.filter(voo => {
+                        const vooData = new Date(voo.data_voo);
+                        return vooData.getMonth() === data.getMonth() && 
+                               vooData.getFullYear() === data.getFullYear();
+                      }).length;
+                      
+                      const maxVoos = Math.max(...Array.from({ length: 6 }, (_, j) => {
+                        const tempData = new Date();
+                        tempData.setMonth(tempData.getMonth() - (5 - j));
+                        return statsData.voosFinalizados.filter(voo => {
+                          const vooData = new Date(voo.data_voo);
+                          return vooData.getMonth() === tempData.getMonth() && 
+                                 vooData.getFullYear() === tempData.getFullYear();
+                        }).length;
+                      }));
+                      
+                      const altura = maxVoos > 0 ? Math.max(20, (voosMes / maxVoos) * 200) : 20;
+                      
+                      return (
+                        <div key={mes} className="flex flex-col items-center gap-2">
+                          <div className="flex flex-col items-center gap-1">
+                            <span className="text-xs font-medium text-gray-600">
+                              {voosMes}
+                            </span>
+                            <div 
+                              className="w-8 bg-gradient-to-t from-blue-500 to-blue-300 rounded-t-sm transition-all duration-300"
+                              style={{ height: `${altura}px` }}
+                            />
+                          </div>
+                          <span className="text-xs text-gray-500 capitalize">
+                            {mes}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </MagicCard>
+              )}
             </div>
           </div>
         )}
