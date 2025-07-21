@@ -139,23 +139,10 @@ export default function PilotoHistorico() {
           observacoes_pos_voo,
           motivo_cancelamento,
           observacoes_cancelamento,
-          created_at,
-          voos_baloes (
-            baloes (
-              id,
-              nome
-            )
-          ),
-          voos_anexos (
-            id,
-            tipo,
-            nome_arquivo,
-            url_storage
-          )
+          created_at
         `)
         .eq('piloto_id', membro.id)
-        // Temporariamente removendo filtro de status para debug
-        // .in('status', ['finalizado', 'cancelado', 'checklist_concluido'])
+        .in('status', ['finalizado', 'cancelado', 'checklist_concluido'])
         .order('data_voo', { ascending: false })
         .order('periodo', { ascending: false });
 
@@ -203,11 +190,11 @@ export default function PilotoHistorico() {
         return;
       }
 
-      // Processar dados dos voos
+      // Processar dados dos voos (simplificado sem balões e anexos por enquanto)
       const voosProcessados = voosData?.map(voo => ({
         ...voo,
-        baloes: voo.voos_baloes?.map(vb => vb.baloes).filter(Boolean).flat() || [],
-        anexos: voo.voos_anexos || []
+        baloes: [], // Temporariamente vazio
+        anexos: [] // Temporariamente vazio
       })) || [];
 
       console.log('[DEBUG] Voos processados:', voosProcessados);
