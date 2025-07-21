@@ -154,9 +154,12 @@ export default function PilotoHistorico() {
           )
         `)
         .eq('piloto_id', membro.id)
-        .in('status', ['finalizado', 'cancelado', 'checklist_concluido'])
+        // Temporariamente removendo filtro de status para debug
+        // .in('status', ['finalizado', 'cancelado', 'checklist_concluido'])
         .order('data_voo', { ascending: false })
         .order('periodo', { ascending: false });
+
+      console.log('[DEBUG] Piloto ID sendo usado na busca:', membro.id);
 
       // Aplicar filtros
       if (filtros.dataInicio) {
@@ -176,6 +179,11 @@ export default function PilotoHistorico() {
 
       console.log('[DEBUG] Query executada:', query);
       console.log('[DEBUG] Resultado voos:', { voosData, voosError });
+      console.log('[DEBUG] Comparação de IDs:', {
+        membroId: membro.id,
+        voosEncontrados: voosData?.length || 0,
+        primeirosVoos: voosData?.slice(0, 2).map(v => ({ id: v.id, piloto_id: v.piloto_id, status: v.status }))
+      });
 
       if (voosError) {
         console.error('[ERROR] Erro na query voos:', voosError);
