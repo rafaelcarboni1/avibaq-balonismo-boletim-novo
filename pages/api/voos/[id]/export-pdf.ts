@@ -54,8 +54,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const pdf = new jsPDF();
     
     // Configurações
-    const primaryColor = [59, 130, 246]; // Blue
-    const secondaryColor = [107, 114, 128]; // Gray
+    const primaryColor: [number, number, number] = [59, 130, 246]; // Blue
+    const secondaryColor: [number, number, number] = [107, 114, 128]; // Gray
     let yPosition = 20;
 
     // Função helper para adicionar nova página se necessário

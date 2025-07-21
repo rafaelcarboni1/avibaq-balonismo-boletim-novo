@@ -1171,70 +1171,72 @@ export default function PosVoo() {
 
         {/* Botões de ação */}
         {!isReadOnly && (
-          <div className="flex justify-between">
-            <button
-              onClick={handleSaveDraft}
-              disabled={submitting}
-              className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              {submitting ? 'Salvando...' : 'Salvar como Rascunho'}
-              <CloudArrowUpIcon className="h-4 w-4" />
-            </button>
-            <button
-              onClick={handleSubmit}
-              disabled={submitting || !formData.local_pouso.trim()}
-              className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-            >
-              {submitting ? 'Finalizando...' : 'Finalizar Voo'}
-              <CheckIcon className="h-4 w-4" />
-            </button>
-          </div>
-
-          {/* Botões de Download */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <h4 className="text-sm font-medium text-gray-700 mb-3">Exportar Dados do Voo</h4>
-            <div className="flex flex-wrap gap-3">
+          <>
+            <div className="flex justify-between">
               <button
-                onClick={handleDownloadZIP}
-                disabled={downloading !== null}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                onClick={handleSaveDraft}
+                disabled={submitting}
+                className="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
-                {downloading === 'zip' ? (
-                  <>
-                    <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
-                    Gerando ZIP...
-                  </>
-                ) : (
-                  <>
-                    <ArchiveBoxIcon className="h-4 w-4" />
-                    Baixar ZIP Completo
-                  </>
-                )}
+                {submitting ? 'Salvando...' : 'Salvar como Rascunho'}
+                <CloudArrowUpIcon className="h-4 w-4" />
               </button>
-              
               <button
-                onClick={handleDownloadPDF}
-                disabled={downloading !== null}
-                className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                onClick={handleSubmit}
+                disabled={submitting || !formData.local_pouso.trim()}
+                className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
-                {downloading === 'pdf' ? (
-                  <>
-                    <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
-                    Gerando PDF...
-                  </>
-                ) : (
-                  <>
-                    <DocumentIcon className="h-4 w-4" />
-                    Baixar Relatório PDF
-                  </>
-                )}
+                {submitting ? 'Finalizando...' : 'Finalizar Voo'}
+                <CheckIcon className="h-4 w-4" />
               </button>
             </div>
             
-            <p className="text-xs text-gray-500 mt-2">
-              ZIP: Backup completo com todos os arquivos • PDF: Relatório profissional formatado
-            </p>
-          </div>
+            {/* Botões de Download */}
+            <div className="mt-6 pt-6 border-t border-gray-200">
+              <h4 className="text-sm font-medium text-gray-700 mb-3">Exportar Dados do Voo</h4>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  onClick={handleDownloadZIP}
+                  disabled={downloading !== null}
+                  className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {downloading === 'zip' ? (
+                    <>
+                      <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                      Gerando ZIP...
+                    </>
+                  ) : (
+                    <>
+                      <ArchiveBoxIcon className="h-4 w-4" />
+                      Baixar ZIP Completo
+                    </>
+                  )}
+                </button>
+                
+                <button
+                  onClick={handleDownloadPDF}
+                  disabled={downloading !== null}
+                  className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {downloading === 'pdf' ? (
+                    <>
+                      <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                      Gerando PDF...
+                    </>
+                  ) : (
+                    <>
+                      <DocumentIcon className="h-4 w-4" />
+                      Baixar Relatório PDF
+                    </>
+                  )}
+                </button>
+              </div>
+              
+              <p className="text-xs text-gray-500 mt-2">
+                ZIP: Backup completo com todos os arquivos • PDF: Relatório profissional formatado
+              </p>
+            </div>
+          </>
         )}
 
         {isReadOnly && (
