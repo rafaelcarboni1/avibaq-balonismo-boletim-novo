@@ -1,7 +1,13 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { supabase } from '../../../../src/integrations/supabase/client';
+import { createClient } from '@supabase/supabase-js';
+
+// Use service role client para acesso completo sem RLS
+const supabaseService = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
@@ -16,7 +22,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
   try {
     // Buscar dados completos do voo
-    const { data: voo, error: vooError } = await supabase
+    const { data: voo, error: vooError } = await supabaseService
       .from('voos')
       .select(`
         *,
@@ -51,7 +57,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }, null, 2));
 
     // Buscar dados do piloto
-    const { data: piloto, error: pilotoError } = await supabase
+    const { data: piloto, error: pilotoError } = await supabaseService
       .from('membros')
       .select('nome_completo, email, telefone')
       .eq('id', voo.piloto_id)
