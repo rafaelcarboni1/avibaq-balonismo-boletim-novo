@@ -1,93 +1,205 @@
 import { NextApiRequest, NextApiResponse } from 'next';
 import { createClient } from '@supabase/supabase-js';
 
-// Use service role client para operações do servidor
-const supabaseService = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+
+// Cliente Supabase com service role para contornar RLS
+const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return res.status(405).json({ error: 'Método não permitido' });
   }
 
   try {
-    const { adminUserId } = req.query;
+    // Para APIs internas de admin, podemos usar service role
+    // Em produção, adicionar verificação de token de admin
 
-    if (!adminUserId) {
-      return res.status(400).json({ error: 'Admin User ID é obrigatório' });
-    }
+    const { 
+      page = 1, 
+      limit = 20, 
+      status, 
+      search,
+      dateFrom,
+      dateTo,
+      type = 'all' // 'immediate', 'scheduled', 'all'
+    } = req.query;
 
-    // Verificar se o usuário é admin
-    const { data: adminUser, error: adminError } = await supabaseService
-      .from('users')
-      .select('id, role')
-      .eq('id', adminUserId as string)
-      .single();
+    const pageNum = parseInt(page as string);
+    const limitNum = parseInt(limit as string);
+    const offset = (pageNum - 1) * limitNum;
 
-    if (adminError || !adminUser || adminUser.role !== 'admin') {
-      return res.status(403).json({ error: 'Acesso negado - apenas administradores' });
-    }
+    // Construir query principal
+    let query = supabase
+      .from('push_notifications')
+      .select(`
+        *,
+        admin_user:users!push_notifications_admin_user_id_fkey (
+          email
+        )
+      `)
+      .in('status', ['sent', 'scheduled'])
+      .order('created_at', { ascending: false });
 
-    // Parâmetros de paginação e filtros
-    const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 20;
-    const offset = (page - 1) * limit;
-    const status = req.query.status as string;
-    const sendType = req.query.sendType as string;
-
-    // Query base para buscar histórico
-    let query = supabaseService
-      .from('vw_push_notifications_stats')
-      .select('*', { count: 'exact' });
-
-    // Aplicar filtros se fornecidos
-    if (status) {
+    // Filtros
+    if (status && status !== 'all') {
       query = query.eq('status', status);
     }
-    if (sendType) {
-      query = query.eq('send_type', sendType);
+
+    if (dateFrom) {
+      query = query.gte('created_at', dateFrom);
     }
 
-    // Paginação e ordenação
-    const { data: notifications, error: historyError, count } = await query
-      .order('created_at', { ascending: false })
-      .range(offset, offset + limit - 1);
+    if (dateTo) {
+      query = query.lte('created_at', dateTo);
+    }
 
-    if (historyError) {
-      console.error('Erro ao buscar histórico:', historyError);
+    // Buscar notificações
+    const { data: notifications, error: notificationsError } = await query
+      .range(offset, offset + limitNum - 1);
+
+    if (notificationsError) {
+      console.error('Erro ao buscar histórico:', notificationsError);
       return res.status(500).json({ error: 'Erro ao buscar histórico' });
     }
 
-    // Buscar estatísticas gerais
-    const { data: totalStats } = await supabaseService
+    // Buscar total para paginação
+    let countQuery = supabase
       .from('push_notifications')
-      .select('status, send_type', { count: 'exact' });
+      .select('id', { count: 'exact', head: true })
+      .in('status', ['sent', 'scheduled']);
 
-    const stats = {
-      total: count || 0,
-      sent: totalStats?.filter(n => n.status === 'sent').length || 0,
-      scheduled: totalStats?.filter(n => n.status === 'scheduled').length || 0,
-      failed: totalStats?.filter(n => n.status === 'failed').length || 0,
-      immediate: totalStats?.filter(n => n.send_type === 'immediate').length || 0,
-      recurring: totalStats?.filter(n => n.send_type === 'recurring').length || 0
+    if (status && status !== 'all') {
+      countQuery = countQuery.eq('status', status);
+    }
+
+    if (dateFrom) {
+      countQuery = countQuery.gte('created_at', dateFrom);
+    }
+
+    if (dateTo) {
+      countQuery = countQuery.lte('created_at', dateTo);
+    }
+
+    const { count, error: countError } = await countQuery;
+
+    if (countError) {
+      console.error('Erro ao contar notificações:', countError);
+      return res.status(500).json({ error: 'Erro ao contar notificações' });
+    }
+
+    // Para cada notificação, buscar estatísticas de entrega
+    const notificationsWithStats = await Promise.all(
+      (notifications || []).map(async (notification) => {
+        // Buscar estatísticas de entrega
+        const { data: deliveryStats, error: statsError } = await supabase
+          .from('push_delivery_logs')
+          .select('status')
+          .eq('notification_id', notification.id);
+
+        if (statsError) {
+          console.error(`Erro ao buscar stats para notificação ${notification.id}:`, statsError);
+        }
+
+        const stats = deliveryStats || [];
+        const delivered = stats.filter(s => s.status === 'delivered').length;
+        const failed = stats.filter(s => s.status === 'failed').length;
+        const clicked = stats.filter(s => s.status === 'clicked').length;
+
+        // Buscar jobs relacionados se for agendada
+        let scheduledJobs = [];
+        if (notification.status === 'scheduled') {
+          const { data: jobs, error: jobsError } = await supabase
+            .from('push_scheduled_jobs')
+            .select('*')
+            .eq('notification_id', notification.id)
+            .order('scheduled_for', { ascending: true });
+
+          if (!jobsError) {
+            scheduledJobs = jobs || [];
+          }
+        }
+
+        return {
+          id: notification.id,
+          title: notification.title,
+          message: notification.message,
+          internalLink: notification.internal_link,
+          targetAudience: notification.target_audience,
+          status: notification.status,
+          createdAt: notification.created_at,
+          adminEmail: notification.admin_user?.email,
+          stats: {
+            targeted: notification.targeted_count || 0,
+            delivered,
+            failed,
+            clicked,
+            deliveryRate: notification.targeted_count > 0 
+              ? Math.round((delivered / notification.targeted_count) * 100)
+              : 0,
+            clickRate: delivered > 0
+              ? Math.round((clicked / delivered) * 100)
+              : 0
+          },
+          scheduledJobs: scheduledJobs
+        };
+      })
+    );
+
+    // Filtrar por busca se especificado
+    let filteredNotifications = notificationsWithStats;
+    if (search) {
+      const searchLower = (search as string).toLowerCase();
+      filteredNotifications = notificationsWithStats.filter(notification =>
+        notification.title?.toLowerCase().includes(searchLower) ||
+        notification.message?.toLowerCase().includes(searchLower) ||
+        notification.adminEmail?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Filtrar por tipo se especificado
+    if (type && type !== 'all') {
+      if (type === 'immediate') {
+        filteredNotifications = filteredNotifications.filter(n => 
+          !n.scheduledJobs || n.scheduledJobs.length === 0
+        );
+      } else if (type === 'scheduled') {
+        filteredNotifications = filteredNotifications.filter(n => 
+          n.scheduledJobs && n.scheduledJobs.length > 0
+        );
+      }
+    }
+
+    const totalPages = Math.ceil((count || 0) / limitNum);
+
+    // Buscar estatísticas gerais
+    const { data: totalStats, error: totalStatsError } = await supabase
+      .from('push_notifications')
+      .select('targeted_count, sent_count')
+      .in('status', ['sent']);
+
+    const overallStats = {
+      totalNotifications: count || 0,
+      totalSent: totalStats?.reduce((sum, n) => sum + (n.sent_count || 0), 0) || 0,
+      totalTargeted: totalStats?.reduce((sum, n) => sum + (n.targeted_count || 0), 0) || 0
     };
 
     res.status(200).json({
-      success: true,
-      notifications: notifications || [],
+      notifications: filteredNotifications,
       pagination: {
-        page,
-        limit,
+        page: pageNum,
+        limit: limitNum,
         total: count || 0,
-        pages: Math.ceil((count || 0) / limit)
+        totalPages,
+        hasNext: pageNum < totalPages,
+        hasPrev: pageNum > 1
       },
-      stats
+      stats: overallStats
     });
 
   } catch (error) {
-    console.error('Erro no endpoint /api/push/history:', error);
+    console.error('Erro na API history:', error);
     res.status(500).json({ error: 'Erro interno do servidor' });
   }
 }

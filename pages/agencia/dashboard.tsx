@@ -492,6 +492,9 @@ export default function AgenciaDashboard() {
             </div>
           </div>
         )}
+        
+        {/* Push Notification Manager */}
+        <PushNotificationManager userId={user?.id} />
       </div>
     </EnhancedDashboardLayout>
   );
