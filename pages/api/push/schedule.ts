@@ -35,14 +35,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'Data de agendamento é obrigatória' });
     }
 
-    const scheduledDate = new Date(scheduledFor);
+    // Tratar datetime-local: converter para horário brasileiro (UTC-3)
+    let scheduledDate;
+    if (scheduledFor.includes('T') && !scheduledFor.endsWith('Z')) {
+      // datetime-local: assumir que é horário brasileiro e converter para UTC
+      const localDateTime = new Date(scheduledFor);
+      // Adicionar 3 horas para converter de Brasília (UTC-3) para UTC
+      scheduledDate = new Date(localDateTime.getTime() + 3 * 60 * 60 * 1000);
+    } else {
+      scheduledDate = new Date(scheduledFor);
+    }
+    
     const now = new Date();
     
     // Debug: vamos ver as datas que estão chegando
-    console.log('[SCHEDULE DEBUG] Data recebida:', scheduledFor);
+    console.log('[SCHEDULE DEBUG] Data recebida raw:', scheduledFor);
     console.log('[SCHEDULE DEBUG] Data parseada:', scheduledDate.toISOString());
     console.log('[SCHEDULE DEBUG] Data atual:', now.toISOString());
     console.log('[SCHEDULE DEBUG] Diferença em minutos:', (scheduledDate.getTime() - now.getTime()) / (60 * 1000));
+    console.log('[SCHEDULE DEBUG] Timezone offset servidor:', new Date().getTimezoneOffset());
     
     // Validar se é uma data válida
     if (isNaN(scheduledDate.getTime())) {

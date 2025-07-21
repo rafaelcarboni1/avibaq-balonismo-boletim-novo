@@ -308,9 +308,10 @@ export default function PushCenter() {
     }
     
     // Debug: mostrar as datas para entender o problema
-    console.log('[DEBUG] Data agendada:', scheduledDate.toISOString());
-    console.log('[DEBUG] Data atual:', now.toISOString());
-    console.log('[DEBUG] Diferenca em minutos:', (scheduledDate.getTime() - now.getTime()) / (60 * 1000));
+    console.log('[FRONTEND DEBUG] Data original input:', scheduleData.scheduledFor);
+    console.log('[FRONTEND DEBUG] Data que será enviada:', scheduledDate.toISOString());
+    console.log('[FRONTEND DEBUG] Data atual:', now.toISOString());
+    console.log('[FRONTEND DEBUG] Diferenca em minutos:', (scheduledDate.getTime() - now.getTime()) / (60 * 1000));
 
     setScheduling(true);
     try {
