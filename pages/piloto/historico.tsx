@@ -31,7 +31,7 @@ interface VooHistorico {
   altitude_maxima: number | null;
   observacoes_pos_voo: string | null;
   motivo_cancelamento: string | null;
-  observacoes_cancelamento: string | null;
+  // observacoes_cancelamento: string | null; // Coluna não existe no banco
   created_at: string;
   baloes: Array<{
     id: string;
@@ -138,7 +138,6 @@ export default function PilotoHistorico() {
           altitude_maxima,
           observacoes_pos_voo,
           motivo_cancelamento,
-          observacoes_cancelamento,
           created_at
         `)
         .eq('piloto_id', membro.id)
@@ -539,11 +538,7 @@ export default function PilotoHistorico() {
                         Motivo do cancelamento:
                       </p>
                       <p className="text-sm text-red-700">{voo.motivo_cancelamento}</p>
-                      {voo.observacoes_cancelamento && (
-                        <p className="text-sm text-red-700 mt-1">
-                          {voo.observacoes_cancelamento}
-                        </p>
-                      )}
+                      {/* Observações de cancelamento removidas - coluna não existe no banco */}
                     </div>
                   )}
 
