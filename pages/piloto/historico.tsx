@@ -179,11 +179,19 @@ export default function PilotoHistorico() {
 
       console.log('[DEBUG] Query executada:', query);
       console.log('[DEBUG] Resultado voos:', { voosData, voosError });
-      console.log('[DEBUG] Comparação de IDs:', {
-        membroId: membro.id,
-        voosEncontrados: voosData?.length || 0,
-        primeirosVoos: voosData?.slice(0, 2).map(v => ({ id: v.id, piloto_id: v.piloto_id, status: v.status }))
-      });
+      if (voosData && voosData.length > 0) {
+        console.log('[DEBUG] Comparação de IDs:', {
+          membroId: membro.id,
+          voosEncontrados: voosData.length,
+          primeiroVoo: {
+            id: voosData[0].id,
+            status: voosData[0].status,
+            data_voo: voosData[0].data_voo
+          }
+        });
+      } else {
+        console.log('[DEBUG] Nenhum voo encontrado para membro:', membro.id);
+      }
 
       if (voosError) {
         console.error('[ERROR] Erro na query voos:', voosError);
