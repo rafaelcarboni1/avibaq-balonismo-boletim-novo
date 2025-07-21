@@ -46,7 +46,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Buscar dados do piloto
     const { data: piloto, error: pilotoError } = await supabase
       .from('membros')
-      .select('nome_completo, email')
+      .select('nome_completo, email, telefone')
       .eq('id', voo.piloto_id)
       .single();
 
@@ -62,6 +62,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       status: voo.status,
       piloto: piloto?.nome_completo || 'Não informado',
       email_piloto: piloto?.email || 'Não informado',
+      telefone_piloto: piloto?.telefone || 'Não informado',
       local_decolagem_previsto: voo.local_decolagem_previsto,
       local_pouso: voo.local_pouso,
       adultos_previstos: voo.adultos_previstos,
@@ -78,6 +79,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       anexos: voo.voos_anexos || []
     };
 
+    console.log('[DEBUG ZIP] Dados do voo processados:', {
+      piloto: vooDetalhes.piloto,
+      baloes: vooDetalhes.baloes.length,
+      anexos: vooDetalhes.anexos.length,
+      voos_baloes_raw: voo.voos_baloes?.length || 0
+    });
+
     zip.file('voo-detalhes.json', JSON.stringify(vooDetalhes, null, 2));
 
     // 2. Adicionar relatório legível (TXT)
@@ -90,6 +98,8 @@ PERÍODO: ${voo.periodo === 'manha' ? 'Manhã' : 'Tarde'}
 HORÁRIO: ${voo.horario_previsto}
 STATUS: ${voo.status}
 PILOTO: ${piloto?.nome_completo || 'Não informado'}
+EMAIL: ${piloto?.email || 'Não informado'}
+TELEFONE: ${piloto?.telefone || 'Não informado'}
 
 DETALHES DO VOO
 ===============
@@ -135,7 +145,7 @@ Total de anexos: ${vooDetalhes.anexos.length}
 ${vooDetalhes.anexos.map((a: any) => `- ${a.nome_arquivo} (${a.tipo})`).join('\n')}
 
 =======================================
-Relatório gerado em: ${new Date().toLocaleString('pt-BR')}
+Relatório gerado em: ${new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}
 Sistema AVIBAQ - Associação de Pilotos e Empresas de Balonismo
     `.trim();
 
@@ -144,23 +154,36 @@ Sistema AVIBAQ - Associação de Pilotos e Empresas de Balonismo
     // 3. Baixar e adicionar anexos
     const anexosFolder = zip.folder('anexos');
     
+    console.log('[DEBUG ZIP] Anexos encontrados:', voo.voos_anexos?.length || 0);
+    console.log('[DEBUG ZIP] Estrutura dos anexos:', JSON.stringify(voo.voos_anexos, null, 2));
+    
     if (voo.voos_anexos && voo.voos_anexos.length > 0) {
       for (const anexo of voo.voos_anexos) {
         try {
+          console.log(`[DEBUG ZIP] Baixando anexo: ${anexo.nome_arquivo} de ${anexo.url_storage}`);
+          
           // Baixar arquivo do Supabase Storage
           const response = await fetch(anexo.url_storage);
+          console.log(`[DEBUG ZIP] Response status para ${anexo.nome_arquivo}:`, response.status);
+          
           if (response.ok) {
             const arrayBuffer = await response.arrayBuffer();
+            console.log(`[DEBUG ZIP] Arquivo baixado, tamanho: ${arrayBuffer.byteLength} bytes`);
             
             // Organizar por tipo
             const tipoFolder = anexosFolder?.folder(anexo.tipo) || anexosFolder;
             tipoFolder?.file(anexo.nome_arquivo, arrayBuffer);
+            console.log(`[DEBUG ZIP] Arquivo ${anexo.nome_arquivo} adicionado ao ZIP na pasta ${anexo.tipo}`);
+          } else {
+            console.error(`[DEBUG ZIP] Erro HTTP ${response.status} ao baixar ${anexo.nome_arquivo}`);
           }
         } catch (error) {
-          console.error(`Erro ao baixar anexo ${anexo.nome_arquivo}:`, error);
+          console.error(`[DEBUG ZIP] Erro ao baixar anexo ${anexo.nome_arquivo}:`, error);
           // Continua mesmo se um anexo falhar
         }
       }
+    } else {
+      console.log('[DEBUG ZIP] Nenhum anexo encontrado para este voo');
     }
 
     // Gerar ZIP

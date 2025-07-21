@@ -43,6 +43,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(404).json({ error: 'Voo não encontrado' });
     }
 
+    console.log('[DEBUG PDF] Dados do voo:', JSON.stringify({
+      id: voo.id,
+      piloto_id: voo.piloto_id,
+      baloes: voo.voos_baloes?.length || 0,
+      anexos: voo.voos_anexos?.length || 0
+    }, null, 2));
+
     // Buscar dados do piloto
     const { data: piloto, error: pilotoError } = await supabase
       .from('membros')
@@ -91,7 +98,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     pdf.setFontSize(10);
     pdf.setFont('helvetica', 'normal');
     pdf.setTextColor(...secondaryColor);
-    const dataGeracao = new Date().toLocaleString('pt-BR');
+    const dataGeracao = new Date().toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' });
     pdf.text(`Gerado em: ${dataGeracao}`, 150, yPosition);
 
     yPosition += 15;
@@ -185,6 +192,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     yPosition = (pdf as any).lastAutoTable.finalY + 15;
 
     // BALÕES UTILIZADOS
+    console.log('[DEBUG PDF] Balões encontrados:', voo.voos_baloes?.length || 0);
+    console.log('[DEBUG PDF] Estrutura dos balões:', JSON.stringify(voo.voos_baloes, null, 2));
+    
     if (voo.voos_baloes && voo.voos_baloes.length > 0) {
       checkPageBreak(60);
       pdf.setFontSize(14);
