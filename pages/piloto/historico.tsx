@@ -83,6 +83,7 @@ export default function PilotoHistorico() {
   });
 
   useEffect(() => {
+    console.log('[DEBUG] useEffect triggered:', { user, userLoading });
     if (!userLoading && user) {
       fetchVoosHistorico();
     }
@@ -90,19 +91,26 @@ export default function PilotoHistorico() {
 
   const fetchVoosHistorico = async () => {
     try {
-      if (!user?.id) return;
+      if (!user?.id) {
+        console.log('[DEBUG] User não disponível:', user);
+        return;
+      }
 
       setLoading(true);
+      console.log('[DEBUG] Iniciando busca para user.id:', user.id);
 
       // Buscar membro do piloto
       const { data: membro, error: membroError } = await supabase
         .from('membros')
-        .select('id')
+        .select('id, status, tipo')
         .eq('user_id', user.id)
         .eq('tipo', 'piloto')
         .single();
 
+      console.log('[DEBUG] Resultado busca membro:', { membro, membroError });
+
       if (membroError || !membro) {
+        console.error('[ERROR] Erro ao buscar membro:', membroError);
         toast({
           title: "Erro",
           description: "Piloto não encontrado",
@@ -165,10 +173,14 @@ export default function PilotoHistorico() {
 
       const { data: voosData, error: voosError } = await query;
 
+      console.log('[DEBUG] Query executada:', query);
+      console.log('[DEBUG] Resultado voos:', { voosData, voosError });
+
       if (voosError) {
+        console.error('[ERROR] Erro na query voos:', voosError);
         toast({
           title: "Erro",
-          description: "Erro ao carregar histórico de voos",
+          description: `Erro ao carregar histórico de voos: ${voosError.message}`,
           variant: "destructive"
         });
         return;
@@ -180,6 +192,9 @@ export default function PilotoHistorico() {
         baloes: voo.voos_baloes?.map(vb => vb.baloes).filter(Boolean).flat() || [],
         anexos: voo.voos_anexos || []
       })) || [];
+
+      console.log('[DEBUG] Voos processados:', voosProcessados);
+      console.log('[DEBUG] Total de voos encontrados:', voosProcessados.length);
 
       setVoos(voosProcessados);
 
