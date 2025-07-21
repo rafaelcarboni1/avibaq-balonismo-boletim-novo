@@ -16,6 +16,7 @@ import { useToast } from '../../src/hooks/use-toast';
 import VooEmAndamento from '../../src/components/VooEmAndamento';
 import VoosStatistics from '../../src/components/VoosStatistics';
 import VoosCharts from '../../src/components/VoosCharts';
+import PushNotificationManager from '../../src/components/PushNotificationManager';
 
 // Lazy load dos componentes pesados
 const AdvancedKPICard = dynamic(() => import('../../src/components/magicui/advanced-kpi-analytics').then(mod => ({ default: mod.AdvancedKPICard })), {

@@ -328,33 +328,152 @@ async function syncOfflineData() {
   }
 }
 
-// Notificações push (para futuras implementações)
+// =============================================================================
+// SISTEMA DE PUSH NOTIFICATIONS AVIBAQ
+// =============================================================================
+
+// Receber notificação push
 self.addEventListener('push', (event) => {
-  console.log('[SW] Push recebido:', event);
+  console.log('[SW PUSH] Notificação recebida:', event);
   
-  if (event.data) {
+  if (!event.data) {
+    console.warn('[SW PUSH] Evento push sem dados');
+    return;
+  }
+  
+  try {
     const data = event.data.json();
+    console.log('[SW PUSH] Dados da notificação:', data);
+    
+    // Configurações da notificação
+    const notificationOptions = {
+      body: data.body || data.message,
+      icon: data.icon || '/icon-192x192.png',
+      badge: data.badge || '/icon-192x192.png',
+      image: data.image, // Imagem grande opcional
+      data: {
+        url: data.data?.url || '/dashboard',
+        notificationId: data.data?.notificationId,
+        timestamp: data.data?.timestamp || Date.now(),
+        ...data.data
+      },
+      actions: [
+        {
+          action: 'open',
+          title: 'Abrir',
+          icon: '/icon-192x192.png'
+        },
+        {
+          action: 'close',
+          title: 'Dispensar'
+        }
+      ],
+      requireInteraction: data.requireInteraction || true,
+      silent: data.silent || false,
+      tag: data.tag || 'avibaq-notification',
+      renotify: true,
+      vibrate: [200, 100, 200], // Padrão de vibração
+      timestamp: Date.now()
+    };
     
     event.waitUntil(
-      self.registration.showNotification(data.title, {
-        body: data.body,
+      self.registration.showNotification(data.title, notificationOptions)
+    );
+    
+  } catch (error) {
+    console.error('[SW PUSH] Erro ao processar notificação:', error);
+    
+    // Fallback: mostrar notificação simples
+    event.waitUntil(
+      self.registration.showNotification('AVIBAQ', {
+        body: 'Nova notificação recebida',
         icon: '/icon-192x192.png',
-        badge: '/badge-72x72.png',
-        data: data.data
+        data: { url: '/dashboard' }
       })
     );
   }
 });
 
-// Clique em notificação
+// Clique na notificação
 self.addEventListener('notificationclick', (event) => {
-  console.log('[SW] Notificação clicada:', event);
+  console.log('[SW PUSH] Notificação clicada:', event);
   
-  event.notification.close();
+  const notification = event.notification;
+  const action = event.action;
+  const data = notification.data || {};
+  
+  // Fechar notificação
+  notification.close();
+  
+  // Se ação for 'close', apenas fechar
+  if (action === 'close') {
+    console.log('[SW PUSH] Notificação dispensada pelo usuário');
+    return;
+  }
+  
+  // Registrar clique se houver ID da notificação
+  if (data.notificationId) {
+    // Enviar log de clique via fetch (fire-and-forget)
+    fetch('/api/push/track-click', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        notificationId: data.notificationId,
+        timestamp: Date.now()
+      })
+    }).catch(error => {
+      console.warn('[SW PUSH] Erro ao registrar clique:', error);
+    });
+  }
+  
+  // Abrir/focar na URL especificada
+  const urlToOpen = data.url || '/dashboard';
   
   event.waitUntil(
-    clients.openWindow(event.notification.data.url || '/')
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clientList) => {
+        console.log(`[SW PUSH] ${clientList.length} clientes encontrados`);
+        
+        // Procurar por uma janela já aberta na URL de destino
+        for (let client of clientList) {
+          const clientUrl = new URL(client.url);
+          const targetUrl = new URL(urlToOpen, self.location.origin);
+          
+          if (clientUrl.pathname === targetUrl.pathname && client.focus) {
+            console.log('[SW PUSH] Focando janela existente:', client.url);
+            return client.focus();
+          }
+        }
+        
+        // Se não encontrou janela, abrir nova
+        console.log('[SW PUSH] Abrindo nova janela:', urlToOpen);
+        return clients.openWindow(urlToOpen);
+      })
+      .catch((error) => {
+        console.error('[SW PUSH] Erro ao abrir janela:', error);
+      })
   );
+});
+
+// Notificação fechada pelo usuário
+self.addEventListener('notificationclose', (event) => {
+  console.log('[SW PUSH] Notificação fechada:', event.notification.tag);
+  
+  // Opcional: registrar que foi fechada sem clique
+  const data = event.notification.data || {};
+  if (data.notificationId) {
+    fetch('/api/push/track-close', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        notificationId: data.notificationId,
+        timestamp: Date.now(),
+        reason: 'user_dismissed'
+      })
+    }).catch(error => {
+      console.warn('[SW PUSH] Erro ao registrar fechamento:', error);
+    });
+  }
 });
 
 console.log('[SW] Service Worker carregado');

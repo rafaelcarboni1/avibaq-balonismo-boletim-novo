@@ -24,7 +24,8 @@ import {
   EnvelopeIcon,
   TruckIcon,
   MapIcon,
-  ArrowDownTrayIcon
+  ArrowDownTrayIcon,
+  BellIcon
 } from "@heroicons/react/24/outline";
 
 interface NavigationItem {
@@ -49,6 +50,7 @@ const getNavLinks = (role?: string): NavigationItem[] => {
       { href: "/admin/dashboard", label: "Dashboard", icon: HomeIcon },
       { href: "/admin/boletins", label: "Boletins", icon: DocumentTextIcon },
       { href: "/admin/associados", label: "Associados", icon: UsersIcon },
+      { href: "/admin/push-center", label: "Push Center", icon: BellIcon, adminOnly: true },
       { href: "/admin/usuarios", label: "Usuários", icon: Cog6ToothIcon, adminOnly: true },
       { href: "/admin/permissoes", label: "Permissões", icon: KeyIcon, adminOnly: true },
       { href: "/admin/minha-conta", label: "Minha Conta", icon: UserCircleIcon },

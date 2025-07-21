@@ -18,6 +18,7 @@ import VooEmAndamento from '../../src/components/VooEmAndamento';
 import VoosStatistics from '../../src/components/VoosStatistics';
 import VoosCharts from '../../src/components/VoosCharts';
 import { formatDateSafe } from '../../src/utils/dateUtils';
+import PushNotificationManager from '../../src/components/PushNotificationManager';
 
 // Lazy load dos componentes pesados
 const AdvancedKPICard = dynamic(() => import('../../src/components/magicui/advanced-kpi-analytics').then(mod => ({ default: mod.AdvancedKPICard })), {
@@ -1075,8 +1076,8 @@ export default function PilotoDashboard() {
               />
             </div>
 
-            {/* Estatísticas Simples */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Estatísticas e Configurações */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               <MagicCard className="p-6">
                 <h3 className="text-lg font-semibold mb-4">Resumo de Voos</h3>
                 <div className="space-y-3">
@@ -1112,6 +1113,16 @@ export default function PilotoDashboard() {
                   </div>
                 </div>
               </MagicCard>
+
+              {/* Gerenciar Notificações Push */}
+              <div className="lg:col-span-1">
+                {user?.id && (
+                  <PushNotificationManager 
+                    userId={user.id}
+                    className=""
+                  />
+                )}
+              </div>
             </div>
 
             {/* Bento Grid Layout */}
