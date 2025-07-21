@@ -55,6 +55,7 @@ interface Filtros {
 const statusMap = {
   'finalizado': { label: 'Finalizado', variant: 'default', color: 'bg-green-100 text-green-800' },
   'cancelado': { label: 'Cancelado', variant: 'destructive', color: 'bg-red-100 text-red-800' },
+  'checklist_concluido': { label: 'Checklist Concluído', variant: 'default', color: 'bg-blue-100 text-blue-800' },
 } as const;
 
 const periodoMap = {
@@ -153,7 +154,7 @@ export default function PilotoHistorico() {
           )
         `)
         .eq('piloto_id', membro.id)
-        .in('status', ['finalizado', 'cancelado'])
+        .in('status', ['finalizado', 'cancelado', 'checklist_concluido'])
         .order('data_voo', { ascending: false })
         .order('periodo', { ascending: false });
 
@@ -390,6 +391,7 @@ export default function PilotoHistorico() {
                     <SelectItem value="todos">Todos</SelectItem>
                     <SelectItem value="finalizado">Finalizado</SelectItem>
                     <SelectItem value="cancelado">Cancelado</SelectItem>
+                    <SelectItem value="checklist_concluido">Checklist Concluído</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
