@@ -90,28 +90,37 @@ export default function PilotoHistorico() {
 
   const fetchVoosHistorico = async () => {
     try {
-      if (!user?.id) return;
+      if (!user?.id) {
+        console.log('❌ [HISTORICO] Usuário não encontrado');
+        return;
+      }
 
+      console.log('🔍 [HISTORICO] Iniciando busca de dados para usuário:', user.id);
       setLoading(true);
 
       // Buscar membro do piloto
+      console.log('👤 [HISTORICO] Buscando membro piloto...');
       const { data: membro, error: membroError } = await supabase
         .from('membros')
-        .select('id')
+        .select('id, tipo, status')
         .eq('user_id', user.id)
         .eq('tipo', 'piloto')
         .single();
 
+      console.log('👤 [HISTORICO] Resultado busca membro:', { membro, membroError });
+
       if (membroError || !membro) {
+        console.error('❌ [HISTORICO] Erro ao buscar membro:', membroError);
         toast({
           title: "Erro",
-          description: "Piloto não encontrado",
+          description: `Piloto não encontrado: ${membroError?.message || 'Dados não encontrados'}`,
           variant: "destructive"
         });
         return;
       }
 
-      // Buscar voos históricos
+      // Buscar voos históricos (query simples primeiro)
+      console.log('📋 [HISTORICO] Buscando voos para piloto ID:', membro.id);
       let query = supabase
         .from('voos')
         .select(`
@@ -130,19 +139,7 @@ export default function PilotoHistorico() {
           observacoes_pos_voo,
           motivo_cancelamento,
           observacoes_cancelamento,
-          created_at,
-          voos_baloes (
-            baloes (
-              id,
-              nome
-            )
-          ),
-          voos_anexos (
-            id,
-            tipo,
-            nome_arquivo,
-            url_storage
-          )
+          created_at
         `)
         .eq('piloto_id', membro.id)
         .in('status', ['finalizado', 'cancelado'])
@@ -165,22 +162,30 @@ export default function PilotoHistorico() {
 
       const { data: voosData, error: voosError } = await query;
 
+      console.log('📋 [HISTORICO] Resultado query voos:', { 
+        voosData: voosData?.length, 
+        voosError,
+        primeirosVoos: voosData?.slice(0, 2)
+      });
+
       if (voosError) {
-        console.error('Erro ao buscar voos:', voosError);
+        console.error('❌ [HISTORICO] Erro ao buscar voos:', voosError);
         toast({
           title: "Erro",
-          description: "Erro ao carregar histórico de voos",
+          description: `Erro ao carregar histórico de voos: ${voosError.message}`,
           variant: "destructive"
         });
         return;
       }
 
-      // Processar dados dos voos
+      // Processar dados dos voos (temporário - sem relacionamentos)
       const voosProcessados = voosData?.map(voo => ({
         ...voo,
-        baloes: voo.voos_baloes?.map(vb => vb.baloes).filter(Boolean).flat() || [],
-        anexos: voo.voos_anexos || []
+        baloes: [], // Temporário - sem balões
+        anexos: []  // Temporário - sem anexos
       })) || [];
+
+      console.log('📊 [HISTORICO] Voos processados:', voosProcessados.length);
 
       setVoos(voosProcessados);
 
@@ -207,10 +212,11 @@ export default function PilotoHistorico() {
       });
 
     } catch (error) {
-      console.error('Erro:', error);
+      console.error('💥 [HISTORICO] Erro inesperado:', error);
+      console.error('💥 [HISTORICO] Stack:', error instanceof Error ? error.stack : 'No stack');
       toast({
         title: "Erro",
-        description: "Erro inesperado ao carregar dados",
+        description: `Erro inesperado ao carregar dados: ${error instanceof Error ? error.message : 'Erro desconhecido'}`,
         variant: "destructive"
       });
     } finally {
