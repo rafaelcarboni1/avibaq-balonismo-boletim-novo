@@ -40,6 +40,12 @@ interface DashboardStats {
   proximoVoo: any;
   voosRecentes: any[];
   voosEmAndamento: any[];
+  horasVoo: {
+    ultimaSemana: number;
+    ultimoMes: number;
+    esteAno: number;
+    total: number;
+  };
 }
 
 interface OfflineData extends DashboardStats {
@@ -59,7 +65,13 @@ export default function PilotoDashboard() {
     convitesPendentes: 0,
     proximoVoo: null,
     voosRecentes: [],
-    voosEmAndamento: []
+    voosEmAndamento: [],
+    horasVoo: {
+      ultimaSemana: 0,
+      ultimoMes: 0,
+      esteAno: 0,
+      total: 0
+    }
   });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'analytics' | 'voos'>('overview');
@@ -149,7 +161,8 @@ export default function PilotoDashboard() {
         convitesResult,
         proximoVooResult,
         voosRecentesResult,
-        voosEmAndamentoResult
+        voosEmAndamentoResult,
+        voosComDuracaoResult
       ] = await Promise.all([
         // Total de balões ativos
         supabase
@@ -204,7 +217,15 @@ export default function PilotoDashboard() {
           .select('*, agencia:membros!voos_agencia_id_fkey(nome_completo)')
           .eq('piloto_id', membro.id)
           .in('status', ['rascunho', 'planejado', 'checklist_bloco1', 'checklist_bloco2', 'checklist_concluido'])
-          .order('data_voo', { ascending: true })
+          .order('data_voo', { ascending: true }),
+        
+        // Voos finalizados com duração para cálculo de horas
+        supabase
+          .from('voos')
+          .select('data_voo, duracao_minutos')
+          .eq('piloto_id', membro.id)
+          .eq('status', 'finalizado')
+          .not('duracao_minutos', 'is', null)
       ]);
 
       // Debug logs para investigar o problema
@@ -213,6 +234,27 @@ export default function PilotoDashboard() {
       console.log('[Dashboard Debug] Voos em andamento data:', voosEmAndamentoResult.data);
       console.log('[Dashboard Debug] Voos em andamento error:', voosEmAndamentoResult.error);
       
+      // Calcular horas de voo por período
+      const voosComDuracao = voosComDuracaoResult.data || [];
+      const agora = new Date();
+      const umaSemanaAtras = new Date(agora.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const umMesAtras = new Date(agora.getTime() - 30 * 24 * 60 * 60 * 1000);
+      const inicioAno = new Date(agora.getFullYear(), 0, 1);
+
+      const horasVoo = {
+        ultimaSemana: Math.round(voosComDuracao
+          .filter(voo => new Date(voo.data_voo) >= umaSemanaAtras)
+          .reduce((sum, voo) => sum + (voo.duracao_minutos || 0), 0) / 60 * 10) / 10,
+        ultimoMes: Math.round(voosComDuracao
+          .filter(voo => new Date(voo.data_voo) >= umMesAtras)
+          .reduce((sum, voo) => sum + (voo.duracao_minutos || 0), 0) / 60 * 10) / 10,
+        esteAno: Math.round(voosComDuracao
+          .filter(voo => new Date(voo.data_voo) >= inicioAno)
+          .reduce((sum, voo) => sum + (voo.duracao_minutos || 0), 0) / 60 * 10) / 10,
+        total: Math.round(voosComDuracao
+          .reduce((sum, voo) => sum + (voo.duracao_minutos || 0), 0) / 60 * 10) / 10
+      };
+      
       const statsData = {
         totalBaloes: baloesResult.data?.length || 0,
         voosEsteAno: voosAnoResult.data?.length || 0,
@@ -220,7 +262,8 @@ export default function PilotoDashboard() {
         convitesPendentes: convitesResult.data?.length || 0,
         proximoVoo: proximoVooResult.data || null,
         voosRecentes: voosRecentesResult.data || [],
-        voosEmAndamento: voosEmAndamentoResult.data || []
+        voosEmAndamento: voosEmAndamentoResult.data || [],
+        horasVoo
       };
       
       console.log('[Dashboard Debug] Stats finais:', statsData);
@@ -295,7 +338,13 @@ export default function PilotoDashboard() {
         convitesPendentes: parsed.convitesPendentes || 0,
         proximoVoo: parsed.proximoVoo || null,
         voosRecentes: parsed.voosRecentes || [],
-        voosEmAndamento: parsed.voosEmAndamento || []
+        voosEmAndamento: parsed.voosEmAndamento || [],
+        horasVoo: parsed.horasVoo || {
+          ultimaSemana: 0,
+          ultimoMes: 0,
+          esteAno: 0,
+          total: 0
+        }
       };
 
       setStats(offlineStats);
@@ -788,6 +837,72 @@ export default function PilotoDashboard() {
 
         {activeTab === 'overview' && (
           <div className="space-y-8">
+            {/* Destaque: Horas de Voo */}
+            <div className="mb-8">
+              <MagicCard className="p-8 bg-gradient-to-br from-blue-600 to-purple-700 text-white relative overflow-hidden">
+                <div className="absolute -right-4 -top-4 opacity-10">
+                  <ClockIcon className="h-32 w-32" />
+                </div>
+                <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-6">
+                    <ClockIcon className="h-8 w-8 text-blue-200" />
+                    <h2 className="text-2xl font-bold">Horas de Voo</h2>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div className="text-center">
+                      <div className="bg-white/20 rounded-xl p-4 backdrop-blur-sm">
+                        <p className="text-3xl font-bold text-white mb-1">{stats.horasVoo.ultimaSemana}h</p>
+                        <p className="text-blue-100 text-sm font-medium">Última Semana</p>
+                      </div>
+                    </div>
+                    
+                    <div className="text-center">
+                      <div className="bg-white/20 rounded-xl p-4 backdrop-blur-sm">
+                        <p className="text-3xl font-bold text-white mb-1">{stats.horasVoo.ultimoMes}h</p>
+                        <p className="text-blue-100 text-sm font-medium">Último Mês</p>
+                      </div>
+                    </div>
+                    
+                    <div className="text-center">
+                      <div className="bg-white/20 rounded-xl p-4 backdrop-blur-sm">
+                        <p className="text-3xl font-bold text-white mb-1">{stats.horasVoo.esteAno}h</p>
+                        <p className="text-blue-100 text-sm font-medium">Este Ano</p>
+                      </div>
+                    </div>
+                    
+                    <div className="text-center">
+                      <div className="bg-white/30 rounded-xl p-4 backdrop-blur-sm border-2 border-yellow-300/50">
+                        <p className="text-4xl font-bold text-yellow-200 mb-1">{stats.horasVoo.total}h</p>
+                        <p className="text-yellow-100 text-sm font-medium">🏆 Total</p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-6 flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-blue-100">
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                      </svg>
+                      <span className="text-sm">
+                        {stats.horasVoo.ultimoMes > 0 ? 
+                          `Média de ${Math.round(stats.horasVoo.ultimoMes / 4 * 10) / 10}h por semana` : 
+                          'Comece voando para ver suas estatísticas'
+                        }
+                      </span>
+                    </div>
+                    
+                    <button
+                      onClick={() => router.push('/piloto/historico')}
+                      className="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg text-sm font-medium transition-colors backdrop-blur-sm border border-white/30"
+                    >
+                      Ver Histórico Completo
+                    </button>
+                  </div>
+                </div>
+              </MagicCard>
+            </div>
+
             {/* KPI Cards Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               <SimpleKpiCard 
