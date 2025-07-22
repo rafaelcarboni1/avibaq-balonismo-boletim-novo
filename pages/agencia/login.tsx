@@ -65,7 +65,7 @@ export default function AgenciaLogin() {
     }
 
     const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-      redirectTo: `${window.location.origin}/agencia/nova-senha`,
+      redirectTo: `${window.location.origin}/redefinir-senha`,
     });
 
     if (error) {

@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { supabase } from "../../src/integrations/supabase/client";
-import { Card, CardContent, CardHeader } from "../../src/components/ui/card";
-import { Button } from "../../src/components/ui/button";
-import { Input } from "../../src/components/ui/input";
+import { supabase } from "../src/integrations/supabase/client";
+import { Card, CardContent, CardHeader } from "../src/components/ui/card";
+import { Button } from "../src/components/ui/button";
+import { Input } from "../src/components/ui/input";
 import { toast } from "react-hot-toast";
 
-export default function AdminSetPassword() {
+export default function RedefinirSenha() {
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -15,17 +15,14 @@ export default function AdminSetPassword() {
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
-    // Processar tokens de recovery da URL
     const handleAuthCallback = async () => {
-      // Verificar se há hash fragments na URL (tokens do Supabase)
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
       const accessToken = hashParams.get('access_token');
       const refreshToken = hashParams.get('refresh_token');
       const type = hashParams.get('type');
 
       if (accessToken && type === 'recovery') {
-        // Estabelecer sessão com os tokens de recovery
-        const { data, error } = await supabase.auth.setSession({
+        const { error } = await supabase.auth.setSession({
           access_token: accessToken,
           refresh_token: refreshToken || ''
         });
@@ -47,30 +44,13 @@ export default function AdminSetPassword() {
     handleAuthCallback();
   }, []);
 
-  // Função de validação de senha forte
   function validatePassword(password: string): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
-    
-    if (password.length < 8) {
-      errors.push("Mínimo 8 caracteres");
-    }
-    
-    if (!/[A-Z]/.test(password)) {
-      errors.push("Pelo menos 1 letra maiúscula");
-    }
-    
-    if (!/[a-z]/.test(password)) {
-      errors.push("Pelo menos 1 letra minúscula");
-    }
-    
-    if (!/[0-9]/.test(password)) {
-      errors.push("Pelo menos 1 número");
-    }
-    
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
-      errors.push("Pelo menos 1 símbolo (!@#$%^&*...)");
-    }
-
+    if (password.length < 8) errors.push("Mínimo 8 caracteres");
+    if (!/[A-Z]/.test(password)) errors.push("Pelo menos 1 letra maiúscula");
+    if (!/[a-z]/.test(password)) errors.push("Pelo menos 1 letra minúscula");
+    if (!/[0-9]/.test(password)) errors.push("Pelo menos 1 número");
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) errors.push("Pelo menos 1 símbolo");
     return { valid: errors.length === 0, errors };
   }
 
@@ -118,13 +98,21 @@ export default function AdminSetPassword() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <Card className="w-full max-w-md mx-auto">
         <CardHeader className="text-center">
-          <h2 className="text-2xl font-bold mb-2">Definir Nova Senha</h2>
+          <div className="flex items-center justify-center space-x-3 mb-4">
+            <img 
+              src="https://elcbodhxzvoqpzamgown.supabase.co/storage/v1/object/public/public-assets/Logo%20AVIBAQ.png" 
+              alt="Logo AVIBAQ" 
+              className="w-12 h-12 rounded-full object-cover bg-white"
+            />
+            <h1 className="text-2xl font-bold text-primary">AVIBAQ</h1>
+          </div>
+          <h2 className="text-xl font-bold mb-2">Redefinir Senha</h2>
           <p className="text-gray-600 text-sm">Digite sua nova senha de acesso</p>
         </CardHeader>
         <CardContent>
           {success ? (
             <div className="text-center">
-              <div className="text-green-600 font-semibold mb-4">Senha atualizada com sucesso!</div>
+              <div className="text-green-600 font-semibold mb-4">Senha redefinida com sucesso!</div>
               <p className="text-gray-600">Redirecionando para o login...</p>
             </div>
           ) : (
@@ -167,20 +155,42 @@ export default function AdminSetPassword() {
               </div>
               {error && <div className="text-red-600 text-sm">{error}</div>}
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? "Atualizando..." : "Atualizar Senha"}
+                {loading ? "Redefinindo..." : "Redefinir Senha"}
               </Button>
-              <Button 
-                type="button" 
-                variant="ghost" 
-                className="w-full" 
-                onClick={() => router.push("/admin/login")}
-              >
-                Voltar ao Login
-              </Button>
+              <div className="text-center space-y-2">
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  className="w-full text-sm" 
+                  onClick={() => router.push("/admin/login")}
+                >
+                  Voltar ao Login Admin
+                </Button>
+                <div className="flex space-x-2">
+                  <Button 
+                    type="button" 
+                    variant="link" 
+                    size="sm"
+                    className="flex-1" 
+                    onClick={() => router.push("/piloto/login")}
+                  >
+                    Login Piloto
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="link" 
+                    size="sm"
+                    className="flex-1" 
+                    onClick={() => router.push("/agencia/login")}
+                  >
+                    Login Agência
+                  </Button>
+                </div>
+              </div>
             </form>
           )}
         </CardContent>
       </Card>
     </div>
   );
-} 
+}

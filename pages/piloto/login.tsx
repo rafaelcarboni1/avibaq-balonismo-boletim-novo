@@ -65,7 +65,7 @@ export default function PilotoLogin() {
     }
 
     const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-      redirectTo: `${window.location.origin}/piloto/nova-senha`,
+      redirectTo: `${window.location.origin}/redefinir-senha`,
     });
 
     if (error) {

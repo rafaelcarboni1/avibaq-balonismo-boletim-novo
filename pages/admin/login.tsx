@@ -59,7 +59,7 @@ export default function AdminLogin() {
       return;
     }
     const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
-      redirectTo: typeof window !== "undefined" ? window.location.origin + "/admin/definir-senha" : undefined
+      redirectTo: typeof window !== "undefined" ? window.location.origin + "/redefinir-senha" : undefined
     });
     if (error) {
       setResetMsg("Erro ao enviar e-mail de redefinição: " + error.message);
