@@ -25,6 +25,15 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     // Verificar se o usuário é admin (middleware básico)
     const { adminUserId, title, message, internalLink, targetAudience } = req.body;
+    
+    console.log('[IMMEDIATE DEBUG] === INÍCIO DO DEBUG ===');
+    console.log('[IMMEDIATE DEBUG] Dados recebidos:', {
+      adminUserId,
+      title,
+      message,
+      internalLink,
+      targetAudience
+    });
 
     // Validações básicas
     if (!adminUserId || !title || !message) {
@@ -59,24 +68,44 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log(`[PUSH] Admin autenticado: ${adminUser.nome} (${adminUser.role})`);
 
     // Criar registro da notificação
+    const insertData = {
+      created_by: adminUserId,
+      title,
+      message,
+      internal_link: internalLink || null,
+      target_audience: targetAudience || { type: 'all' },
+      send_type: 'immediate',
+      status: 'sending'
+    };
+    
+    console.log('[IMMEDIATE DEBUG] Dados para inserir na notificação:', insertData);
+    
     const { data: notification, error: notificationError } = await supabaseService
       .from('push_notifications')
-      .insert({
-        admin_user_id: adminUserId,
-        title,
-        message,
-        internal_link: internalLink || null,
-        target_audience: targetAudience || { type: 'all' },
-        send_type: 'immediate',
-        status: 'sending'
-      })
+      .insert(insertData)
       .select('id')
       .single();
 
     if (notificationError || !notification) {
-      console.error('Erro ao criar notificação:', notificationError);
-      return res.status(500).json({ error: 'Erro ao criar notificação' });
+      console.error('[IMMEDIATE DEBUG] Erro COMPLETO ao criar notificação:', {
+        error: notificationError,
+        code: notificationError?.code,
+        message: notificationError?.message,
+        details: notificationError?.details,
+        hint: notificationError?.hint,
+        insertData
+      });
+      return res.status(500).json({ 
+        error: 'Erro ao criar notificação',
+        debug: {
+          errorCode: notificationError?.code,
+          errorMessage: notificationError?.message,
+          errorDetails: notificationError?.details
+        }
+      });
     }
+    
+    console.log('[IMMEDIATE DEBUG] Notificação criada com sucesso:', notification);
 
     const notificationId = notification.id;
     console.log(`[PUSH] Iniciando envio da notificação ${notificationId}...`);
@@ -265,7 +294,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
   } catch (error) {
-    console.error('Erro no endpoint /api/push/send-immediate:', error);
-    res.status(500).json({ error: 'Erro interno do servidor' });
+    console.error('[IMMEDIATE DEBUG] Erro GERAL na API send-immediate:', {
+      error,
+      message: error?.message,
+      stack: error?.stack,
+      body: req.body
+    });
+    res.status(500).json({ 
+      error: 'Erro interno do servidor',
+      debug: {
+        message: error?.message,
+        type: typeof error
+      }
+    });
   }
 }

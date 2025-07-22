@@ -26,6 +26,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       recurringPattern
     } = req.body;
 
+    console.log('[SCHEDULE DEBUG] === INÍCIO DO DEBUG ===');
+    console.log('[SCHEDULE DEBUG] Dados recebidos:', {
+      title,
+      message,
+      internalLink,
+      targetAudience,
+      scheduledFor,
+      recurring,
+      recurringPattern,
+      adminUserId: req.body.adminUserId
+    });
+
     // Validações
     if (!title || !message) {
       return res.status(400).json({ error: 'Título e mensagem são obrigatórios' });
@@ -83,34 +95,58 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Criar notificação template
+    const insertData = {
+      created_by: req.body.adminUserId,
+      title,
+      message,
+      internal_link: internalLink,
+      target_audience: targetAudience || { type: 'all' },
+      status: 'scheduled',
+      send_type: 'scheduled',
+      scheduled_date: scheduledDate.toISOString(),
+      created_at: new Date().toISOString()
+    };
+    
+    console.log('[SCHEDULE DEBUG] Dados para inserir na notificação:', insertData);
+    
     const { data: notification, error: notificationError } = await supabase
       .from('push_notifications')
-      .insert({
-        admin_user_id: req.body.adminUserId,
-        title,
-        message,
-        internal_link: internalLink,
-        target_audience: targetAudience,
-        status: 'scheduled',
-        created_at: new Date().toISOString()
-      })
+      .insert(insertData)
       .select()
       .single();
 
     if (notificationError) {
-      console.error('Erro ao criar notificação:', notificationError);
-      return res.status(500).json({ error: 'Erro ao criar template de notificação' });
+      console.error('[SCHEDULE DEBUG] Erro COMPLETO ao criar notificação:', {
+        error: notificationError,
+        code: notificationError?.code,
+        message: notificationError?.message,
+        details: notificationError?.details,
+        hint: notificationError?.hint,
+        insertData
+      });
+      return res.status(500).json({ 
+        error: 'Erro ao criar template de notificação',
+        debug: {
+          errorCode: notificationError?.code,
+          errorMessage: notificationError?.message,
+          errorDetails: notificationError?.details
+        }
+      });
     }
+    
+    console.log('[SCHEDULE DEBUG] Notificação criada com sucesso:', notification);
 
     // Criar job agendado
     const jobData = {
       notification_id: notification.id,
-      scheduled_for: scheduledFor,
-      recurring: recurring || false,
-      recurring_pattern: recurringPattern || null,
+      job_type: recurring ? 'recurring' : 'once',
+      next_run_at: scheduledDate.toISOString(),
+      recurring_rule: recurring ? recurringPattern : null,
       status: 'pending',
       created_at: new Date().toISOString()
     };
+    
+    console.log('[SCHEDULE DEBUG] Dados para inserir no job:', jobData);
 
     const { data: job, error: jobError } = await supabase
       .from('push_scheduled_jobs')
@@ -119,7 +155,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .single();
 
     if (jobError) {
-      console.error('Erro ao criar job:', jobError);
+      console.error('[SCHEDULE DEBUG] Erro COMPLETO ao criar job:', {
+        error: jobError,
+        code: jobError?.code,
+        message: jobError?.message,
+        details: jobError?.details,
+        hint: jobError?.hint,
+        jobData
+      });
       
       // Limpar notificação criada em caso de erro
       await supabase
@@ -127,8 +170,17 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .delete()
         .eq('id', notification.id);
         
-      return res.status(500).json({ error: 'Erro ao agendar notificação' });
+      return res.status(500).json({ 
+        error: 'Erro ao agendar notificação',
+        debug: {
+          errorCode: jobError?.code,
+          errorMessage: jobError?.message,
+          errorDetails: jobError?.details
+        }
+      });
     }
+    
+    console.log('[SCHEDULE DEBUG] Job criado com sucesso:', job);
 
     // Calcular próximas execuções se for recorrente
     let nextExecutions = [];
@@ -138,9 +190,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // Criar jobs para as próximas execuções
       const futureJobs = nextExecutions.map(date => ({
         notification_id: notification.id,
-        scheduled_for: date.toISOString(),
-        recurring: true,
-        recurring_pattern: recurringPattern,
+        job_type: 'recurring',
+        next_run_at: date.toISOString(),
+        recurring_rule: recurringPattern,
         status: 'pending',
         created_at: new Date().toISOString()
       }));
@@ -161,8 +213,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     });
 
   } catch (error) {
-    console.error('Erro na API schedule:', error);
-    res.status(500).json({ error: 'Erro interno do servidor' });
+    console.error('[SCHEDULE DEBUG] Erro GERAL na API schedule:', {
+      error,
+      message: error?.message,
+      stack: error?.stack,
+      body: req.body
+    });
+    res.status(500).json({ 
+      error: 'Erro interno do servidor',
+      debug: {
+        message: error?.message,
+        type: typeof error
+      }
+    });
   }
 }
 

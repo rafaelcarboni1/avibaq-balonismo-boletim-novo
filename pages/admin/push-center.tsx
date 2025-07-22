@@ -313,25 +313,34 @@ export default function PushCenter() {
     console.log('[FRONTEND DEBUG] Data atual:', now.toISOString());
     console.log('[FRONTEND DEBUG] Diferenca em minutos:', (scheduledDate.getTime() - now.getTime()) / (60 * 1000));
 
+    // Log dos dados que serão enviados para o backend
+    const requestPayload = {
+      adminUserId: user?.id,
+      title: formData.title,
+      message: formData.message,
+      internalLink: formData.internalLink || undefined,
+      targetAudience: formData.targetAudience,
+      scheduledFor: scheduleData.scheduledFor,
+      recurring: scheduleData.recurring,
+      recurringPattern: scheduleData.recurring ? scheduleData.recurringPattern : undefined
+    };
+    
+    console.log('[FRONTEND DEBUG] === ENVIANDO PARA API SCHEDULE ===');
+    console.log('[FRONTEND DEBUG] User object:', user);
+    console.log('[FRONTEND DEBUG] Request payload:', requestPayload);
+    console.log('[FRONTEND DEBUG] JSON stringify:', JSON.stringify(requestPayload));
+
     setScheduling(true);
     try {
       const response = await fetch('/api/push/schedule', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          adminUserId: user?.id,
-          title: formData.title,
-          message: formData.message,
-          internalLink: formData.internalLink || undefined,
-          targetAudience: formData.targetAudience,
-          scheduledFor: scheduleData.scheduledFor,
-          recurring: scheduleData.recurring,
-          recurringPattern: scheduleData.recurring ? scheduleData.recurringPattern : undefined
-        })
+        body: JSON.stringify(requestPayload)
       });
 
       if (!response.ok) {
         const errorData = await response.json();
+        console.log('[FRONTEND DEBUG] Erro da API schedule:', errorData);
         throw new Error(errorData.error || 'Erro ao agendar notificação');
       }
 
@@ -386,18 +395,26 @@ export default function PushCenter() {
       return;
     }
 
+    // Log dos dados que serão enviados para o backend
+    const requestPayload = {
+      adminUserId: user?.id,
+      title: formData.title,
+      message: formData.message,
+      internalLink: formData.internalLink || undefined,
+      targetAudience: formData.targetAudience
+    };
+    
+    console.log('[FRONTEND DEBUG] === ENVIANDO PARA API SEND-IMMEDIATE ===');
+    console.log('[FRONTEND DEBUG] User object:', user);
+    console.log('[FRONTEND DEBUG] Request payload:', requestPayload);
+    console.log('[FRONTEND DEBUG] JSON stringify:', JSON.stringify(requestPayload));
+
     setSending(true);
     try {
       const response = await fetch('/api/push/send-immediate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          adminUserId: user?.id,
-          title: formData.title,
-          message: formData.message,
-          internalLink: formData.internalLink || undefined,
-          targetAudience: formData.targetAudience
-        })
+        body: JSON.stringify(requestPayload)
       });
 
       if (!response.ok) {
