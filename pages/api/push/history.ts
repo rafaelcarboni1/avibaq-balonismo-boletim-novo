@@ -45,6 +45,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Filtros
     if (status && status !== 'all') {
       query = query.eq('status', status);
+    } else {
+      // Por padrão, mostrar todas as notificações (incluindo draft que são notificações enviadas)
+      // Em produção, vamos filtrar apenas sent, scheduled e draft
+      query = query.in('status', ['sent', 'scheduled', 'draft']);
     }
 
     if (dateFrom) {
@@ -71,6 +75,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (status && status !== 'all') {
       countQuery = countQuery.eq('status', status);
+    } else {
+      countQuery = countQuery.in('status', ['sent', 'scheduled', 'draft']);
     }
 
     if (dateFrom) {

@@ -31,13 +31,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           title,
           message,
           target_audience,
-          admin_user_id,
-          users!push_notifications_admin_user_id_fkey (
-            email
+          created_by,
+          users!push_notifications_created_by_fkey (
+            email,
+            nome
           )
         )
       `)
-      .order('scheduled_for', { ascending: false });
+      .order('next_run_at', { ascending: false });
 
     // Filtros
     if (status && status !== 'all') {
@@ -72,10 +73,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Processar dados para resposta
     const processedJobs = jobs?.map(job => ({
       id: job.id,
-      scheduledFor: job.scheduled_for,
+      scheduledFor: job.next_run_at,
       status: job.status,
-      recurring: job.recurring,
-      recurringPattern: job.recurring_pattern,
+      jobType: job.job_type,
+      recurringRule: job.recurring_rule,
       executedAt: job.executed_at,
       sentCount: job.sent_count,
       failedCount: job.failed_count,
@@ -85,7 +86,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         title: job.push_notifications?.title,
         message: job.push_notifications?.message,
         targetAudience: job.push_notifications?.target_audience,
-        adminEmail: job.push_notifications?.users?.email
+        adminEmail: job.push_notifications?.users?.email,
+        adminName: job.push_notifications?.users?.nome
       },
       createdAt: job.created_at
     })) || [];
