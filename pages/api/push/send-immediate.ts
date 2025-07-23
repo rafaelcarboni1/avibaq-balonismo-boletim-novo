@@ -68,8 +68,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     console.log(`[PUSH] Admin autenticado: ${adminUser.nome} (${adminUser.role})`);
 
     // Criar registro da notificação - versão simplificada
-    const insertData = {
-      created_by: adminUserId,
+    const insertData: any = {
+      created_by: adminUser.id, // Usar o ID validado do banco
       title,
       message,
       target_audience: targetAudience || { type: 'all' }

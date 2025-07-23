@@ -130,7 +130,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Criar notificação template - versão simplificada com apenas campos básicos
-    const insertData = {
+    const insertData: any = {
       created_by: userExists.id, // Usar o ID validado do banco
       title,
       message,
