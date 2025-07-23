@@ -179,7 +179,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let jobError = null;
     
     try {
-      const jobData = {
+      const jobData: any = {
         notification_id: notification.id,
         job_type: recurring ? 'recurring' : 'once',
         next_run_at: scheduledDate.toISOString(),
@@ -247,7 +247,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         recurring_rule: recurringPattern,
         status: 'pending',
         created_at: new Date().toISOString()
-      }));
+      } as any));
 
       if (futureJobs.length > 0) {
         await supabase
