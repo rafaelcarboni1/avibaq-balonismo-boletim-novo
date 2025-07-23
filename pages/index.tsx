@@ -94,6 +94,7 @@ const Home = () => {
               <p className="text-xl sm:text-xl text-gray-600 mb-8">
                 Promovendo a segurança e excelência no balonismo em Praia Grande/SC através de informações meteorológicas precisas e confiáveis para nossa comunidade.
               </p>
+              {/* Test deploy: 18:52 */}
             </article>
           </div>
         </section>
