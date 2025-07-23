@@ -13,10 +13,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return res.status(405).json({ error: 'Método não permitido' });
   }
 
-  // Verificar se tem authorization header ou é uma chamada interna
+  // Verificar se é uma chamada do cron do Vercel ou interna
   const authHeader = req.headers.authorization;
-  if (!authHeader || authHeader !== `Bearer ${process.env.CRON_SECRET || 'internal-cron-secret'}`) {
-    return res.status(401).json({ error: 'Não autorizado - apenas chamadas internas' });
+  const isVercelCron = req.headers['user-agent']?.includes('vercel-cron');
+  const cronSecret = process.env.CRON_SECRET || 'internal-cron-secret';
+  
+  if (!isVercelCron && (!authHeader || authHeader !== `Bearer ${cronSecret}`)) {
+    return res.status(401).json({ error: 'Não autorizado - apenas chamadas do cron' });
   }
 
   try {
@@ -45,8 +48,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         push_notifications (*)
       `)
       .eq('status', 'pending')
-      .lte('scheduled_for', now.toISOString())
-      .order('scheduled_for', { ascending: true });
+      .lte('next_run_at', now.toISOString())
+      .order('next_run_at', { ascending: true });
 
     if (jobsError) {
       console.error('Erro ao buscar jobs:', jobsError);
@@ -229,16 +232,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         successCount++;
 
         // Se for recorrente, criar próximo job
-        if (job.recurring && job.recurring_pattern) {
-          const nextDate = calculateNextExecution(new Date(job.scheduled_for), job.recurring_pattern);
+        if (job.job_type === 'recurring' && job.recurring_rule) {
+          const nextDate = calculateNextExecution(new Date(job.next_run_at), job.recurring_rule);
           if (nextDate) {
             await supabase
               .from('push_scheduled_jobs')
               .insert({
                 notification_id: notification.id,
-                scheduled_for: nextDate.toISOString(),
-                recurring: true,
-                recurring_pattern: job.recurring_pattern,
+                job_type: 'recurring',
+                next_run_at: nextDate.toISOString(),
+                recurring_rule: job.recurring_rule,
                 status: 'pending',
                 created_at: new Date().toISOString()
               });

@@ -289,12 +289,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       await supabaseService
         .from('push_notifications')
         .update({
-          // Usar apenas campos que sabemos que existem
+          status: 'sent',
+          sent_count: sent,
+          targeted_count: subscriptions.length,
           updated_at: new Date().toISOString()
-          // status: 'sent', // pode não existir ainda
-          // total_sent: sent, // pode não existir ainda  
-          // total_failed: failed, // pode não existir ainda
-          // sent_at: new Date().toISOString() // pode não existir ainda
         })
         .eq('id', notificationId);
       console.log('[IMMEDIATE DEBUG] Status atualizado (modo seguro)');

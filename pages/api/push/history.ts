@@ -35,11 +35,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       .from('push_notifications')
       .select(`
         *,
-        admin_user:users!push_notifications_admin_user_id_fkey (
-          email
+        users!push_notifications_created_by_fkey (
+          email,
+          nome
         )
       `)
-      .in('status', ['sent', 'scheduled'])
       .order('created_at', { ascending: false });
 
     // Filtros
@@ -67,8 +67,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Buscar total para paginação
     let countQuery = supabase
       .from('push_notifications')
-      .select('id', { count: 'exact', head: true })
-      .in('status', ['sent', 'scheduled']);
+      .select('id', { count: 'exact', head: true });
 
     if (status && status !== 'all') {
       countQuery = countQuery.eq('status', status);
@@ -129,7 +128,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           targetAudience: notification.target_audience,
           status: notification.status,
           createdAt: notification.created_at,
-          adminEmail: notification.admin_user?.email,
+          adminEmail: notification.users?.email,
+          adminName: notification.users?.nome,
           stats: {
             targeted: notification.targeted_count || 0,
             delivered,
@@ -154,7 +154,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       filteredNotifications = notificationsWithStats.filter(notification =>
         notification.title?.toLowerCase().includes(searchLower) ||
         notification.message?.toLowerCase().includes(searchLower) ||
-        notification.adminEmail?.toLowerCase().includes(searchLower)
+        notification.adminEmail?.toLowerCase().includes(searchLower) ||
+        notification.adminName?.toLowerCase().includes(searchLower)
       );
     }
 
@@ -177,7 +178,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const { data: totalStats, error: totalStatsError } = await supabase
       .from('push_notifications')
       .select('targeted_count, sent_count')
-      .in('status', ['sent']);
+      .eq('status', 'sent');
 
     const overallStats = {
       totalNotifications: count || 0,
