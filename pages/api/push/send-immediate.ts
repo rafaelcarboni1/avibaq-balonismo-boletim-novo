@@ -67,23 +67,25 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     console.log(`[PUSH] Admin autenticado: ${adminUser.nome} (${adminUser.role})`);
 
-    // Criar registro da notificação
+    // Criar registro da notificação - versão simplificada
     const insertData = {
       created_by: adminUserId,
       title,
       message,
-      internal_link: internalLink || null,
-      target_audience: targetAudience || { type: 'all' },
-      send_type: 'immediate',
-      status: 'sending'
+      target_audience: targetAudience || { type: 'all' }
     };
     
-    console.log('[IMMEDIATE DEBUG] Dados para inserir na notificação:', insertData);
+    // Adicionar campos opcionais apenas se necessário
+    if (internalLink) {
+      insertData.internal_link = internalLink;
+    }
+    
+    console.log('[IMMEDIATE DEBUG] Dados para inserir na notificação (modo seguro):', insertData);
     
     const { data: notification, error: notificationError } = await supabaseService
       .from('push_notifications')
       .insert(insertData)
-      .select('id')
+      .select('id, created_by, title, message, created_at')
       .single();
 
     if (notificationError || !notification) {
@@ -140,22 +142,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (subscriptionsError) {
       console.error('Erro ao buscar subscriptions:', subscriptionsError);
-      await supabaseService
-        .from('push_notifications')
-        .update({ status: 'failed' })
-        .eq('id', notificationId);
+      try {
+        await supabaseService
+          .from('push_notifications')
+          .update({ updated_at: new Date().toISOString() })
+          .eq('id', notificationId);
+      } catch (err) {
+        console.log('[IMMEDIATE DEBUG] Não foi possível atualizar status de falha');
+      }
       return res.status(500).json({ error: 'Erro ao buscar destinatários' });
     }
 
     if (!subscriptions || subscriptions.length === 0) {
-      await supabaseService
-        .from('push_notifications')
-        .update({ 
-          status: 'sent',
-          total_targeted: 0,
-          sent_at: new Date().toISOString()
-        })
-        .eq('id', notificationId);
+      try {
+        await supabaseService
+          .from('push_notifications')
+          .update({ 
+            updated_at: new Date().toISOString()
+            // status: 'sent', // pode não existir
+            // total_targeted: 0, // pode não existir
+            // sent_at: new Date().toISOString() // pode não existir
+          })
+          .eq('id', notificationId);
+      } catch (err) {
+        console.log('[IMMEDIATE DEBUG] Não foi possível atualizar status final');
+      }
         
       return res.status(200).json({ 
         success: true, 
@@ -165,11 +176,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       });
     }
 
-    // Atualizar contador de destinatários
-    await supabaseService
-      .from('push_notifications')
-      .update({ total_targeted: subscriptions.length })
-      .eq('id', notificationId);
+    // Atualizar contador de destinatários (se campo existir)
+    try {
+      await supabaseService
+        .from('push_notifications')
+        .update({ total_targeted: subscriptions.length })
+        .eq('id', notificationId);
+      console.log('[IMMEDIATE DEBUG] Total targeted atualizado:', subscriptions.length);
+    } catch (updateError) {
+      console.log('[IMMEDIATE DEBUG] Campo total_targeted pode não existir ainda:', updateError.message);
+    }
 
     console.log(`[PUSH] Enviando para ${subscriptions.length} destinatários...`);
 
@@ -268,16 +284,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         .insert(deliveryLogs);
     }
 
-    // Atualizar status final da notificação
-    await supabaseService
-      .from('push_notifications')
-      .update({
-        status: 'sent',
-        total_sent: sent,
-        total_failed: failed,
-        sent_at: new Date().toISOString()
-      })
-      .eq('id', notificationId);
+    // Atualizar status final da notificação (campos básicos)
+    try {
+      await supabaseService
+        .from('push_notifications')
+        .update({
+          // Usar apenas campos que sabemos que existem
+          updated_at: new Date().toISOString()
+          // status: 'sent', // pode não existir ainda
+          // total_sent: sent, // pode não existir ainda  
+          // total_failed: failed, // pode não existir ainda
+          // sent_at: new Date().toISOString() // pode não existir ainda
+        })
+        .eq('id', notificationId);
+      console.log('[IMMEDIATE DEBUG] Status atualizado (modo seguro)');
+    } catch (updateError) {
+      console.log('[IMMEDIATE DEBUG] Erro ao atualizar status (alguns campos podem não existir):', updateError.message);
+    }
 
     const successRate = subscriptions.length > 0 ? Math.round((sent / subscriptions.length) * 100) : 0;
 

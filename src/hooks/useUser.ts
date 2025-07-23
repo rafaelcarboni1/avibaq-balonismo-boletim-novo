@@ -15,16 +15,21 @@ export function useUser() {
       
       if (user) {
         setUser(user);
-        // Busca o papel na tabela users
+        // Busca o papel E O ID na tabela users
         const { data, error } = await supabase
           .from("users")
-          .select("role, nome")
+          .select("id, role, nome")
           .match({ email: user.email })
           .single();
         console.log('[useUser] resultado da busca na tabela users:', data, error);
         if (data && !error) {
           setRole(data.role);
           setNome(data.nome || "");
+          // IMPORTANTE: Substituir o ID do auth pelo ID da tabela users
+          const userWithCorrectId = { ...user, id: data.id };
+          console.log('[useUser] ID CORRIGIDO - auth ID:', user.id, '-> users table ID:', data.id);
+          console.log('[useUser] user final:', userWithCorrectId);
+          setUser(userWithCorrectId);
         }
       } else {
         setUser(null);

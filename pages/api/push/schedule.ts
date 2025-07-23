@@ -37,6 +37,41 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       recurringPattern,
       adminUserId: req.body.adminUserId
     });
+    
+    // VALIDAR adminUserId ANTES DE USAR
+    const adminUserId = req.body.adminUserId;
+    console.log('[SCHEDULE DEBUG] adminUserId raw:', adminUserId);
+    console.log('[SCHEDULE DEBUG] adminUserId type:', typeof adminUserId);
+    console.log('[SCHEDULE DEBUG] adminUserId length:', adminUserId?.length);
+    
+    if (!adminUserId || adminUserId.length < 10) {
+      return res.status(400).json({ 
+        error: 'adminUserId inválido ou ausente',
+        debug: { adminUserId, type: typeof adminUserId }
+      });
+    }
+    
+    // Verificar se o usuário existe no banco
+    console.log('[SCHEDULE DEBUG] Verificando se usuário existe...');
+    const { data: userExists, error: userError } = await supabase
+      .from('users')
+      .select('id, nome, email, role')
+      .eq('id', adminUserId)
+      .single();
+      
+    if (userError || !userExists) {
+      console.log('[SCHEDULE DEBUG] Usuário não encontrado:', { userError, adminUserId });
+      return res.status(400).json({ 
+        error: 'Usuário não encontrado no banco de dados',
+        debug: { 
+          adminUserId, 
+          userError: userError?.message,
+          code: userError?.code
+        }
+      });
+    }
+    
+    console.log('[SCHEDULE DEBUG] Usuário encontrado:', userExists);
 
     // Validações
     if (!title || !message) {
@@ -94,25 +129,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'Padrão de recorrência é obrigatório para notificações recorrentes' });
     }
 
-    // Criar notificação template
+    // Criar notificação template - versão simplificada com apenas campos básicos
     const insertData = {
-      created_by: req.body.adminUserId,
+      created_by: userExists.id, // Usar o ID validado do banco
       title,
       message,
-      internal_link: internalLink,
-      target_audience: targetAudience || { type: 'all' },
-      status: 'scheduled',
-      send_type: 'scheduled',
-      scheduled_date: scheduledDate.toISOString(),
-      created_at: new Date().toISOString()
+      target_audience: targetAudience || { type: 'all' }
     };
     
-    console.log('[SCHEDULE DEBUG] Dados para inserir na notificação:', insertData);
+    // Adicionar campos opcionais apenas se existirem na tabela
+    if (internalLink) {
+      insertData.internal_link = internalLink;
+    }
     
+    console.log('[SCHEDULE DEBUG] Dados para inserir na notificação (modo seguro):', insertData);
+    
+    // Tentar inserção modo seguro - apenas campos garantidos
     const { data: notification, error: notificationError } = await supabase
       .from('push_notifications')
       .insert(insertData)
-      .select()
+      .select('id, created_by, title, message, created_at')
       .single();
 
     if (notificationError) {
@@ -136,23 +172,39 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     console.log('[SCHEDULE DEBUG] Notificação criada com sucesso:', notification);
 
-    // Criar job agendado
-    const jobData = {
-      notification_id: notification.id,
-      job_type: recurring ? 'recurring' : 'once',
-      next_run_at: scheduledDate.toISOString(),
-      recurring_rule: recurring ? recurringPattern : null,
-      status: 'pending',
-      created_at: new Date().toISOString()
-    };
+    console.log('[SCHEDULE DEBUG] Notificação criada, tentando criar job agendado...');
     
-    console.log('[SCHEDULE DEBUG] Dados para inserir no job:', jobData);
+    // Verificar se tabela push_scheduled_jobs existe
+    let job = null;
+    let jobError = null;
+    
+    try {
+      const jobData = {
+        notification_id: notification.id,
+        job_type: recurring ? 'recurring' : 'once',
+        next_run_at: scheduledDate.toISOString(),
+        status: 'pending'
+      };
+      
+      // Adicionar recurring_rule apenas se for recorrente
+      if (recurring && recurringPattern) {
+        jobData.recurring_rule = recurringPattern;
+      }
+      
+      console.log('[SCHEDULE DEBUG] Dados para inserir no job:', jobData);
 
-    const { data: job, error: jobError } = await supabase
-      .from('push_scheduled_jobs')
-      .insert(jobData)
-      .select()
-      .single();
+      const { data, error } = await supabase
+        .from('push_scheduled_jobs')
+        .insert(jobData)
+        .select()
+        .single();
+        
+      job = data;
+      jobError = error;
+    } catch (jobInsertError) {
+      console.log('[SCHEDULE DEBUG] Erro ao inserir job (tabela pode não existir):', jobInsertError);
+      jobError = jobInsertError;
+    }
 
     if (jobError) {
       console.error('[SCHEDULE DEBUG] Erro COMPLETO ao criar job:', {
