@@ -16,26 +16,45 @@ export default function RedefinirSenha() {
 
   useEffect(() => {
     const handleAuthCallback = async () => {
+      console.log('🔧 [DEBUG] Iniciando processamento de tokens de recovery');
+      console.log('🔧 [DEBUG] URL completa:', window.location.href);
+      console.log('🔧 [DEBUG] Hash da URL:', window.location.hash);
+      
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
       const accessToken = hashParams.get('access_token');
       const refreshToken = hashParams.get('refresh_token');
       const type = hashParams.get('type');
+      
+      console.log('🔧 [DEBUG] Tokens extraídos:', {
+        accessToken: accessToken ? 'presente' : 'ausente',
+        refreshToken: refreshToken ? 'presente' : 'ausente',
+        type: type
+      });
 
       if (accessToken && type === 'recovery') {
-        const { error } = await supabase.auth.setSession({
+        console.log('✅ [DEBUG] Tokens válidos encontrados, estabelecendo sessão...');
+        
+        const { data, error } = await supabase.auth.setSession({
           access_token: accessToken,
           refresh_token: refreshToken || ''
         });
 
         if (error) {
+          console.log('❌ [DEBUG] Erro ao estabelecer sessão:', error);
           setError("Erro ao processar link de redefinição: " + error.message);
           return;
         }
-
+        
+        console.log('✅ [DEBUG] Sessão estabelecida com sucesso:', data.session?.user?.email);
         window.history.replaceState({}, document.title, window.location.pathname);
       } else {
+        console.log('⚠️ [DEBUG] Tokens não encontrados, verificando sessão existente...');
+        
         const { data: { session } } = await supabase.auth.getSession();
+        console.log('🔧 [DEBUG] Sessão atual:', session ? 'ativa' : 'inativa');
+        
         if (!session) {
+          console.log('❌ [DEBUG] Nenhuma sessão encontrada');
           setError("Link inválido ou expirado. Solicite um novo link de redefinição.");
         }
       }
@@ -82,10 +101,36 @@ export default function RedefinirSenha() {
         return;
       }
 
+      console.log('✅ [DEBUG] Senha redefinida com sucesso');
+      
+      // Obter dados do usuário para determinar o redirecionamento correto
+      const { data: { user } } = await supabase.auth.getUser();
+      console.log('🔧 [DEBUG] Dados do usuário:', user?.email);
+      
+      // Buscar role do usuário para redirecionamento correto
+      let redirectPath = '/admin/login'; // default
+      
+      if (user?.email) {
+        const { data: userData } = await supabase
+          .from('users')
+          .select('role')
+          .eq('email', user.email)
+          .single();
+          
+        console.log('🔧 [DEBUG] Role do usuário:', userData?.role);
+        
+        if (userData?.role === 'piloto') {
+          redirectPath = '/piloto/login';
+        } else if (userData?.role === 'agencia') {
+          redirectPath = '/agencia/login';
+        }
+      }
+      
       toast.success("Senha redefinida com sucesso!");
       setSuccess(true);
       setTimeout(() => {
-        router.push("/admin/login");
+        console.log('🔧 [DEBUG] Redirecionando para:', redirectPath);
+        router.push(redirectPath);
       }, 2000);
 
     } catch (error: any) {
