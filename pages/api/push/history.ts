@@ -13,6 +13,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
+    console.log('[PushHistory] Carregando histórico - versão corrigida...');
     // Para APIs internas de admin, podemos usar service role
     // Em produção, adicionar verificação de token de admin
 
