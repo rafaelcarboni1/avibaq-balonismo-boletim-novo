@@ -46,7 +46,7 @@ function CardLink({ title, value, href, subtitle }: { title: any, value: any, hr
 }
 
 export default function AdminDashboard() {
-  const { role } = useUser();
+  const { role, user } = useUser();
   const [stats, setStats] = useState({
     totalPilotos: "--",
     pilotosEmDia: "--",
