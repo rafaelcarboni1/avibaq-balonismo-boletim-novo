@@ -178,18 +178,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     let job = null;
     let jobError = null;
     
+    // Definir jobData fora do try para estar disponível no tratamento de erro
+    const jobData: any = {
+      notification_id: notification.id,
+      job_type: recurring ? 'recurring' : 'once',
+      next_run_at: scheduledDate.toISOString(),
+      status: 'pending'
+    };
+    
+    // Adicionar recurring_rule apenas se for recorrente
+    if (recurring && recurringPattern) {
+      jobData.recurring_rule = recurringPattern;
+    }
+    
     try {
-      const jobData: any = {
-        notification_id: notification.id,
-        job_type: recurring ? 'recurring' : 'once',
-        next_run_at: scheduledDate.toISOString(),
-        status: 'pending'
-      };
-      
-      // Adicionar recurring_rule apenas se for recorrente
-      if (recurring && recurringPattern) {
-        jobData.recurring_rule = recurringPattern;
-      }
       
       console.log('[SCHEDULE DEBUG] Dados para inserir no job:', jobData);
 
