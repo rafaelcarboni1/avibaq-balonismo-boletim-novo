@@ -27,6 +27,7 @@ import {
   CurrencyDollarIcon
 } from "@heroicons/react/24/solid";
 import VooEmAndamento from '@/components/VooEmAndamento';
+import PushNotificationManager from '@/components/PushNotificationManager';
 
 function CardLink({ title, value, href, subtitle }: { title: any, value: any, href: any, subtitle?: any }) {
   // Cores de depuração para cada card
@@ -681,6 +682,16 @@ export default function AdminDashboard() {
           {activeTab === 'analytics' && (
             <div className="space-y-8">
               <ComparativeAnalyticsDashboard data={advancedData} />
+            </div>
+          )}
+
+          {/* Push Notifications Manager */}
+          {user?.id && (
+            <div className="mt-8">
+              <PushNotificationManager 
+                userId={user.id}
+                className=""
+              />
             </div>
           )}
         </div>
