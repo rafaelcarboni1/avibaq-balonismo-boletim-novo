@@ -153,7 +153,7 @@ export default function RedefinirSenha() {
           </div>
           <h2 className="text-xl font-bold mb-2">Redefinir Senha</h2>
           <p className="text-gray-600 text-sm">Digite sua nova senha de acesso</p>
-          {/* Force deploy: trigger build after webhook reconnection */}
+          {/* Deploy test: hook URL working 2025-07-23 18:30 */}
         </CardHeader>
         <CardContent>
           {success ? (
