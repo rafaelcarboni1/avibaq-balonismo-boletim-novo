@@ -102,6 +102,7 @@ const Home = () => {
         <section className="mb-12">
           <div className="text-center mb-8">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">Boletim de Hoje</h2>
+            {/* DEBUG: Webhook test 2025-07-23 18:15 */}
             <p className="text-gray-600">
               Condições meteorológicas atualizadas diariamente até às 19h
             </p>
