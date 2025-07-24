@@ -242,32 +242,34 @@ export default function MinhaContaPiloto() {
             />
           </div>
 
-          {/* Gráficos de Atividade */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <AnimatedChart
-              title="Distribuição de Atividades"
-              type="pie"
-              data={[
-                { name: 'Voos Realizados', value: stats.totalVoos },
-                { name: 'Balões Registrados', value: stats.baloesRegistrados },
-                { name: 'Horas Voadas', value: Math.round(stats.horasVoadas / 10) }, // Escala reduzida para visualização
-              ]}
-              colors={["#3b82f6", "#10b981", "#8b5cf6"]}
-            />
-            
-            <AnimatedChart
-              title="Estatísticas Mensais"
-              type="bar"
-              data={[
-                { name: 'Jan', value: Math.round(stats.totalVoos * 0.1) },
-                { name: 'Fev', value: Math.round(stats.totalVoos * 0.15) },
-                { name: 'Mar', value: Math.round(stats.totalVoos * 0.2) },
-                { name: 'Abr', value: Math.round(stats.totalVoos * 0.25) },
-                { name: 'Mai', value: Math.round(stats.totalVoos * 0.3) },
-              ]}
-              colors={["#3b82f6"]}
-            />
-          </div>
+          {/* Gráficos de Atividade - Só mostra se há dados */}
+          {(stats.totalVoos > 0 || stats.baloesRegistrados > 0 || stats.horasVoadas > 0) && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              <AnimatedChart
+                title="Distribuição de Atividades"
+                type="pie"
+                data={[
+                  { name: 'Voos Realizados', value: Math.max(stats.totalVoos, 1) },
+                  { name: 'Balões Registrados', value: Math.max(stats.baloesRegistrados, 1) },
+                  { name: 'Horas Voadas', value: Math.max(Math.round(stats.horasVoadas / 10), 1) },
+                ]}
+                colors={["#3b82f6", "#10b981", "#8b5cf6"]}
+              />
+              
+              <AnimatedChart
+                title="Estatísticas Mensais"
+                type="bar"
+                data={[
+                  { name: 'Jan', value: Math.max(Math.round(stats.totalVoos * 0.1), 1) },
+                  { name: 'Fev', value: Math.max(Math.round(stats.totalVoos * 0.15), 1) },
+                  { name: 'Mar', value: Math.max(Math.round(stats.totalVoos * 0.2), 1) },
+                  { name: 'Abr', value: Math.max(Math.round(stats.totalVoos * 0.25), 1) },
+                  { name: 'Mai', value: Math.max(Math.round(stats.totalVoos * 0.3), 2) },
+                ]}
+                colors={["#3b82f6"]}
+              />
+            </div>
+          )}
 
           {/* Bento Grid Layout */}
           <BentoGrid className="md:auto-rows-[20rem] mb-8">

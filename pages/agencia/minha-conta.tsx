@@ -271,32 +271,34 @@ export default function MinhaContaAgencia() {
             />
           </div>
 
-          {/* Gráficos de Operações */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <AnimatedChart
-              title="Distribuição de Recursos"
-              type="pie"
-              data={[
-                { name: 'Pilotos', value: stats.pilotosVinculados },
-                { name: 'Balões', value: stats.baloesGerenciados },
-                { name: 'Voos', value: Math.round(stats.voosRealizados / 10) }, // Escala reduzida
-              ]}
-              colors={["#3b82f6", "#10b981", "#8b5cf6"]}
-            />
-            
-            <AnimatedChart
-              title="Atividade Operacional"
-              type="bar"
-              data={[
-                { name: 'Voos Jan', value: Math.round(stats.voosRealizados * 0.1) },
-                { name: 'Voos Fev', value: Math.round(stats.voosRealizados * 0.15) },
-                { name: 'Voos Mar', value: Math.round(stats.voosRealizados * 0.2) },
-                { name: 'Voos Abr', value: Math.round(stats.voosRealizados * 0.25) },
-                { name: 'Voos Mai', value: Math.round(stats.voosRealizados * 0.3) },
-              ]}
-              colors={["#3b82f6"]}
-            />
-          </div>
+          {/* Gráficos de Operações - Só mostra se há dados */}
+          {(stats.pilotosVinculados > 0 || stats.baloesGerenciados > 0 || stats.voosRealizados > 0) && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              <AnimatedChart
+                title="Distribuição de Recursos"
+                type="pie"
+                data={[
+                  { name: 'Pilotos', value: Math.max(stats.pilotosVinculados, 1) },
+                  { name: 'Balões', value: Math.max(stats.baloesGerenciados, 1) },
+                  { name: 'Voos', value: Math.max(Math.round(stats.voosRealizados / 10), 1) },
+                ]}
+                colors={["#3b82f6", "#10b981", "#8b5cf6"]}
+              />
+              
+              <AnimatedChart
+                title="Atividade Operacional"
+                type="bar"
+                data={[
+                  { name: 'Jan', value: Math.max(Math.round(stats.voosRealizados * 0.1), 1) },
+                  { name: 'Fev', value: Math.max(Math.round(stats.voosRealizados * 0.15), 1) },
+                  { name: 'Mar', value: Math.max(Math.round(stats.voosRealizados * 0.2), 1) },
+                  { name: 'Abr', value: Math.max(Math.round(stats.voosRealizados * 0.25), 1) },
+                  { name: 'Mai', value: Math.max(Math.round(stats.voosRealizados * 0.3), 2) },
+                ]}
+                colors={["#3b82f6"]}
+              />
+            </div>
+          )}
 
           {/* Bento Grid Layout */}
           <BentoGrid className="md:auto-rows-[20rem] mb-8">
