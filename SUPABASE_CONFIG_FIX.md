@@ -11,17 +11,20 @@
 Supabase Dashboard → Authentication → URL Configuration
 ```
 
-### 2. Configurar Site URL
+### 2. Configurar Site URL (manter o principal)
 ```
-Site URL: https://avibaq-balonismo-boletim-novo.vercel.app
+Site URL: https://avibaq.org
 ```
 
-### 3. Adicionar Redirect URLs
+### 3. Adicionar Redirect URLs (CRÍTICO!)
 ```
-Redirect URLs (adicionar ambas):
-- http://localhost:3000/redefinir-senha
-- https://avibaq-balonismo-boletim-novo.vercel.app/redefinir-senha
+Redirect URLs (adicionar todas essas):
+- http://localhost:3000/**
+- https://avibaq-balonismo-boletim-novo.vercel.app/**
+- https://avibaq.org/**
 ```
+
+**IMPORTANTE**: O problema é que o Supabase só aceita redirectTo para URLs que estão na lista de Redirect URLs. Como o link do email está indo para avibaq.org em vez da URL do Vercel, precisa adicionar ambas as URLs.
 
 ### 4. Salvar Configurações
 Clicar "Save" após adicionar as URLs
