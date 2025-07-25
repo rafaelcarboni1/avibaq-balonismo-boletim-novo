@@ -155,7 +155,6 @@ export default function PlanejamentoAgencia() {
         user_id: v.membros?.user_id
       })).filter((p: any) => p.id) || [];
 
-      console.log('[DEBUG] Pilotos carregados:', pilotosFormatados);
       setPilotos(pilotosFormatados);
     } catch (error) {
       console.error('Erro:', error);
@@ -171,7 +170,6 @@ export default function PlanejamentoAgencia() {
 
   const carregarBaloesPiloto = async () => {
     try {
-      console.log('[DEBUG] carregarBaloesPiloto iniciou com formData.piloto_id:', formData.piloto_id);
       if (!formData.piloto_id) return;
 
       // Buscar membro agência associado ao usuário
@@ -199,11 +197,15 @@ export default function PlanejamentoAgencia() {
         .eq('ativo', true)
         .order('prefixo');
 
-      // Log temporário para debug final
-      console.log('[DEBUG FINAL] formData.piloto_id:', formData.piloto_id);
-      console.log('[DEBUG FINAL] membro.id (agencia):', membro.id);
-      console.log('[DEBUG FINAL] IDs buscados na query:', [formData.piloto_id, membro.id]);
-      console.log('[DEBUG FINAL] Balões retornados:', data?.map(b => `${b.prefixo}(${b.proprietario_id}): ativo=${b.ativo}`));
+      // Debug logs detalhados
+      console.log('[DEBUG] Query executada:', {
+        proprietario_ids: [formData.piloto_id, membro.id],
+        piloto_id: formData.piloto_id,
+        agencia_id: membro.id,
+        data_retornada: data,
+        error: error,
+        total_baloes: data?.length || 0
+      });
 
       if (error) {
         console.error('Erro ao carregar balões:', error);
@@ -227,7 +229,6 @@ export default function PlanejamentoAgencia() {
         const proprietario = proprietarios?.find(p => p.id === b.proprietario_id);
         
         // Log da categorização
-        console.log(`[DEBUG] ${b.prefixo}: proprietario_id="${b.proprietario_id}" === piloto_id="${formData.piloto_id}" = ${isPiloto}`);
         
         return {
           ...b,
@@ -524,7 +525,6 @@ export default function PlanejamentoAgencia() {
             id="piloto"
             value={formData.piloto_id}
             onChange={(e) => {
-              console.log('[DEBUG] Piloto selecionado - ID:', e.target.value);
               setFormData({...formData, piloto_id: e.target.value});
               setBaloesSelecionados([]);
             }}

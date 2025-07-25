@@ -20,6 +20,8 @@ import VoosCharts from '../../src/components/VoosCharts';
 import { formatDateSafe } from '../../src/utils/dateUtils';
 import PushNotificationManager from '../../src/components/PushNotificationManager';
 import { WhatsAppWelcomeModal } from '../../src/components/WhatsAppWelcomeModal';
+import { PermissionGuard, CanManage, CanCreate } from '../../src/components/PermissionGuard';
+import { usePermissions } from '../../src/hooks/usePermissions';
 
 // Lazy load dos componentes pesados
 const AdvancedKPICard = dynamic(() => import('../../src/components/magicui/advanced-kpi-analytics').then(mod => ({ default: mod.AdvancedKPICard })), {
@@ -59,6 +61,7 @@ export default function PilotoDashboard() {
   const router = useRouterDebug();
   const { user, loading: userLoading } = useUser();
   const { toast } = useToast();
+  const { hasPermission, canManage } = usePermissions();
   
   const [stats, setStats] = useState<DashboardStats>({
     totalBaloes: 0,
@@ -1259,6 +1262,191 @@ export default function PilotoDashboard() {
               }
               icon={<PlusIcon className="h-6 w-6 text-blue-500" />}
             />
+
+            {/* Módulos condicionais baseados em permissões específicas */}
+            
+            {/* Gestão de Associados - Só aparece se tiver permissão */}
+            <PermissionGuard 
+              recurso="associados" 
+              acao="manage"
+              fallback={null}
+              debug={true}
+            >
+              <BentoGridItem
+                className="md:col-span-1"
+                title="Gestão de Associados"
+                description={
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-600">
+                      Você tem permissão especial para gerenciar os associados da AVIBAQ.
+                    </p>
+                    <div className="grid gap-2">
+                      <CanCreate recurso="associados">
+                        <Button
+                          onClick={() => router.push('/admin/associados')}
+                          className="w-full text-left justify-start"
+                          variant="outline"
+                        >
+                          <UsersIcon className="h-4 w-4 mr-2" />
+                          Gerenciar Associados
+                        </Button>
+                      </CanCreate>
+                      
+                      <PermissionGuard recurso="associados" acao="export">
+                        <Button
+                          onClick={() => alert('Funcionalidade de exportação em desenvolvimento')}
+                          className="w-full text-left justify-start"
+                          variant="outline"
+                        >
+                          <ChartBarIcon className="h-4 w-4 mr-2" />
+                          Exportar Dados
+                        </Button>
+                      </PermissionGuard>
+                    </div>
+                  </div>
+                }
+                header={
+                  <div className="flex h-20 w-full bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl items-center justify-center">
+                    <UsersIcon className="h-10 w-10 text-white" />
+                  </div>
+                }
+                icon={<UsersIcon className="h-6 w-6 text-green-500" />}
+              />
+            </PermissionGuard>
+
+            {/* Gestão de Boletins - Só aparece se tiver permissão */}
+            <PermissionGuard 
+              recurso="boletins" 
+              acao="manage"
+              fallback={null}
+              debug={true}
+            >
+              <BentoGridItem
+                className="md:col-span-1"
+                title="Gestão de Boletins"
+                description={
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-600">
+                      Você pode criar e gerenciar boletins meteorológicos.
+                    </p>
+                    <div className="grid gap-2">
+                      <CanCreate recurso="boletins">
+                        <Button
+                          onClick={() => router.push('/admin/boletins/new')}
+                          className="w-full text-left justify-start"
+                          variant="outline"
+                        >
+                          <PlusIcon className="h-4 w-4 mr-2" />
+                          Criar Boletim
+                        </Button>
+                      </CanCreate>
+                      
+                      <Button
+                        onClick={() => router.push('/admin/boletins')}
+                        className="w-full text-left justify-start"
+                        variant="outline"
+                      >
+                        <DocumentTextIcon className="h-4 w-4 mr-2" />
+                        Gerenciar Boletins
+                      </Button>
+                    </div>
+                  </div>
+                }
+                header={
+                  <div className="flex h-20 w-full bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl items-center justify-center">
+                    <DocumentTextIcon className="h-10 w-10 text-white" />
+                  </div>
+                }
+                icon={<DocumentTextIcon className="h-6 w-6 text-blue-500" />}
+              />
+            </PermissionGuard>
+
+            {/* Relatórios Avançados - Só aparece se tiver permissão */}
+            <PermissionGuard 
+              recurso="relatorios" 
+              acao="view_all"
+              fallback={null}
+              debug={true}
+            >
+              <BentoGridItem
+                className="md:col-span-1"
+                title="Relatórios Avançados"
+                description={
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-600">
+                      Acesso a relatórios detalhados e analytics da associação.
+                    </p>
+                    <div className="grid gap-2">
+                      <Button
+                        onClick={() => router.push('/admin/dashboard')}
+                        className="w-full text-left justify-start"
+                        variant="outline"
+                      >
+                        <ChartBarIcon className="h-4 w-4 mr-2" />
+                        Dashboard Admin
+                      </Button>
+                      
+                      <PermissionGuard recurso="relatorios" acao="export">
+                        <Button
+                          onClick={() => alert('Exportação de relatórios em desenvolvimento')}
+                          className="w-full text-left justify-start"
+                          variant="outline"
+                        >
+                          <ArrowTrendingUpIcon className="h-4 w-4 mr-2" />
+                          Exportar Relatórios
+                        </Button>
+                      </PermissionGuard>
+                    </div>
+                  </div>
+                }
+                header={
+                  <div className="flex h-20 w-full bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl items-center justify-center">
+                    <ChartBarIcon className="h-10 w-10 text-white" />
+                  </div>
+                }
+                icon={<ChartBarIcon className="h-6 w-6 text-purple-500" />}
+              />
+            </PermissionGuard>
+
+            {/* Módulo de Debug de Permissões (só em desenvolvimento) */}
+            {process.env.NODE_ENV === 'development' && (
+              <BentoGridItem
+                className="md:col-span-2"
+                title="Debug: Suas Permissões"
+                description={
+                  <div className="space-y-2">
+                    <p className="text-xs text-gray-500">Modo desenvolvimento - suas permissões atuais:</p>
+                    <div className="max-h-32 overflow-y-auto space-y-1">
+                      <div className="text-xs">
+                        <span className="font-mono">Role:</span> {user?.role}
+                      </div>
+                      
+                      {/* Verificações de exemplo */}
+                      <div className="text-xs space-y-1">
+                        <div className={hasPermission('associados', 'manage') ? 'text-green-600' : 'text-red-600'}>
+                          {hasPermission('associados', 'manage') ? '✓' : '✗'} associados.manage
+                        </div>
+                        <div className={hasPermission('boletins', 'manage') ? 'text-green-600' : 'text-red-600'}>
+                          {hasPermission('boletins', 'manage') ? '✓' : '✗'} boletins.manage
+                        </div>
+                        <div className={hasPermission('relatorios', 'view_all') ? 'text-green-600' : 'text-red-600'}>
+                          {hasPermission('relatorios', 'view_all') ? '✓' : '✗'} relatorios.view_all
+                        </div>
+                        <div className={hasPermission('voos', 'create') ? 'text-green-600' : 'text-red-600'}>
+                          {hasPermission('voos', 'create') ? '✓' : '✗'} voos.create
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                }
+                header={
+                  <div className="flex h-20 w-full bg-gradient-to-br from-gray-500 to-gray-700 rounded-xl items-center justify-center">
+                    <ShieldCheckIcon className="h-10 w-10 text-white" />
+                  </div>
+                }
+                icon={<ShieldCheckIcon className="h-6 w-6 text-gray-500" />}
+              />
+            )}
 
             </BentoGrid>
           </div>

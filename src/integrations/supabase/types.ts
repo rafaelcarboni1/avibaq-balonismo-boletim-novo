@@ -240,12 +240,170 @@ export type Database = {
         }
         Relationships: []
       }
+      user_permissions: {
+        Row: {
+          id: number
+          user_id: string
+          recurso: string
+          acao: string
+          permitido: boolean
+          nivel_acesso: string | null
+          restricoes: Json | null
+          concedido_por: string | null
+          concedido_em: string
+          data_expiracao: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: never
+          user_id: string
+          recurso: string
+          acao: string
+          permitido?: boolean
+          nivel_acesso?: string | null
+          restricoes?: Json | null
+          concedido_por?: string | null
+          concedido_em?: string
+          data_expiracao?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: never
+          user_id?: string
+          recurso?: string
+          acao?: string
+          permitido?: boolean
+          nivel_acesso?: string | null
+          restricoes?: Json | null
+          concedido_por?: string | null
+          concedido_em?: string
+          data_expiracao?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_permissions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_permissions_concedido_por_fkey"
+            columns: ["concedido_por"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      permission_audit_log: {
+        Row: {
+          id: number
+          timestamp: string
+          admin_user_id: string | null
+          target_user_id: string | null
+          action: string
+          permission_type: string
+          recurso: string | null
+          acao: string | null
+          old_value: Json | null
+          new_value: Json | null
+          reason: string | null
+          ip_address: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          id?: never
+          timestamp?: string
+          admin_user_id?: string | null
+          target_user_id?: string | null
+          action: string
+          permission_type: string
+          recurso?: string | null
+          acao?: string | null
+          old_value?: Json | null
+          new_value?: Json | null
+          reason?: string | null
+          ip_address?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          id?: never
+          timestamp?: string
+          admin_user_id?: string | null
+          target_user_id?: string | null
+          action?: string
+          permission_type?: string
+          recurso?: string | null
+          acao?: string | null
+          old_value?: Json | null
+          new_value?: Json | null
+          reason?: string | null
+          ip_address?: string | null
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "permission_audit_log_admin_user_id_fkey"
+            columns: ["admin_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "permission_audit_log_target_user_id_fkey"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
-      [_ in never]: never
+      v_user_permissions_summary: {
+        Row: {
+          user_id: string | null
+          email: string | null
+          nome: string | null
+          role: 'admin' | 'meteo' | 'tesouraria' | 'piloto' | 'agencia' | null
+          recurso: string | null
+          acao: string | null
+          permitido: boolean | null
+          nivel_acesso: string | null
+          concedido_em: string | null
+          data_expiracao: string | null
+          concedido_por_nome: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
-      [_ in never]: never
+      get_user_combined_permissions: {
+        Args: {
+          p_user_id: string
+        }
+        Returns: {
+          recurso: string
+          acao: string
+          permitido: boolean
+          fonte: string
+          nivel_acesso: string | null
+          restricoes: Json | null
+        }[]
+      }
+      user_has_permission: {
+        Args: {
+          p_user_id: string
+          p_recurso: string
+          p_acao: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       bandeira_tipo: "verde" | "amarela" | "vermelha"
@@ -287,6 +445,89 @@ export type Tables<
       ? R
       : never
     : never
+
+// Tipos auxiliares para sistema de permissões
+export type UserRole = 'admin' | 'meteo' | 'tesouraria' | 'piloto' | 'agencia';
+
+export interface Permission {
+  recurso: string;
+  acao: string;
+  permitido: boolean;
+  fonte: 'role' | 'user_specific';
+  nivel_acesso?: string | null;
+  restricoes?: Json | null;
+}
+
+export interface UserPermission {
+  id: number;
+  user_id: string;
+  recurso: string;
+  acao: string;
+  permitido: boolean;
+  nivel_acesso?: string | null;
+  restricoes?: Json | null;
+  concedido_por?: string | null;
+  concedido_em: string;
+  data_expiracao?: string | null;
+}
+
+export interface PermissionAuditLog {
+  id: number;
+  timestamp: string;
+  admin_user_id?: string | null;
+  target_user_id?: string | null;
+  action: 'grant' | 'revoke' | 'modify';
+  permission_type: 'role' | 'user_specific';
+  recurso?: string | null;
+  acao?: string | null;
+  old_value?: Json | null;
+  new_value?: Json | null;
+  reason?: string | null;
+}
+
+export interface UserPermissionsSummary {
+  user_id: string;
+  email: string;
+  nome: string;
+  role: UserRole;
+  recurso: string;
+  acao: string;
+  permitido: boolean;
+  nivel_acesso?: string | null;
+  concedido_em: string;
+  data_expiracao?: string | null;
+  concedido_por_nome?: string | null;
+}
+
+// Tipos para recursos e ações comuns do sistema
+export type SystemResource = 
+  | 'voos' 
+  | 'baloes' 
+  | 'boletins' 
+  | 'associados' 
+  | 'usuarios' 
+  | 'permissoes'
+  | 'dashboard'
+  | 'relatorios'
+  | 'configuracoes';
+
+export type SystemAction = 
+  | 'create' 
+  | 'read' 
+  | 'update' 
+  | 'delete' 
+  | 'approve' 
+  | 'export'
+  | 'manage'
+  | 'view_all'
+  | 'view_own';
+
+// Interface para verificação de permissões
+export interface PermissionCheck {
+  recurso: SystemResource | string;
+  acao: SystemAction | string;
+  required?: boolean;
+}
 
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
