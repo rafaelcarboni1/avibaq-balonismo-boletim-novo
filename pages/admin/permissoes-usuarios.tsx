@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { SimpleDashboardLayout } from '../../src/components/ui/simple-dashboard-layout';
+import { SimpleDashboardLayout } from '../../src/components/SimpleDashboardLayout';
 import { Button } from '../../src/components/ui/button';
 import { supabase } from '../../src/integrations/supabase/client';
 import { useUser } from '../../src/hooks/useUser';

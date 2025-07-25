@@ -234,8 +234,8 @@ export function usePermissions(): UsePermissionsReturn {
       denied: permissions.filter(p => !p.permitido).length,
       fromRole: permissions.filter(p => p.fonte === 'role').length,
       fromUser: permissions.filter(p => p.fonte === 'user_specific').length,
-      recursos: [...new Set(permissions.map(p => p.recurso))].sort(),
-      acoes: [...new Set(permissions.map(p => p.acao))].sort()
+      recursos: Array.from(new Set(permissions.map(p => p.recurso))).sort(),
+      acoes: Array.from(new Set(permissions.map(p => p.acao))).sort()
     };
 
     console.log('[usePermissions] Estatísticas das permissões:', stats);
