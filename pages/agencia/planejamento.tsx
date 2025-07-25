@@ -222,12 +222,23 @@ export default function PlanejamentoAgencia() {
       // Debug: Log dos dados retornados
       console.log('[DEBUG] Dados retornados da query balões:', data);
 
-      const baloesFormatados = data?.map((b: any) => ({
-        ...b,
-        proprietario_nome: b.membros?.nome_completo,
-        proprietario_tipo: b.membros?.tipo,
-        categoria: b.proprietario_id === formData.piloto_id ? 'piloto' : 'agencia'
-      })) || [];
+      const baloesFormatados = data?.map((b: any) => {
+        // Debug: Log detalhado da comparação
+        const isPiloto = String(b.proprietario_id) === String(formData.piloto_id);
+        console.log(`[DEBUG] Balão ${b.prefixo}:`);
+        console.log(`  - proprietario_id: "${b.proprietario_id}" (tipo: ${typeof b.proprietario_id})`);
+        console.log(`  - formData.piloto_id: "${formData.piloto_id}" (tipo: ${typeof formData.piloto_id})`);
+        console.log(`  - membro.id (agencia): "${membro.id}" (tipo: ${typeof membro.id})`); 
+        console.log(`  - Comparação (piloto): ${b.proprietario_id} === ${formData.piloto_id} = ${isPiloto}`);
+        console.log(`  - Categoria determinada: ${isPiloto ? 'piloto' : 'agencia'}`);
+        
+        return {
+          ...b,
+          proprietario_nome: b.membros?.nome_completo,
+          proprietario_tipo: b.membros?.tipo,
+          categoria: isPiloto ? 'piloto' : 'agencia'
+        };
+      }) || [];
 
       console.log('[DEBUG] Balões formatados:', baloesFormatados);
       console.log('[DEBUG] Balões do piloto (categoria piloto):', baloesFormatados.filter(b => b.categoria === 'piloto'));
