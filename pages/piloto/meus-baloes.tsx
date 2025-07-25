@@ -178,7 +178,7 @@ export default function MeusBaloes() {
             description: "Já existe um balão com este prefixo",
             variant: "destructive"
           });
-        } else if (result.error.message.includes('formato PT-XXX, BR-XXX ou PP-XXX')) {
+        } else if (result.error.message.includes('formato PP-XXX') || result.error.message.includes('formato PT-XXX')) {
           toast({
             title: "Erro",
             description: "Prefixo deve seguir o formato PT-XXX, BR-XXX ou PP-XXX (ex: PT-ABC, BR-FORT1, PP-123)",
