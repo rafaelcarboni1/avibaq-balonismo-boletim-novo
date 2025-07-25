@@ -18,15 +18,21 @@ export function useUser() {
         // Busca o papel E O ID na tabela users
         const { data, error } = await supabase
           .from("users")
-          .select("id, role, nome")
+          .select("id, role, nome, whatsapp_group_joined, whatsapp_modal_shown")
           .match({ email: user.email })
           .single();
         console.log('[useUser] resultado da busca na tabela users:', data, error);
         if (data && !error) {
           setRole(data.role);
           setNome(data.nome || "");
-          // IMPORTANTE: Substituir o ID do auth pelo ID da tabela users
-          const userWithCorrectId = { ...user, id: data.id };
+          // IMPORTANTE: Substituir o ID do auth pelo ID da tabela users e incluir campos WhatsApp
+          const userWithCorrectId = { 
+            ...user, 
+            id: data.id,
+            role: data.role,
+            whatsapp_group_joined: data.whatsapp_group_joined,
+            whatsapp_modal_shown: data.whatsapp_modal_shown
+          };
           console.log('[useUser] ID CORRIGIDO - auth ID:', user.id, '-> users table ID:', data.id);
           console.log('[useUser] user final:', userWithCorrectId);
           setUser(userWithCorrectId);

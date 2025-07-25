@@ -213,7 +213,7 @@ export type Database = {
           email: string
           id: string
           nome: string | null
-          role: 'admin' | 'meteo' | 'tesouraria' | 'pilot' | 'agency' | null
+          role: 'admin' | 'meteo' | 'tesouraria' | 'piloto' | 'agencia' | null
           updated_at: string | null
           whatsapp_group_joined: boolean | null
           whatsapp_modal_shown: boolean | null
@@ -223,7 +223,7 @@ export type Database = {
           email: string
           id?: string
           nome?: string | null
-          role?: 'admin' | 'meteo' | 'tesouraria' | 'pilot' | 'agency' | null
+          role?: 'admin' | 'meteo' | 'tesouraria' | 'piloto' | 'agencia' | null
           updated_at?: string | null
           whatsapp_group_joined?: boolean | null
           whatsapp_modal_shown?: boolean | null
@@ -233,7 +233,7 @@ export type Database = {
           email?: string
           id?: string
           nome?: string | null
-          role?: 'admin' | 'meteo' | 'tesouraria' | 'pilot' | 'agency' | null
+          role?: 'admin' | 'meteo' | 'tesouraria' | 'piloto' | 'agencia' | null
           updated_at?: string | null
           whatsapp_group_joined?: boolean | null
           whatsapp_modal_shown?: boolean | null

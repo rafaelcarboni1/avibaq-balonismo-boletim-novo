@@ -222,6 +222,9 @@ export default function PlanejamentoAgencia() {
         const isPiloto = String(b.proprietario_id) === String(formData.piloto_id);
         const proprietario = proprietarios?.find(p => p.id === b.proprietario_id);
         
+        // Log da categorização
+        console.log(`[DEBUG] ${b.prefixo}: proprietario_id="${b.proprietario_id}" === piloto_id="${formData.piloto_id}" = ${isPiloto}`);
+        
         return {
           ...b,
           proprietario_nome: proprietario?.nome_completo || 'Proprietário não encontrado',

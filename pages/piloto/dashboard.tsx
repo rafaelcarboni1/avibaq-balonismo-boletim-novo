@@ -137,11 +137,25 @@ export default function PilotoDashboard() {
 
   // Verificar se deve mostrar modal do WhatsApp
   useEffect(() => {
-    if (!user || userLoading || user.role !== 'piloto') return;
+    console.log('[WhatsApp Modal] Verificando se deve mostrar modal:', {
+      user: !!user,
+      userLoading,
+      role: user?.role,
+      whatsapp_modal_shown: user?.whatsapp_modal_shown,
+      whatsapp_group_joined: user?.whatsapp_group_joined
+    });
+    
+    if (!user || userLoading || user.role !== 'piloto') {
+      console.log('[WhatsApp Modal] Não mostrando modal - condições não atendidas');
+      return;
+    }
     
     // Verificar se é o primeiro acesso ou se ainda não entrou no grupo
     if (!user.whatsapp_modal_shown || !user.whatsapp_group_joined) {
+      console.log('[WhatsApp Modal] Mostrando modal!');
       setShowWhatsAppModal(true);
+    } else {
+      console.log('[WhatsApp Modal] Modal já foi mostrado e usuário já entrou no grupo');
     }
   }, [user, userLoading]);
 
