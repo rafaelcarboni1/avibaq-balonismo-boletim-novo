@@ -171,6 +171,7 @@ export default function PlanejamentoAgencia() {
 
   const carregarBaloesPiloto = async () => {
     try {
+      console.log('[DEBUG] carregarBaloesPiloto iniciou com formData.piloto_id:', formData.piloto_id);
       if (!formData.piloto_id) return;
 
       // Buscar membro agência associado ao usuário
@@ -199,7 +200,9 @@ export default function PlanejamentoAgencia() {
         .order('prefixo');
 
       // Log temporário para debug final
-      console.log('[DEBUG FINAL] IDs buscados:', [formData.piloto_id, membro.id]);
+      console.log('[DEBUG FINAL] formData.piloto_id:', formData.piloto_id);
+      console.log('[DEBUG FINAL] membro.id (agencia):', membro.id);
+      console.log('[DEBUG FINAL] IDs buscados na query:', [formData.piloto_id, membro.id]);
       console.log('[DEBUG FINAL] Balões retornados:', data?.map(b => `${b.prefixo}(${b.proprietario_id}): ativo=${b.ativo}`));
 
       if (error) {
