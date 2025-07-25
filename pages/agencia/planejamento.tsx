@@ -197,6 +197,10 @@ export default function PlanejamentoAgencia() {
         .eq('ativo', true)
         .order('prefixo');
 
+      // Log temporário para debug final
+      console.log('[DEBUG FINAL] IDs buscados:', [formData.piloto_id, membro.id]);
+      console.log('[DEBUG FINAL] Balões retornados:', data?.map(b => `${b.prefixo}(${b.proprietario_id}): ativo=${b.ativo}`));
+
       if (error) {
         console.error('Erro ao carregar balões:', error);
         toast({
