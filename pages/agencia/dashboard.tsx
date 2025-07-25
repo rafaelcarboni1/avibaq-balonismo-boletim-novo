@@ -17,6 +17,7 @@ import VooEmAndamento from '../../src/components/VooEmAndamento';
 import VoosStatistics from '../../src/components/VoosStatistics';
 import VoosCharts from '../../src/components/VoosCharts';
 import PushNotificationManager from '../../src/components/PushNotificationManager';
+import { WhatsAppWelcomeModal } from '../../src/components/WhatsAppWelcomeModal';
 
 // Lazy load dos componentes pesados
 const AdvancedKPICard = dynamic(() => import('../../src/components/magicui/advanced-kpi-analytics').then(mod => ({ default: mod.AdvancedKPICard })), {
@@ -57,6 +58,7 @@ export default function AgenciaDashboard() {
   });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'overview' | 'business' | 'team'>('overview');
+  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
 
   // Verificar autenticação e carregar dados
   useEffect(() => {
@@ -78,6 +80,56 @@ export default function AgenciaDashboard() {
       carregarDashboard();
     }
   }, [user, userLoading, router]);
+
+  // Verificar se deve mostrar modal do WhatsApp
+  useEffect(() => {
+    if (!user || userLoading || user.role !== 'agencia') return;
+    
+    // Verificar se é o primeiro acesso ou se ainda não entrou no grupo
+    if (!user.whatsapp_modal_shown || !user.whatsapp_group_joined) {
+      setShowWhatsAppModal(true);
+    }
+  }, [user, userLoading]);
+
+  // Funções do modal WhatsApp
+  const handleJoinWhatsApp = () => {
+    // Abrir link do WhatsApp (URL deve ser configurada no ambiente)
+    const whatsappUrl = process.env.NEXT_PUBLIC_WHATSAPP_GROUP_URL || '#';
+    window.open(whatsappUrl, '_blank');
+  };
+
+  const handleMarkAsJoined = async () => {
+    try {
+      await supabase
+        .from('users')
+        .update({ 
+          whatsapp_group_joined: true,
+          whatsapp_modal_shown: true 
+        })
+        .eq('id', user?.id);
+      
+      setShowWhatsAppModal(false);
+      toast({
+        title: "Obrigado!",
+        description: "Esperamos você no grupo do WhatsApp!",
+      });
+    } catch (error) {
+      console.error('Erro ao atualizar status WhatsApp:', error);
+    }
+  };
+
+  const handleSkipWhatsApp = async () => {
+    try {
+      await supabase
+        .from('users')
+        .update({ whatsapp_modal_shown: true })
+        .eq('id', user?.id);
+      
+      setShowWhatsAppModal(false);
+    } catch (error) {
+      console.error('Erro ao atualizar status WhatsApp:', error);
+    }
+  };
 
   const carregarDashboard = async () => {
     try {
@@ -496,6 +548,16 @@ export default function AgenciaDashboard() {
         {/* Push Notification Manager */}
         <PushNotificationManager userId={user?.id} />
       </div>
+
+      {/* Modal de boas-vindas do WhatsApp */}
+      <WhatsAppWelcomeModal
+        isOpen={showWhatsAppModal}
+        onClose={() => setShowWhatsAppModal(false)}
+        onJoinWhatsApp={handleJoinWhatsApp}
+        onMarkAsJoined={handleMarkAsJoined}
+        onSkip={handleSkipWhatsApp}
+        hasShownBefore={user?.whatsapp_modal_shown || false}
+      />
     </EnhancedDashboardLayout>
   );
 }

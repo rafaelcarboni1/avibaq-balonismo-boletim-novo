@@ -207,6 +207,39 @@ export type Database = {
         }
         Relationships: []
       }
+      users: {
+        Row: {
+          created_at: string | null
+          email: string
+          id: string
+          nome: string | null
+          role: 'admin' | 'meteo' | 'tesouraria' | 'pilot' | 'agency' | null
+          updated_at: string | null
+          whatsapp_group_joined: boolean | null
+          whatsapp_modal_shown: boolean | null
+        }
+        Insert: {
+          created_at?: string | null
+          email: string
+          id?: string
+          nome?: string | null
+          role?: 'admin' | 'meteo' | 'tesouraria' | 'pilot' | 'agency' | null
+          updated_at?: string | null
+          whatsapp_group_joined?: boolean | null
+          whatsapp_modal_shown?: boolean | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string
+          id?: string
+          nome?: string | null
+          role?: 'admin' | 'meteo' | 'tesouraria' | 'pilot' | 'agency' | null
+          updated_at?: string | null
+          whatsapp_group_joined?: boolean | null
+          whatsapp_modal_shown?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
