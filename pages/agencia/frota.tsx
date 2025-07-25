@@ -211,10 +211,10 @@ export default function Frota() {
             description: "Já existe um balão com este prefixo",
             variant: "destructive"
           });
-        } else if (result.error.message.includes('formato PP-XXX')) {
+        } else if (result.error.message.includes('formato PT-XXX, BR-XXX ou PP-XXX')) {
           toast({
             title: "Erro",
-            description: "Prefixo deve seguir o formato PP-XXX (ex: PT-ABC)",
+            description: "Prefixo deve seguir o formato PT-XXX, BR-XXX ou PP-XXX (ex: PT-ABC, BR-FORT1, PP-123)",
             variant: "destructive"
           });
         } else {
@@ -588,17 +588,17 @@ export default function Frota() {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium mb-1">
-                    Prefixo * (formato: PT-ABC)
+                    Prefixo * (formato: PT-ABC, BR-FORT1 ou PP-123)
                   </label>
                   <input
                     type="text"
                     value={formData.prefixo}
                     onChange={(e) => setFormData({ ...formData, prefixo: e.target.value })}
-                    placeholder="PT-ABC"
+                    placeholder="PT-ABC, BR-FORT1 ou PP-123"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     required
-                    pattern="[A-Z]{2}-[A-Z0-9]{3}"
-                    title="Formato deve ser PP-XXX (ex: PT-ABC)"
+                    pattern="(PT|BR|PP)-[A-Z0-9]{3,4}"
+                    title="Formato deve ser PT-XXX, BR-XXX ou PP-XXX (ex: PT-ABC, BR-FORT1, PP-123)"
                   />
                 </div>
 
