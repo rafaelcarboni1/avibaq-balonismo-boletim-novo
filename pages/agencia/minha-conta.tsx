@@ -52,19 +52,26 @@ export default function MinhaContaAgencia() {
         .eq("id", user?.id)
         .single();
       
-      if (userData) {
-        setProfile({
-          nome: userData.nome || "",
-          telefone: userData.telefone || "",
-          celular: userData.celular || "",
-          endereco: userData.endereco || "",
-          cidade: userData.cidade || "",
-          cep: userData.cep || "",
-          cnpj: userData.cnpj || "",
-          razao_social: userData.razao_social || "",
-          nome_fantasia: userData.nome_fantasia || ""
-        });
-      }
+      // Buscar dados do formulário "Associar-se" na tabela membros
+      const { data: membroData } = await supabase
+        .from("membros")
+        .select("*")
+        .eq("email", user?.email)
+        .eq("tipo", "agencia")
+        .single();
+      
+      // Combinar dados de ambas as tabelas (membros tem prioridade por ser mais completo)
+      setProfile({
+        nome: membroData?.nome_completo || userData?.nome || "",
+        telefone: membroData?.telefone || userData?.telefone || "",
+        celular: userData?.celular || "",
+        endereco: userData?.endereco || "",
+        cidade: userData?.cidade || "",
+        cep: userData?.cep || "",
+        cnpj: membroData?.cnpj || userData?.cnpj || "",
+        razao_social: membroData?.nome_empresa || userData?.razao_social || "",
+        nome_fantasia: userData?.nome_fantasia || ""
+      });
       
       // Buscar estatísticas da agência
       if (user?.id) {
@@ -105,26 +112,51 @@ export default function MinhaContaAgencia() {
   async function saveProfile() {
     setLoading(true);
     
-    const { error } = await supabase
-      .from("users")
-      .update({
-        nome: profile.nome,
-        telefone: profile.telefone,
-        celular: profile.celular,
-        endereco: profile.endereco,
-        cidade: profile.cidade,
-        cep: profile.cep,
-        cnpj: profile.cnpj,
-        razao_social: profile.razao_social,
-        nome_fantasia: profile.nome_fantasia
-      })
-      .eq("id", user.id);
+    try {
+      // Atualizar tabela users
+      const { error: usersError } = await supabase
+        .from("users")
+        .update({
+          nome: profile.nome,
+          telefone: profile.telefone,
+          celular: profile.celular,
+          endereco: profile.endereco,
+          cidade: profile.cidade,
+          cep: profile.cep,
+          cnpj: profile.cnpj,
+          razao_social: profile.razao_social,
+          nome_fantasia: profile.nome_fantasia
+        })
+        .eq("id", user.id);
 
-    if (error) {
-      toast.error("Erro ao salvar perfil: " + error.message);
-    } else {
-      await supabase.auth.updateUser({ data: { nome: profile.nome_fantasia || profile.razao_social } });
+      if (usersError) {
+        toast.error("Erro ao salvar na tabela users: " + usersError.message);
+        setLoading(false);
+        return;
+      }
+
+      // Atualizar tabela membros (se existir registro)
+      const { error: membrosError } = await supabase
+        .from("membros")
+        .update({
+          nome_completo: profile.nome,
+          telefone: profile.telefone,
+          cnpj: profile.cnpj,
+          nome_empresa: profile.razao_social
+        })
+        .eq("email", user.email)
+        .eq("tipo", "agencia");
+
+      // Não tratamos membrosError como erro crítico pois nem todos têm registro em membros
+
+      // Atualizar metadata do auth
+      await supabase.auth.updateUser({ 
+        data: { nome: profile.nome_fantasia || profile.razao_social || profile.nome } 
+      });
+      
       toast.success("Perfil salvo com sucesso!");
+    } catch (error) {
+      toast.error("Erro inesperado: " + error.message);
     }
     
     setLoading(false);
