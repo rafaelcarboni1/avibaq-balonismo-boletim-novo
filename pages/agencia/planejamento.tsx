@@ -195,6 +195,21 @@ export default function PlanejamentoAgencia() {
       console.log('  - membro.id (agencia):', membro.id);
       console.log('  - Buscando balões com proprietario_id em:', [formData.piloto_id, membro.id]);
 
+      // Debug: Primeiro buscar TODOS os balões para ver o que existe
+      const { data: todosBaloes, error: erroTodos } = await supabase
+        .from('baloes')
+        .select(`
+          *,
+          membros!baloes_proprietario_id_fkey (
+            nome_completo,
+            tipo
+          )
+        `)
+        .order('prefixo');
+
+      console.log('[DEBUG] TODOS os balões no banco:', todosBaloes);
+      console.log('[DEBUG] Balões do piloto Rafael (24a1afd4...):', todosBaloes?.filter(b => b.proprietario_id === formData.piloto_id));
+
       // Buscar balões ativos do piloto selecionado E da agência
       const { data, error } = await supabase
         .from('baloes')
