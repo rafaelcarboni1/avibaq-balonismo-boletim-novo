@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { PlusIcon, CalendarIcon, ClockIcon, MapPinIcon, UsersIcon, CheckIcon, EyeIcon, HomeIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, CalendarIcon, ClockIcon, MapPinIcon, UsersIcon, CheckIcon, EyeIcon, HomeIcon, BuildingOfficeIcon } from '@heroicons/react/24/outline';
 import { EnhancedDashboardLayout } from '../../src/components/magicui/enhanced-dashboard-layout';
 import { MagicCard } from '../../src/components/magicui/magic-card';
 import { BentoGrid, BentoGridItem } from '../../src/components/magicui/bento-grid';
@@ -23,6 +23,8 @@ interface Balao {
   ativo: boolean;
   proprietario_id: string;
   proprietario_nome: string;
+  proprietario_tipo?: string;
+  categoria?: 'piloto' | 'agencia';
 }
 
 interface BalaoSelecionado {
@@ -170,16 +172,34 @@ export default function PlanejamentoAgencia() {
     try {
       if (!formData.piloto_id) return;
 
-      // Buscar balões ativos do piloto selecionado
+      // Buscar membro agência associado ao usuário
+      const { data: membro, error: membroError } = await supabase
+        .from('membros')
+        .select('id')
+        .eq('user_id', user?.id)
+        .eq('tipo', 'agencia')
+        .single();
+
+      if (membroError || !membro) {
+        toast({
+          title: "Erro",
+          description: "Agência não encontrada no sistema",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Buscar balões ativos do piloto selecionado E da agência
       const { data, error } = await supabase
         .from('baloes')
         .select(`
           *,
           membros!baloes_proprietario_id_fkey (
-            nome_completo
+            nome_completo,
+            tipo
           )
         `)
-        .eq('proprietario_id', formData.piloto_id)
+        .in('proprietario_id', [formData.piloto_id, membro.id])
         .eq('ativo', true)
         .order('prefixo');
 
@@ -187,7 +207,7 @@ export default function PlanejamentoAgencia() {
         console.error('Erro ao carregar balões:', error);
         toast({
           title: "Erro",
-          description: "Erro ao carregar balões do piloto",
+          description: "Erro ao carregar balões",
           variant: "destructive"
         });
         return;
@@ -195,7 +215,9 @@ export default function PlanejamentoAgencia() {
 
       const baloesFormatados = data?.map((b: any) => ({
         ...b,
-        proprietario_nome: b.membros?.nome_completo
+        proprietario_nome: b.membros?.nome_completo,
+        proprietario_tipo: b.membros?.tipo,
+        categoria: b.proprietario_id === formData.piloto_id ? 'piloto' : 'agencia'
       })) || [];
 
       setBaloes(baloesFormatados);
@@ -614,53 +636,62 @@ export default function PlanejamentoAgencia() {
 
   // Renderizar passo 2: Seleção de Balões
   const renderSelecaoBaloes = () => {
-    return (
-      <div className="space-y-4">
-        <MagicCard className="p-6">
-          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-            <PlusIcon className="h-5 w-5 text-primary" />
-            Selecionar Balões de {pilotoSelecionado?.nome}
-          </h3>
-          
-          {baloes.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-gray-500">
-                {!formData.piloto_id 
-                  ? "Selecione um piloto primeiro para ver seus balões"
-                  : "Este piloto não possui balões ativos cadastrados."
-                }
-              </p>
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {baloes.map((balao) => {
-                const indisponivel = baloesIndisponiveis.includes(balao.id);
-                const selecionado = baloesSelecionados.find(bs => bs.balao_id === balao.id);
-                const capacidadeEstimada = Math.floor(balao.volume_m3 / 300);
+    // Separar balões por categoria
+    const baloesAgencia = baloes.filter(b => b.categoria === 'agencia');
+    const baloesPiloto = baloes.filter(b => b.categoria === 'piloto');
 
-                return (
-                  <div
-                    key={balao.id}
-                    className={`border rounded-lg p-4 cursor-pointer transition-all ${
-                      indisponivel 
-                        ? 'border-red-200 bg-red-50 opacity-60 cursor-not-allowed' 
-                        : selecionado
-                        ? 'border-green-300 bg-green-50 ring-2 ring-green-200'
-                        : 'border-gray-200 hover:border-primary hover:bg-blue-50'
-                    }`}
-                    onClick={() => !indisponivel && !selecionado && handleAddBalao(balao)}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h4 className="font-semibold">{balao.prefixo}</h4>
-                        {balao.nome_batismo && (
-                          <p className="text-sm text-gray-600">{balao.nome_batismo}</p>
-                        )}
-                        <p className="text-sm text-gray-600">{balao.volume_m3.toLocaleString()} m³</p>
-                        <p className="text-sm text-gray-600">
-                          Capacidade est.: {capacidadeEstimada} passageiros
-                        </p>
-                      </div>
+    const renderBaloesGrupo = (baloes: Balao[], titulo: string, icone: React.ReactNode, cor: string) => (
+      <div className="mb-6">
+        <h4 className={`text-md font-semibold mb-3 flex items-center gap-2 ${cor}`}>
+          {icone}
+          {titulo} ({baloes.length})
+        </h4>
+        
+        {baloes.length === 0 ? (
+          <p className="text-gray-500 text-sm italic ml-7">Nenhum balão disponível nesta categoria</p>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {baloes.map((balao) => {
+              const indisponivel = baloesIndisponiveis.includes(balao.id);
+              const selecionado = baloesSelecionados.find(bs => bs.balao_id === balao.id);
+              const capacidadeEstimada = Math.floor(balao.volume_m3 / 300);
+
+              return (
+                <div
+                  key={balao.id}
+                  className={`border rounded-lg p-4 cursor-pointer transition-all relative ${
+                    indisponivel 
+                      ? 'border-red-200 bg-red-50 opacity-60 cursor-not-allowed' 
+                      : selecionado
+                      ? 'border-green-300 bg-green-50 ring-2 ring-green-200'
+                      : 'border-gray-200 hover:border-primary hover:bg-blue-50'
+                  }`}
+                  onClick={() => !indisponivel && !selecionado && handleAddBalao(balao)}
+                >
+                  {/* Badge indicando categoria */}
+                  <div className={`absolute top-2 right-2 text-xs px-2 py-1 rounded ${
+                    balao.categoria === 'agencia' 
+                      ? 'bg-blue-100 text-blue-800' 
+                      : 'bg-purple-100 text-purple-800'
+                  }`}>
+                    {balao.categoria === 'agencia' ? 'Frota' : 'Piloto'}
+                  </div>
+                  
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h5 className="font-semibold">{balao.prefixo}</h5>
+                      {balao.nome_batismo && (
+                        <p className="text-sm text-gray-600">{balao.nome_batismo}</p>
+                      )}
+                      <p className="text-sm text-gray-600">{balao.volume_m3.toLocaleString()} m³</p>
+                      <p className="text-sm text-gray-600">
+                        Capacidade est.: {capacidadeEstimada} passageiros
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Proprietário: {balao.proprietario_nome}
+                      </p>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
                       {indisponivel && (
                         <span className="text-xs bg-red-100 text-red-800 px-2 py-1 rounded">
                           Indisponível
@@ -671,8 +702,48 @@ export default function PlanejamentoAgencia() {
                       )}
                     </div>
                   </div>
-                );
-              })}
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+
+    return (
+      <div className="space-y-4">
+        <MagicCard className="p-6">
+          <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
+            <PlusIcon className="h-5 w-5 text-primary" />
+            Selecionar Balões Disponíveis
+          </h3>
+          
+          {baloes.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-gray-500">
+                {!formData.piloto_id 
+                  ? "Selecione um piloto primeiro para ver os balões disponíveis"
+                  : "Nenhum balão disponível para este piloto ou agência."
+                }
+              </p>
+            </div>
+          ) : (
+            <div>
+              {/* Balões da Agência */}
+              {renderBaloesGrupo(
+                baloesAgencia, 
+                "Balões da Frota da Agência", 
+                <BuildingOfficeIcon className="h-5 w-5" />,
+                "text-blue-700"
+              )}
+              
+              {/* Balões do Piloto */}
+              {renderBaloesGrupo(
+                baloesPiloto, 
+                `Balões do Piloto (${pilotoSelecionado?.nome})`, 
+                <UsersIcon className="h-5 w-5" />,
+                "text-purple-700"
+              )}
             </div>
           )}
         </MagicCard>
