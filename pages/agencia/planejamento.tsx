@@ -219,6 +219,16 @@ export default function PlanejamentoAgencia() {
       console.log('[DEBUG] TODOS os balões COM foreign key:', todosBaloes);
       console.log('[DEBUG] Balões do piloto Rafael COM FK (24a1afd4...):', todosBaloes?.filter(b => b.proprietario_id === formData.piloto_id));
 
+      // TESTE: Buscar balões SEM filtro de ativo para ver se BR-RAF1 está inativo
+      const { data: todosAtivos, error: erroAtivos } = await supabase
+        .from('baloes')
+        .select('*')
+        .in('proprietario_id', [formData.piloto_id, membro.id])
+        .order('prefixo');
+
+      console.log('[DEBUG] Todos os balões (incluindo inativos):', todosAtivos);
+      console.log('[DEBUG] Balões ativos vs inativos:', todosAtivos?.map(b => `${b.prefixo}: ativo=${b.ativo}`));
+
       // CORREÇÃO TEMPORÁRIA: Buscar balões SEM foreign key para contornar problema
       const { data, error } = await supabase
         .from('baloes')
