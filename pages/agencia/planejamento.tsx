@@ -195,7 +195,16 @@ export default function PlanejamentoAgencia() {
       console.log('  - membro.id (agencia):', membro.id);
       console.log('  - Buscando balões com proprietario_id em:', [formData.piloto_id, membro.id]);
 
-      // Debug: Primeiro buscar TODOS os balões para ver o que existe
+      // Debug: Primeiro buscar TODOS os balões SEM foreign key para ver o que existe
+      const { data: todosBaloesSemFK, error: erroTodosSemFK } = await supabase
+        .from('baloes')
+        .select('*')
+        .order('prefixo');
+
+      console.log('[DEBUG] TODOS os balões SEM foreign key:', todosBaloesSemFK);
+      console.log('[DEBUG] Balões do piloto Rafael SEM FK (24a1afd4...):', todosBaloesSemFK?.filter(b => b.proprietario_id === formData.piloto_id));
+
+      // Debug: Buscar TODOS os balões COM foreign key para comparar
       const { data: todosBaloes, error: erroTodos } = await supabase
         .from('baloes')
         .select(`
@@ -207,22 +216,18 @@ export default function PlanejamentoAgencia() {
         `)
         .order('prefixo');
 
-      console.log('[DEBUG] TODOS os balões no banco:', todosBaloes);
-      console.log('[DEBUG] Balões do piloto Rafael (24a1afd4...):', todosBaloes?.filter(b => b.proprietario_id === formData.piloto_id));
+      console.log('[DEBUG] TODOS os balões COM foreign key:', todosBaloes);
+      console.log('[DEBUG] Balões do piloto Rafael COM FK (24a1afd4...):', todosBaloes?.filter(b => b.proprietario_id === formData.piloto_id));
 
-      // Buscar balões ativos do piloto selecionado E da agência
+      // CORREÇÃO TEMPORÁRIA: Buscar balões SEM foreign key para contornar problema
       const { data, error } = await supabase
         .from('baloes')
-        .select(`
-          *,
-          membros!baloes_proprietario_id_fkey (
-            nome_completo,
-            tipo
-          )
-        `)
+        .select('*')
         .in('proprietario_id', [formData.piloto_id, membro.id])
         .eq('ativo', true)
         .order('prefixo');
+
+      console.log('[DEBUG] Query principal SEM FK - dados retornados:', data);
 
       if (error) {
         console.error('Erro ao carregar balões:', error);
@@ -237,20 +242,32 @@ export default function PlanejamentoAgencia() {
       // Debug: Log dos dados retornados
       console.log('[DEBUG] Dados retornados da query balões:', data);
 
+      // Buscar nomes dos proprietários separadamente para contornar FK quebrada
+      const proprietariosIds = data?.map(b => b.proprietario_id).filter(Boolean) || [];
+      const { data: proprietarios } = await supabase
+        .from('membros')
+        .select('id, nome_completo, tipo')
+        .in('id', proprietariosIds);
+
+      console.log('[DEBUG] Proprietários encontrados:', proprietarios);
+
       const baloesFormatados = data?.map((b: any) => {
         // Debug: Log detalhado da comparação
         const isPiloto = String(b.proprietario_id) === String(formData.piloto_id);
+        const proprietario = proprietarios?.find(p => p.id === b.proprietario_id);
+        
         console.log(`[DEBUG] Balão ${b.prefixo}:`);
         console.log(`  - proprietario_id: "${b.proprietario_id}" (tipo: ${typeof b.proprietario_id})`);
         console.log(`  - formData.piloto_id: "${formData.piloto_id}" (tipo: ${typeof formData.piloto_id})`);
         console.log(`  - membro.id (agencia): "${membro.id}" (tipo: ${typeof membro.id})`); 
         console.log(`  - Comparação (piloto): ${b.proprietario_id} === ${formData.piloto_id} = ${isPiloto}`);
+        console.log(`  - Proprietário: ${proprietario?.nome_completo || 'Não encontrado'}`);
         console.log(`  - Categoria determinada: ${isPiloto ? 'piloto' : 'agencia'}`);
         
         return {
           ...b,
-          proprietario_nome: b.membros?.nome_completo,
-          proprietario_tipo: b.membros?.tipo,
+          proprietario_nome: proprietario?.nome_completo || 'Proprietário não encontrado',
+          proprietario_tipo: proprietario?.tipo,
           categoria: isPiloto ? 'piloto' : 'agencia'
         };
       }) || [];
