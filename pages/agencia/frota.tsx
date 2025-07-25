@@ -597,7 +597,7 @@ export default function Frota() {
                     placeholder="PT-ABC, BR-FORT1 ou PP-123"
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                     required
-                    pattern="(PT|BR|PP)-[A-Z0-9]{3,4}"
+                    pattern="(PT|BR|PP)-[A-Z0-9]{3,5}"
                     title="Formato deve ser PT-XXX, BR-XXX ou PP-XXX (ex: PT-ABC, BR-FORT1, PP-123)"
                   />
                 </div>
