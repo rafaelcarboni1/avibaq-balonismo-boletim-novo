@@ -128,7 +128,7 @@ export default function PlanejamentoAgencia() {
           piloto_id,
           membros!vinculos_agencia_piloto_piloto_id_fkey (
             id,
-            nome,
+            nome_completo,
             email,
             user_id
           )
@@ -148,7 +148,7 @@ export default function PlanejamentoAgencia() {
 
       const pilotosFormatados = data?.map((v: any) => ({
         id: v.membros?.id,
-        nome: v.membros?.nome,
+        nome: v.membros?.nome_completo,
         email: v.membros?.email,
         user_id: v.membros?.user_id
       })).filter((p: any) => p.id) || [];
@@ -176,7 +176,7 @@ export default function PlanejamentoAgencia() {
         .select(`
           *,
           membros!baloes_proprietario_id_fkey (
-            nome
+            nome_completo
           )
         `)
         .eq('proprietario_id', formData.piloto_id)
@@ -195,7 +195,7 @@ export default function PlanejamentoAgencia() {
 
       const baloesFormatados = data?.map((b: any) => ({
         ...b,
-        proprietario_nome: b.membros?.nome
+        proprietario_nome: b.membros?.nome_completo
       })) || [];
 
       setBaloes(baloesFormatados);
