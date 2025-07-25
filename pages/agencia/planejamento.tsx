@@ -155,6 +155,7 @@ export default function PlanejamentoAgencia() {
         user_id: v.membros?.user_id
       })).filter((p: any) => p.id) || [];
 
+      console.log('[DEBUG] Pilotos carregados:', pilotosFormatados);
       setPilotos(pilotosFormatados);
     } catch (error) {
       console.error('Erro:', error);
@@ -520,6 +521,7 @@ export default function PlanejamentoAgencia() {
             id="piloto"
             value={formData.piloto_id}
             onChange={(e) => {
+              console.log('[DEBUG] Piloto selecionado - ID:', e.target.value);
               setFormData({...formData, piloto_id: e.target.value});
               setBaloesSelecionados([]);
             }}
