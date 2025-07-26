@@ -1,7 +1,10 @@
 -- Queries para debug do problema de balões não aparecendo
 -- Execute estas queries no Supabase Dashboard
 
--- 1. Verificar o piloto Rafael
+-- 0. Descobrir valores válidos do enum membro_tipo
+SELECT unnest(enum_range(NULL::membro_tipo)) AS valores_validos;
+
+-- 1. Verificar o piloto Rafael (sem filtro de tipo)
 SELECT 
   id,
   nome_completo,
@@ -9,8 +12,7 @@ SELECT
   user_id,
   created_at
 FROM membros 
-WHERE nome_completo ILIKE '%Rafael%' 
-  AND tipo = 'pilot';
+WHERE nome_completo ILIKE '%Rafael%';
 
 -- 2. Listar todos os balões e seus proprietários
 SELECT 
