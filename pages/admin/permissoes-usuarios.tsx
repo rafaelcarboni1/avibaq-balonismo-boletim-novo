@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import { SimpleDashboardLayout } from '../../src/components/SimpleDashboardLayout';
 import { Button } from '../../src/components/ui/button';
@@ -54,7 +54,7 @@ const ACOES_DISPONIVEIS: SystemAction[] = [
 
 export default function PermissoesUsuarios() {
   const router = useRouter();
-  const { user: currentUser, role } = useUser();
+  const { user: currentUser, role, loading: userLoading } = useUser();
   const { toast } = useToast();
 
   const [users, setUsers] = useState<User[]>([]);
@@ -71,22 +71,8 @@ export default function PermissoesUsuarios() {
     data_expiracao: ''
   });
 
-  // Verificar se é admin
-  if (role !== 'admin') {
-    return (
-      <div className="max-w-2xl mx-auto mt-16 text-center text-lg text-red-600 font-semibold">
-        Acesso restrito a administradores.
-      </div>
-    );
-  }
-
   // Carregar usuários
-  useEffect(() => {
-    loadUsers();
-  }, []);
-
-  // Carregar usuários
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('users')
@@ -105,10 +91,16 @@ export default function PermissoesUsuarios() {
         variant: "destructive"
       });
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    if (role === 'admin') {
+      loadUsers();
+    }
+  }, [role, loadUsers]);
 
   // Carregar permissões de um usuário específico
-  const loadUserPermissions = async (userId: string) => {
+  const loadUserPermissions = useCallback(async (userId: string) => {
     setLoading(true);
     try {
       // Buscar permissões combinadas
@@ -163,10 +155,10 @@ export default function PermissoesUsuarios() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [users, toast]);
 
   // Adicionar permissão específica
-  const addUserPermission = async () => {
+  const addUserPermission = useCallback(async () => {
     if (!selectedUser || !newPermission.recurso || !newPermission.acao) {
       toast({
         title: "Erro",
@@ -219,10 +211,10 @@ export default function PermissoesUsuarios() {
         variant: "destructive"
       });
     }
-  };
+  }, [selectedUser, newPermission, currentUser?.id, toast, loadUserPermissions]);
 
   // Remover permissão específica
-  const removeUserPermission = async (permissionId: number) => {
+  const removeUserPermission = useCallback(async (permissionId: number) => {
     if (!confirm('Tem certeza que deseja remover esta permissão?')) return;
 
     try {
@@ -251,7 +243,25 @@ export default function PermissoesUsuarios() {
         variant: "destructive"
       });
     }
-  };
+  }, [selectedUser, loadUserPermissions, toast]);
+
+  // Verificações de segurança
+  if (userLoading) {
+    return (
+      <div className="max-w-2xl mx-auto mt-16 text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+        <p className="text-gray-500 mt-2">Carregando...</p>
+      </div>
+    );
+  }
+
+  if (role !== 'admin') {
+    return (
+      <div className="max-w-2xl mx-auto mt-16 text-center text-lg text-red-600 font-semibold">
+        Acesso restrito a administradores.
+      </div>
+    );
+  }
 
   return (
     <SimpleDashboardLayout title="Gerenciar Permissões por Usuário">
