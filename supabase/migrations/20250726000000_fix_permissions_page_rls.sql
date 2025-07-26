@@ -6,9 +6,9 @@
 CREATE POLICY "Admins can read all users for management" ON users
   FOR SELECT USING (
     EXISTS (
-      SELECT 1 FROM users current_user
-      WHERE current_user.id = auth.uid() 
-      AND current_user.role = 'admin'
+      SELECT 1 FROM users u
+      WHERE u.id = auth.uid() 
+      AND u.role = 'admin'
     )
   );
 
@@ -99,9 +99,9 @@ BEGIN
   -- Verificar se o usuário atual é admin ou está consultando suas próprias permissões
   IF NOT (
     EXISTS (
-      SELECT 1 FROM users 
-      WHERE id = auth.uid() 
-      AND role = 'admin'
+      SELECT 1 FROM users u
+      WHERE u.id = auth.uid() 
+      AND u.role = 'admin'
     ) 
     OR auth.uid() = p_user_id
   ) THEN
