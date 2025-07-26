@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import { supabase } from "@/integrations/supabase/client";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import SimpleDashboardLayout from "@/components/SimpleDashboardLayout";
@@ -12,11 +13,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/sonner";
 
-import { Shield, ShieldCheck, Settings, Users, CheckCircle, XCircle, KeyIcon, History, FileText, Eye, Download, Clock, AlertTriangle } from "lucide-react";
+import { Shield, ShieldCheck, Settings, Users, CheckCircle, XCircle, KeyIcon, History, FileText, Eye, Download, Clock, AlertTriangle, UserCog } from "lucide-react";
 import { useUser } from "@/hooks/useUser";
 
 export default function PermissoesAdmin() {
   const { role, user } = useUser();
+  const router = useRouter();
   const [permissoes, setPermissoes] = useState<any[]>([]);
   const [modules, setModules] = useState<any[]>([]);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
@@ -294,6 +296,14 @@ export default function PermissoesAdmin() {
         ]}
         headerActions={
           <div className="flex gap-3">
+            <Button 
+              onClick={() => router.push('/admin/permissoes-usuarios')}
+              variant="outline"
+              className="border-blue-200 text-blue-700 hover:bg-blue-50"
+            >
+              <UserCog className="w-4 h-4 mr-2" />
+              Permissões por Usuário
+            </Button>
             <Button onClick={handleSalvar} disabled={!dirty || saving} className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
               {saving ? (
                 <>
