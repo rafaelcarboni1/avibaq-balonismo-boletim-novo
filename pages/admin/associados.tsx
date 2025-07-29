@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../src/components/u
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../src/components/ui/dialog";
 import { Textarea } from "../../src/components/ui/textarea";
 import { toast } from "../../src/components/ui/sonner";
-import { CheckCircle, XCircle, Download, Calendar, User, Building, ChevronLeft, ChevronRight, Users, MapPin, CreditCard, Shield, Plane, Edit, Save, X } from "lucide-react";
+import { CheckCircle, XCircle, Download, Calendar, User, Building, ChevronLeft, ChevronRight, Users, MapPin, CreditCard, Shield, Plane, Edit, Save, X, Search, Filter, Plus, FileText, FileSpreadsheet } from "lucide-react";
 import RequireAdmin from "../../src/components/RequireAdmin";
 import { useUser } from "../../src/hooks/useUser";
 import { PermissionGuard, CanManage } from "../../src/components/PermissionGuard";
@@ -74,6 +74,19 @@ export default function AdminAssociados() {
   const [anoMensalidade, setAnoMensalidade] = useState<number>(2025);
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState<Membro | null>(null);
+  
+  // Estados para filtros e busca
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterType, setFilterType] = useState<"todos" | "piloto" | "agencia">("todos");
+  const [filterPayment, setFilterPayment] = useState<"todos" | "pago" | "pendente">("todos");
+  const [filterMensalidade, setFilterMensalidade] = useState<"todos" | "em_dia" | "atrasado">("todos");
+  const [filterLocation, setFilterLocation] = useState({ estado: "", cidade: "" });
+  const [showFilters, setShowFilters] = useState(false);
+  
+  // Estados para cadastro manual
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [newMemberType, setNewMemberType] = useState<"piloto" | "agencia">("piloto");
+  const [newMemberData, setNewMemberData] = useState<Partial<Membro>>({});
 
   useEffect(() => {
     fetchMembros();
@@ -237,9 +250,106 @@ export default function AdminAssociados() {
     }
   };
 
-  const membrosPendentes = membros.filter(m => m.status === "pendente");
-  const membrosAtivos = membros.filter(m => m.status === "ativo");
-  const membrosRecusados = membros.filter(m => m.status === "recusado");
+  // Função para filtrar e buscar membros
+  const filterAndSearchMembers = (status: 'pendente' | 'ativo' | 'recusado') => {
+    return membros.filter(membro => {
+      // Filtro por status
+      if (membro.status !== status) return false;
+      
+      // Busca por termo
+      if (searchTerm) {
+        const searchLower = searchTerm.toLowerCase();
+        const nome = membro.tipo === 'agencia' ? (membro.nome_empresa || membro.nome_completo) : membro.nome_completo;
+        const matchesSearch = 
+          nome.toLowerCase().includes(searchLower) ||
+          membro.email.toLowerCase().includes(searchLower) ||
+          (membro.cpf && membro.cpf.includes(searchTerm)) ||
+          (membro.cnpj && membro.cnpj.includes(searchTerm)) ||
+          (membro.telefone && membro.telefone.includes(searchTerm));
+        
+        if (!matchesSearch) return false;
+      }
+      
+      // Filtro por tipo
+      if (filterType !== "todos" && membro.tipo !== filterType) return false;
+      
+      // Filtro por pagamento da inscrição
+      if (filterPayment === "pago" && membro.pagamento_inscricao !== "ok") return false;
+      if (filterPayment === "pendente" && membro.pagamento_inscricao !== "aguardando") return false;
+      
+      // Filtro por mensalidade (apenas para ativos)
+      if (status === "ativo" && filterMensalidade !== "todos") {
+        const statusMens = getStatusMensalidade(membro);
+        if (filterMensalidade === "em_dia" && statusMens.status !== "em_dia") return false;
+        if (filterMensalidade === "atrasado" && statusMens.status === "em_dia") return false;
+      }
+      
+      // Filtro por localização
+      if (filterLocation.estado && membro.estado !== filterLocation.estado) return false;
+      if (filterLocation.cidade && membro.cidade !== filterLocation.cidade) return false;
+      
+      return true;
+    });
+  };
+
+  const membrosPendentes = filterAndSearchMembers("pendente");
+  const membrosAtivos = filterAndSearchMembers("ativo");
+  const membrosRecusados = filterAndSearchMembers("recusado");
+
+  // Obter opções de localização únicas dos membros
+  const getLocationOptions = () => {
+    const estadosSet = new Set(membros.map(m => m.estado).filter(Boolean));
+    const cidadesSet = new Set(membros.map(m => m.cidade).filter(Boolean));
+    const estados = Array.from(estadosSet).sort();
+    const cidades = Array.from(cidadesSet).sort();
+    return { estados, cidades };
+  };
+
+  const { estados, cidades } = getLocationOptions();
+
+  // Função para adicionar novo membro
+  const handleAddNewMember = async () => {
+    // Validação básica
+    if (!newMemberData.nome_completo || !newMemberData.email || !newMemberData.telefone) {
+      toast.error("Preencha os campos obrigatórios: Nome, E-mail e Telefone");
+      return;
+    }
+
+    if (newMemberType === "agencia" && !newMemberData.nome_empresa) {
+      toast.error("Preencha o nome da empresa");
+      return;
+    }
+
+    try {
+      const memberToCreate: Partial<Membro> = {
+        ...newMemberData,
+        tipo: newMemberType,
+        status: "ativo", // Cadastro manual já é aprovado automaticamente
+        pagamento_inscricao: "aguardando", // Pode ser alterado depois
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+
+      const { error } = await supabase
+        .from("membros")
+        .insert([memberToCreate]);
+
+      if (error) throw error;
+
+      toast.success(`${newMemberType === "piloto" ? "Piloto" : "Agência"} cadastrado(a) com sucesso!`);
+      
+      // Limpar formulário e fechar modal
+      setNewMemberData({});
+      setNewMemberType("piloto");
+      setShowAddDialog(false);
+      
+      // Recarregar lista
+      fetchMembros();
+    } catch (error) {
+      console.error("Erro ao cadastrar membro:", error);
+      toast.error("Erro ao cadastrar associado");
+    }
+  };
 
   const handleVisualizar = (membro: Membro) => {
     setSelectedMembro(membro);
@@ -395,24 +505,86 @@ export default function AdminAssociados() {
 
   // Exportar CSV
   const handleExportCSV = () => {
-    const headers = ['Nome', 'Tipo', 'Status', 'Pagamento Inscrição', 'Última Mensalidade'];
-    const rows = membros.map(m => [
+    // Determinar quais membros exportar (filtrados ou todos)
+    const membrosParaExportar = searchTerm || filterType !== "todos" || filterPayment !== "todos" || filterMensalidade !== "todos" || filterLocation.estado || filterLocation.cidade 
+      ? [...membrosPendentes, ...membrosAtivos, ...membrosRecusados]
+      : membros;
+
+    const headers = [
+      'Nome/Empresa',
+      'Nome Responsável',
+      'Tipo',
+      'Status', 
+      'E-mail',
+      'Telefone',
+      'CPF/CNPJ',
+      'Endereço',
+      'Cidade',
+      'Estado',
+      'RBAC 103',
+      'Validade RBAC 103',
+      'Associação RBAC 103',
+      'RBAC 91A',
+      'Código ANAC',
+      'Número Licença',
+      'Validade Habilitação',
+      'Validade CMA',
+      'Qtd Balões',
+      'Volumes Balões',
+      'Pagamento Inscrição',
+      'Última Mensalidade',
+      'Mensalidades Pagas',
+      'Data Cadastro',
+      'Observações'
+    ];
+
+    const rows = membrosParaExportar.map(m => [
       m.tipo === 'agencia' ? (m.nome_empresa || m.nome_completo) : m.nome_completo,
+      m.tipo === 'agencia' ? m.nome_completo : '',
       m.tipo,
       m.status,
+      m.email,
+      m.telefone,
+      m.tipo === 'piloto' ? (m.cpf || '') : (m.cnpj || ''),
+      m.endereco || '',
+      m.cidade || '',
+      m.estado || '',
+      m.rbac103 || '',
+      m.validade_rbac103 || '',
+      m.associacao_rbac103 || '',
+      m.rbac91 || '',
+      m.codigo_anac || '',
+      m.numero_licenca || '',
+      m.validade_habilitacao || '',
+      m.validade_cma || '',
+      m.qtd_baloes?.toString() || '',
+      m.volumes_baloes?.toString() || '',
       m.pagamento_inscricao,
-      m.ultima_mensalidade || ''
+      m.ultima_mensalidade || '',
+      (m.mensalidades_pagas || []).join('; '),
+      new Date(m.created_at).toLocaleDateString('pt-BR'),
+      m.observacoes || ''
     ]);
-    const csvContent = [headers, ...rows].map(e => e.map(v => `"${(v ?? '').toString().replace(/"/g, '""')}"`).join(",")).join("\n");
+
+    const csvContent = [headers, ...rows]
+      .map(row => row.map(value => `"${(value ?? '').toString().replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `associados_avibaq_${new Date().toISOString().slice(0,10)}.csv`;
+    
+    const filtroTexto = searchTerm || filterType !== "todos" || filterPayment !== "todos" || filterMensalidade !== "todos" || filterLocation.estado || filterLocation.cidade 
+      ? '_filtrado' : '';
+    a.download = `associados_avibaq${filtroTexto}_${new Date().toISOString().slice(0,10)}.csv`;
+    
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+
+    toast.success(`Exportados ${membrosParaExportar.length} associados para CSV`);
   };
 
   // Função para atualizar mensalidades pagas
@@ -548,36 +720,46 @@ export default function AdminAssociados() {
               color="blue"
               trend={{
                 value: membros.filter(m => new Date(m.created_at).getMonth() === new Date().getMonth()).length,
-                label: "este mês",
+                label: "novos este mês",
                 direction: "up"
               }}
-              description="Total de associados"
+              description={`${membros.filter(m => m.tipo === "piloto").length} pilotos + ${membros.filter(m => m.tipo === "agencia").length} agências`}
             />
             <SimpleKpiCard 
               title="Pendentes"
               value={membrosPendentes.length}
               icon={CheckCircle}
               color="yellow"
-              trend={membrosPendentes.length > 0 ? {
-                value: 0,
-                label: "Requer atenção",
+              trend={{
+                value: membrosPendentes.filter(m => m.tipo === "piloto").length,
+                label: "pilotos",
                 direction: "neutral"
-              } : undefined}
-              description="Aguardando aprovação"
+              }}
+              description={`${membrosPendentes.filter(m => m.tipo === "agencia").length} agências aguardando`}
             />
             <SimpleKpiCard 
               title="Ativos"
               value={membrosAtivos.length}
               icon={User}
               color="green"
-              description="Com status ativo"
+              trend={{
+                value: membrosAtivos.filter(m => m.pagamento_inscricao === "ok").length,
+                label: "com inscrição paga",
+                direction: "up"
+              }}
+              description={`${membrosAtivos.filter(m => m.pagamento_inscricao === "aguardando").length} pendentes de pagamento`}
             />
             <SimpleKpiCard 
               title="Empresas"
               value={membros.filter(m => m.tipo === 'agencia').length}
               icon={Building}
               color="purple"
-              description="Empresas parceiras"
+              trend={{
+                value: membros.filter(m => m.tipo === "agencia" && m.status === "ativo").length,
+                label: "ativas",
+                direction: "neutral"
+              }}
+              description={`${membros.filter(m => m.tipo === "piloto").length} pilotos individuais`}
             />
           </div>
 
@@ -870,14 +1052,397 @@ export default function AdminAssociados() {
         </Dialog>
 
 
-        {/* Botão Exportar CSV */}
-        <div className="flex justify-end mb-4">
-          <CanManage recurso="associados">
-            <Button onClick={handleExportCSV} variant="outline" className="flex items-center gap-2">
-              <Download className="w-4 h-4" /> Exportar CSV
-            </Button>
-          </CanManage>
+        {/* Barra de Controles e Filtros */}
+        <div className="bg-white rounded-xl border border-gray-200/50 shadow-sm mb-6">
+          {/* Header da barra de controles */}
+          <div className="p-4 border-b border-gray-200/50">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              {/* Busca */}
+              <div className="flex-1 max-w-md">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <input
+                    type="text"
+                    placeholder="Buscar por nome, email, CPF/CNPJ, telefone..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              {/* Botões de ação */}
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowFilters(!showFilters)}
+                  className="flex items-center gap-2"
+                >
+                  <Filter className="h-4 w-4" />
+                  Filtros
+                  {(filterType !== "todos" || filterPayment !== "todos" || filterMensalidade !== "todos" || filterLocation.estado || filterLocation.cidade) && (
+                    <span className="ml-1 px-1.5 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full">●</span>
+                  )}
+                </Button>
+                
+                <CanManage recurso="associados">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowAddDialog(true)}
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Adicionar
+                  </Button>
+                </CanManage>
+                
+                <CanManage recurso="associados">
+                  <Button
+                    variant="outline"
+                    onClick={handleExportCSV}
+                    className="flex items-center gap-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    Exportar
+                  </Button>
+                </CanManage>
+              </div>
+            </div>
+          </div>
+
+          {/* Painel de filtros colapsível */}
+          {showFilters && (
+            <div className="p-4 bg-gray-50/50 border-b border-gray-200/50">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Filtro por tipo */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
+                  <select
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value as any)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="todos">Todos</option>
+                    <option value="piloto">Apenas Pilotos</option>
+                    <option value="agencia">Apenas Agências</option>
+                  </select>
+                </div>
+
+                {/* Filtro por pagamento inscrição */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Pagamento Inscrição</label>
+                  <select
+                    value={filterPayment}
+                    onChange={(e) => setFilterPayment(e.target.value as any)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="todos">Todos</option>
+                    <option value="pago">Pago</option>
+                    <option value="pendente">Pendente</option>
+                  </select>
+                </div>
+
+                {/* Filtro por mensalidade */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Mensalidades</label>
+                  <select
+                    value={filterMensalidade}
+                    onChange={(e) => setFilterMensalidade(e.target.value as any)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="todos">Todos</option>
+                    <option value="em_dia">Em Dia</option>
+                    <option value="atrasado">Atrasado</option>
+                  </select>
+                </div>
+
+                {/* Filtro por estado */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                  <select
+                    value={filterLocation.estado}
+                    onChange={(e) => setFilterLocation({...filterLocation, estado: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Todos</option>
+                    {estados.map(estado => (
+                      <option key={estado} value={estado}>{estado}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Botão para limpar filtros */}
+              <div className="mt-4 flex justify-end">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSearchTerm("");
+                    setFilterType("todos");
+                    setFilterPayment("todos");
+                    setFilterMensalidade("todos");
+                    setFilterLocation({ estado: "", cidade: "" });
+                  }}
+                  className="text-gray-600 hover:text-gray-800"
+                >
+                  Limpar Filtros
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
+
+        {/* Modal de Cadastro de Novo Associado */}
+        {showAddDialog && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+            <div className="bg-white rounded-xl shadow-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto relative">
+              <button 
+                className="absolute top-4 right-4 text-gray-400 hover:text-red-600 text-2xl z-10" 
+                onClick={() => {
+                  setShowAddDialog(false);
+                  setNewMemberData({});
+                  setNewMemberType("piloto");
+                }}
+              >
+                &times;
+              </button>
+              
+              <div className="p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <Plus className="h-8 w-8 text-green-600" />
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">Adicionar Novo Associado</h2>
+                    <p className="text-gray-600">Cadastre um novo membro manualmente</p>
+                  </div>
+                </div>
+
+                {/* Seleção do tipo */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-gray-700 mb-3">Tipo de Associado</label>
+                  <div className="flex gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setNewMemberType("piloto")}
+                      className={`flex items-center gap-2 px-4 py-3 border rounded-lg transition-all ${
+                        newMemberType === "piloto" 
+                          ? "border-blue-500 bg-blue-50 text-blue-700" 
+                          : "border-gray-300 hover:border-gray-400"
+                      }`}
+                    >
+                      <User className="h-5 w-5" />
+                      Piloto
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewMemberType("agencia")}
+                      className={`flex items-center gap-2 px-4 py-3 border rounded-lg transition-all ${
+                        newMemberType === "agencia" 
+                          ? "border-purple-500 bg-purple-50 text-purple-700" 
+                          : "border-gray-300 hover:border-gray-400"
+                      }`}
+                    >
+                      <Building className="h-5 w-5" />
+                      Agência
+                    </button>
+                  </div>
+                </div>
+
+                {/* Formulário dinâmico */}
+                <div className="space-y-6">
+                  {/* Informações básicas */}
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Informações Básicas</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {newMemberType === "agencia" && (
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Nome da Empresa *</label>
+                          <input
+                            type="text"
+                            value={newMemberData.nome_empresa || ""}
+                            onChange={(e) => setNewMemberData({...newMemberData, nome_empresa: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            placeholder="Razão social da empresa"
+                          />
+                        </div>
+                      )}
+                      
+                      <div className={newMemberType === "piloto" ? "md:col-span-2" : ""}>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {newMemberType === "agencia" ? "Nome do Responsável *" : "Nome Completo *"}
+                        </label>
+                        <input
+                          type="text"
+                          value={newMemberData.nome_completo || ""}
+                          onChange={(e) => setNewMemberData({...newMemberData, nome_completo: e.target.value})}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder={newMemberType === "agencia" ? "Nome do responsável" : "Nome completo"}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">E-mail *</label>
+                        <input
+                          type="email"
+                          value={newMemberData.email || ""}
+                          onChange={(e) => setNewMemberData({...newMemberData, email: e.target.value})}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="email@exemplo.com"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Telefone *</label>
+                        <input
+                          type="tel"
+                          value={newMemberData.telefone || ""}
+                          onChange={(e) => setNewMemberData({...newMemberData, telefone: e.target.value})}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="(00) 00000-0000"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {newMemberType === "piloto" ? "CPF" : "CNPJ"}
+                        </label>
+                        <input
+                          type="text"
+                          value={newMemberType === "piloto" ? (newMemberData.cpf || "") : (newMemberData.cnpj || "")}
+                          onChange={(e) => {
+                            if (newMemberType === "piloto") {
+                              setNewMemberData({...newMemberData, cpf: e.target.value});
+                            } else {
+                              setNewMemberData({...newMemberData, cnpj: e.target.value});
+                            }
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder={newMemberType === "piloto" ? "000.000.000-00" : "00.000.000/0000-00"}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Endereço */}
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Endereço</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Endereço</label>
+                        <input
+                          type="text"
+                          value={newMemberData.endereco || ""}
+                          onChange={(e) => setNewMemberData({...newMemberData, endereco: e.target.value})}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="Rua, número, complemento"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Cidade</label>
+                        <input
+                          type="text"
+                          value={newMemberData.cidade || ""}
+                          onChange={(e) => setNewMemberData({...newMemberData, cidade: e.target.value})}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="Cidade"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                        <input
+                          type="text"
+                          value={newMemberData.estado || ""}
+                          onChange={(e) => setNewMemberData({...newMemberData, estado: e.target.value})}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          placeholder="UF"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Certificações (apenas para pilotos) */}
+                  {newMemberType === "piloto" && (
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <h3 className="text-lg font-semibold text-gray-900 mb-4">Certificações e Licenças</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">RBAC 103</label>
+                          <input
+                            type="text"
+                            value={newMemberData.rbac103 || ""}
+                            onChange={(e) => setNewMemberData({...newMemberData, rbac103: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Validade RBAC 103</label>
+                          <input
+                            type="date"
+                            value={newMemberData.validade_rbac103 || ""}
+                            onChange={(e) => setNewMemberData({...newMemberData, validade_rbac103: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Código ANAC</label>
+                          <input
+                            type="text"
+                            value={newMemberData.codigo_anac || ""}
+                            onChange={(e) => setNewMemberData({...newMemberData, codigo_anac: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Validade CMA</label>
+                          <input
+                            type="date"
+                            value={newMemberData.validade_cma || ""}
+                            onChange={(e) => setNewMemberData({...newMemberData, validade_cma: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Observações */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Observações</label>
+                    <textarea
+                      value={newMemberData.observacoes || ""}
+                      onChange={(e) => setNewMemberData({...newMemberData, observacoes: e.target.value})}
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Observações administrativas..."
+                    />
+                  </div>
+                </div>
+
+                {/* Botões */}
+                <div className="flex gap-3 mt-8 pt-6 border-t border-gray-200">
+                  <Button
+                    onClick={() => {
+                      setShowAddDialog(false);
+                      setNewMemberData({});
+                      setNewMemberType("piloto");
+                    }}
+                    variant="outline"
+                    className="flex-1"
+                  >
+                    Cancelar
+                  </Button>
+                  <Button
+                    onClick={handleAddNewMember}
+                    className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Cadastrar Associado
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Modal de Visualização do Associado */}
         {showVisualizarDialog && selectedMembro && (
