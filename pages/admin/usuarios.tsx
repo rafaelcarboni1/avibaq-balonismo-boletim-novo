@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { PermissionGuard } from "@/components/PermissionGuard";
 import SimpleDashboardLayout from "@/components/SimpleDashboardLayout";
 import LoadingSkeleton from "@/components/magicui/loading-skeleton";
 import { AdvancedUserManagement } from "@/components/magicui/advanced-user-management";
@@ -222,16 +223,18 @@ export default function UsuariosAdmin() {
     );
   }
 
-  if (role !== 'admin') {
-    return (
-      <div className="max-w-2xl mx-auto mt-16 text-center text-lg text-red-600 font-semibold">
-        Acesso restrito a administradores.
-      </div>
-    );
-  }
+  // Verificação de permissões será feita pelo PermissionGuard abaixo
 
   return (
-    <ProtectedRoute allowedRoles={["admin"]}>
+    <PermissionGuard 
+      recurso="usuarios" 
+      acao="manage"
+      fallback={
+        <div className="max-w-2xl mx-auto mt-16 text-center text-lg text-red-600 font-semibold">
+          Acesso restrito. Você precisa de permissão para gerenciar usuários.
+        </div>
+      }
+    >
       <SimpleDashboardLayout 
         title="Gerenciar Usuários"
         breadcrumbs={[
@@ -373,6 +376,6 @@ export default function UsuariosAdmin() {
             </Dialog>
           )}
       </SimpleDashboardLayout>
-    </ProtectedRoute>
+    </PermissionGuard>
   );
 }

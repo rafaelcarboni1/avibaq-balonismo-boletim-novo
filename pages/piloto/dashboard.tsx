@@ -1332,22 +1332,22 @@ export default function PilotoDashboard() {
                     <div className="grid gap-2">
                       <CanCreate recurso="boletins">
                         <Button
-                          onClick={() => router.push('/admin/boletins/new')}
+                          onClick={() => router.push('/historico')}
                           className="w-full text-left justify-start"
                           variant="outline"
                         >
                           <PlusIcon className="h-4 w-4 mr-2" />
-                          Criar Boletim
+                          Ver Boletins
                         </Button>
                       </CanCreate>
                       
                       <Button
-                        onClick={() => router.push('/admin/boletins')}
+                        onClick={() => router.push('/historico')}
                         className="w-full text-left justify-start"
                         variant="outline"
                       >
                         <DocumentTextIcon className="h-4 w-4 mr-2" />
-                        Gerenciar Boletins
+                        Histórico de Boletins
                       </Button>
                     </div>
                   </div>

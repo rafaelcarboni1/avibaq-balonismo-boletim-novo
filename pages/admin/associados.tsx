@@ -11,6 +11,7 @@ import { toast } from "../../src/components/ui/sonner";
 import { CheckCircle, XCircle, Download, Calendar, User, Building, ChevronLeft, ChevronRight, Users } from "lucide-react";
 import RequireAdmin from "../../src/components/RequireAdmin";
 import { useUser } from "../../src/hooks/useUser";
+import { PermissionGuard, CanManage } from "../../src/components/PermissionGuard";
 import { Resend } from 'resend';
 import SimpleDashboardLayout from "@/components/SimpleDashboardLayout";
 import SimpleKpiCard from "@/components/SimpleKpiCard";
@@ -530,12 +531,18 @@ export default function AdminAssociados() {
     );
   }
 
-  if (role !== 'admin' && role !== 'tesouraria') {
-    return <div className="max-w-2xl mx-auto mt-16 text-center text-lg text-red-600 font-semibold">Acesso restrito a administradores e tesouraria.</div>;
-  }
+  // Verificação de permissões será feita pelo PermissionGuard abaixo
 
   return (
-    <RequireAdmin>
+    <PermissionGuard 
+      recurso="associados" 
+      acao="manage"
+      fallback={
+        <div className="max-w-2xl mx-auto mt-16 text-center text-lg text-red-600 font-semibold">
+          Acesso restrito. Você precisa de permissão para gerenciar associados.
+        </div>
+      }
+    >
       <SimpleDashboardLayout 
         title="Gerenciar Associados"
         breadcrumbs={[
@@ -938,11 +945,11 @@ export default function AdminAssociados() {
 
         {/* Botão Exportar CSV */}
         <div className="flex justify-end mb-4">
-          {(role === 'admin' || role === 'tesouraria') && (
+          <CanManage recurso="associados">
             <Button onClick={handleExportCSV} variant="outline" className="flex items-center gap-2">
               <Download className="w-4 h-4" /> Exportar CSV
             </Button>
-          )}
+          </CanManage>
         </div>
 
         {/* Modal de Visualização do Associado */}
@@ -1164,6 +1171,6 @@ export default function AdminAssociados() {
           </div>
         )}
       </SimpleDashboardLayout>
-    </RequireAdmin>
+    </PermissionGuard>
   );
 }

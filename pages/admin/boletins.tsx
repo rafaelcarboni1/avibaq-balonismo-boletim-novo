@@ -7,6 +7,7 @@ import { Badge } from "../../src/components/ui/badge";
 import { toast } from "../../src/components/ui/sonner";
 import { Plus, Edit, Trash2, Users, Eye, FileText, CheckCircle, Clock, Calendar } from "lucide-react";
 import RequireAdmin from "../../src/components/RequireAdmin";
+import { PermissionGuard } from "../../src/components/PermissionGuard";
 import { useUser } from "@/hooks/useUser";
 import SimpleDashboardLayout from "@/components/SimpleDashboardLayout";
 import { BentoGrid, BentoGridItem } from "@/components/magicui/bento-grid";
@@ -123,12 +124,18 @@ export default function AdminBoletinsList() {
     );
   }
   
-  if (role !== 'admin' && role !== 'tesouraria' && role !== 'meteo') {
-    return <div className="max-w-2xl mx-auto mt-16 text-center text-lg text-red-600 font-semibold">Acesso restrito a administradores, tesouraria e meteorologia.</div>;
-  }
+  // Verificação de permissões será feita pelo PermissionGuard abaixo
 
   return (
-    <RequireAdmin>
+    <PermissionGuard 
+      recurso="boletins" 
+      acao="manage"
+      fallback={
+        <div className="max-w-2xl mx-auto mt-16 text-center text-lg text-red-600 font-semibold">
+          Acesso restrito. Você precisa de permissão para gerenciar boletins.
+        </div>
+      }
+    >
       <SimpleDashboardLayout 
         title="Gerenciar Boletins"
         breadcrumbs={[
@@ -294,6 +301,6 @@ export default function AdminBoletinsList() {
           </div>
         )}
       </SimpleDashboardLayout>
-    </RequireAdmin>
+    </PermissionGuard>
   );
 }
