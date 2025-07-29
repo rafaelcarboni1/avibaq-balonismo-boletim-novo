@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 import { cn } from "../../lib/utils";
 import { designTokens } from "../../lib/design-tokens";
 import { supabase } from "../../integrations/supabase/client";
+import { usePermissions } from "../../hooks/usePermissions";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -43,8 +44,8 @@ interface EnhancedSidebarProps {
   children?: React.ReactNode;
 }
 
-// Navigation links based on user role
-const getNavLinks = (role?: string): NavigationItem[] => {
+// Navigation links based on user role and permissions
+const getNavLinks = (role?: string, hasPermission?: (recurso: string, acao: string) => boolean): NavigationItem[] => {
   if (role === 'admin' || role === 'meteo' || role === 'tesouraria') {
     return [
       { href: "/admin/dashboard", label: "Dashboard", icon: HomeIcon },
@@ -56,19 +57,59 @@ const getNavLinks = (role?: string): NavigationItem[] => {
       { href: "/admin/minha-conta", label: "Minha Conta", icon: UserCircleIcon },
     ];
   } else if (role === 'piloto') {
-    return [
+    const baseLinks = [
       { href: "/piloto/dashboard", label: "Dashboard", icon: HomeIcon },
       { href: "/piloto/meus-baloes", label: "Meus Balões", icon: CloudIcon },
       { href: "/piloto/planejamento", label: "Planejamento", icon: CalendarIcon },
       { href: "/piloto/convites", label: "Convites", icon: EnvelopeIcon },
+    ];
+
+    // Adicionar módulos administrativos baseados em permissões
+    const adminModules: NavigationItem[] = [];
+    
+    if (hasPermission && hasPermission('associados', 'manage')) {
+      adminModules.push({ href: "/admin/associados", label: "Gestão de Associados", icon: UsersIcon });
+    }
+    
+    if (hasPermission && hasPermission('boletins', 'manage')) {
+      adminModules.push({ href: "/admin/boletins", label: "Gestão de Boletins", icon: DocumentTextIcon });
+    }
+    
+    if (hasPermission && hasPermission('usuarios', 'manage')) {
+      adminModules.push({ href: "/admin/usuarios", label: "Gestão de Usuários", icon: Cog6ToothIcon });
+    }
+
+    return [
+      ...baseLinks,
+      ...adminModules,
       { href: "/piloto/minha-conta", label: "Minha Conta", icon: UserCircleIcon },
     ];
   } else if (role === 'agencia') {
-    return [
+    const baseLinks = [
       { href: "/agencia/dashboard", label: "Dashboard", icon: HomeIcon },
       { href: "/agencia/frota", label: "Frota", icon: TruckIcon },
       { href: "/agencia/pilotos", label: "Pilotos", icon: UsersIcon },
       { href: "/agencia/planejamento", label: "Planejamento", icon: MapIcon },
+    ];
+
+    // Adicionar módulos administrativos baseados em permissões
+    const adminModules: NavigationItem[] = [];
+    
+    if (hasPermission && hasPermission('associados', 'manage')) {
+      adminModules.push({ href: "/admin/associados", label: "Gestão de Associados", icon: UsersIcon });
+    }
+    
+    if (hasPermission && hasPermission('boletins', 'manage')) {
+      adminModules.push({ href: "/admin/boletins", label: "Gestão de Boletins", icon: DocumentTextIcon });
+    }
+    
+    if (hasPermission && hasPermission('usuarios', 'manage')) {
+      adminModules.push({ href: "/admin/usuarios", label: "Gestão de Usuários", icon: Cog6ToothIcon });
+    }
+
+    return [
+      ...baseLinks,
+      ...adminModules,
       { href: "/agencia/minha-conta", label: "Minha Conta", icon: UserCircleIcon },
     ];
   }
@@ -88,6 +129,7 @@ export default function EnhancedSidebar({
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const router = useRouter();
+  const { hasPermission } = usePermissions();
   
   const userName = nome || user?.user_metadata?.full_name || user?.email || "Usuário";
 
@@ -159,7 +201,7 @@ export default function EnhancedSidebar({
 
       {/* Navigation */}
       <nav className="flex-1 p-4 space-y-2">
-        {getNavLinks(role).map((link, index) => {
+        {getNavLinks(role, hasPermission).map((link, index) => {
           if (link.adminOnly && role !== "admin") return null;
           
           const active = isActive(link.href);

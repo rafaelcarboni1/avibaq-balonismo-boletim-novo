@@ -1281,16 +1281,14 @@ export default function PilotoDashboard() {
                       Você tem permissão especial para gerenciar os associados da AVIBAQ.
                     </p>
                     <div className="grid gap-2">
-                      <CanCreate recurso="associados">
-                        <Button
-                          onClick={() => router.push('/admin/associados')}
-                          className="w-full text-left justify-start"
-                          variant="outline"
-                        >
-                          <UsersIcon className="h-4 w-4 mr-2" />
-                          Gerenciar Associados
-                        </Button>
-                      </CanCreate>
+                      <Button
+                        onClick={() => router.push('/admin/associados')}
+                        className="w-full text-left justify-start"
+                        variant="default"
+                      >
+                        <UsersIcon className="h-4 w-4 mr-2" />
+                        Acessar Gestão de Associados
+                      </Button>
                       
                       <PermissionGuard recurso="associados" acao="export">
                         <Button
