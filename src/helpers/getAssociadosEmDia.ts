@@ -24,6 +24,8 @@ export async function getAssociadosEmDia() {
 
 // Lógica original para quando a coluna mensalidades_pagas existir
 async function getAssociadosComMensalidadesPagas() {
+  console.log("  - Usando lógica com mensalidades_pagas");
+  
   const hoje = new Date();
   const brasilOffset = -3;
   const hojeBrasil = new Date(hoje.getTime() + (brasilOffset * 60 * 60 * 1000));
@@ -37,6 +39,8 @@ async function getAssociadosComMensalidadesPagas() {
     atual.setMonth(atual.getMonth() + 1);
   }
 
+  console.log("  - Meses esperados:", meses);
+
   const { data, error } = await supabase
     .from("membros")
     .select("nome_completo, tipo, status, mensalidades_pagas")
@@ -47,10 +51,21 @@ async function getAssociadosComMensalidadesPagas() {
     return [];
   }
 
-  return (data || []).filter(m => {
+  console.log("  - Total membros ativos encontrados:", data?.length || 0);
+
+  const membrosEmDia = (data || []).filter(m => {
     const pagos = m.mensalidades_pagas || [];
-    return meses.every(mes => pagos.includes(mes));
+    const estEmDia = meses.every(mes => pagos.includes(mes));
+    
+    console.log(`  - ${m.nome_completo} (${m.tipo}): tem ${JSON.stringify(pagos)}, precisa ${JSON.stringify(meses)} = ${estEmDia ? '✅ EM DIA' : '❌ EM ABERTO'}`);
+    
+    return estEmDia;
   });
+
+  console.log("  - Total em dia:", membrosEmDia.length);
+  console.log("  - Membros em dia:", membrosEmDia.map(m => `${m.nome_completo} (${m.tipo})`));
+
+  return membrosEmDia;
 }
 
 // Lógica alternativa usando ultima_mensalidade (similar ao getDashboardStats)
