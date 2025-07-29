@@ -6,12 +6,24 @@ import { supabase } from '../../src/integrations/supabase/client';
 import { useUser } from '../../src/hooks/useUser';
 import { useToast } from '../../src/hooks/use-toast';
 import { 
-  UserPermission, 
   PermissionAuditLog, 
   SystemResource, 
   SystemAction,
   UserRole 
 } from '../../src/integrations/supabase/types';
+
+// Tipo local para permissões de usuário
+interface UserPermission {
+  id: number;
+  user_id: string;
+  recurso: string;
+  acao: string;
+  permitido: boolean;
+  nivel_acesso?: string;
+  restricoes?: any;
+  data_expiracao?: string;
+  created_at: string;
+}
 import { 
   UserIcon, 
   ShieldCheckIcon, 
