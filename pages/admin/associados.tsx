@@ -663,7 +663,9 @@ export default function AdminAssociados() {
                                     }
                                   </div>
                                   <div className="min-w-0 flex-1">
-                                    <h4 className="font-semibold text-gray-900 truncate">{membro.nome_completo}</h4>
+                                    <h4 className="font-semibold text-gray-900 truncate">
+                                      {membro.tipo === 'agencia' ? (membro.nome_empresa || membro.nome_completo) : membro.nome_completo}
+                                    </h4>
                                     <p className="text-sm text-gray-600 truncate">{membro.email}</p>
                                     <div className="flex flex-wrap items-center gap-2 mt-1">
                                       <Badge variant="outline" className="capitalize text-xs">
@@ -749,7 +751,9 @@ export default function AdminAssociados() {
                                       }
                                     </div>
                                     <div>
-                                      <h4 className="font-semibold text-gray-900">{membro.nome_completo}</h4>
+                                      <h4 className="font-semibold text-gray-900">
+                                        {membro.tipo === 'agencia' ? (membro.nome_empresa || membro.nome_completo) : membro.nome_completo}
+                                      </h4>
                                       <p className="text-sm text-gray-600">{membro.email}</p>
                                       <div className="flex items-center gap-2 mt-1">
                                         <Badge variant="outline" className="capitalize">
@@ -827,7 +831,9 @@ export default function AdminAssociados() {
                                     }
                                   </div>
                                   <div>
-                                    <h4 className="font-semibold text-gray-900">{membro.nome_completo}</h4>
+                                    <h4 className="font-semibold text-gray-900">
+                                      {membro.tipo === 'agencia' ? (membro.nome_empresa || membro.nome_completo) : membro.nome_completo}
+                                    </h4>
                                     <p className="text-sm text-gray-600">{membro.email}</p>
                                     <div className="flex items-center gap-2 mt-1">
                                       <Badge variant="outline" className="capitalize">
