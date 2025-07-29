@@ -4,10 +4,39 @@ export async function getAssociadosEmDia() {
   console.log("🚀 [SOLUÇÃO DEFINITIVA] Iniciando busca de associados em dia...");
 
   try {
-    // PRIMEIRO: Verificar quantos membros existem e quais status
+    // PRIMEIRO: Verificar quantos membros existem - TESTE DE ACESSO MAIS BÁSICO
+    console.log("🔧 TESTE DE ACESSO AO BANCO:");
+    
+    // Teste 1: Apenas count sem dados sensíveis
+    const { count, error: errorCount } = await supabase
+      .from("membros")
+      .select("*", { count: 'exact', head: true });
+    
+    console.log("   - Teste count:", { count, error: errorCount?.message });
+    
+    // Teste 2: Buscar dados básicos
     const { data: todosMembros, error: erroTodos } = await supabase
       .from("membros")
-      .select("nome_completo, tipo, status, mensalidades_pagas, ultima_mensalidade, pagamento_inscricao, created_at");
+      .select("id, nome_completo, tipo, status")
+      .limit(5);
+
+    console.log("   - Teste select básico:", { 
+      count: todosMembros?.length || 0, 
+      error: erroTodos?.message,
+      amostra: todosMembros?.map(m => ({ nome: m.nome_completo, status: m.status })) || []
+    });
+
+    // Teste 3: Buscar com todas as colunas que você usa
+    const { data: membrosCompletos, error: erroCompleto } = await supabase
+      .from("membros")
+      .select("nome_completo, tipo, status, mensalidades_pagas, ultima_mensalidade, pagamento_inscricao")
+      .limit(3);
+
+    console.log("   - Teste com mensalidades_pagas:", { 
+      count: membrosCompletos?.length || 0, 
+      error: erroCompleto?.message,
+      primeiroMembro: membrosCompletos?.[0] || null
+    });
 
     if (erroTodos) {
       console.error("❌ Erro ao buscar todos os membros:", erroTodos);
@@ -43,29 +72,46 @@ export async function getAssociadosEmDia() {
 
     console.log("📊 Total membros ativos (status='ativo'):", data?.length || 0);
     
-    // SE NÃO TEM MEMBROS ATIVOS, usar todos que pagaram inscrição
-    let membrosParaAnalise = data;
-    let estrategiaUsada = "membros_ativos";
+    // COMO VOCÊ USA mensalidades_pagas: buscar TODOS os membros e filtrar por quem tem julho
+    console.log("💡 ESTRATÉGIA BASEADA EM mensalidades_pagas (como você usa):");
     
-    if (!data || data.length === 0) {
-      console.log("⚠️  Nenhum membro com status='ativo', tentando estratégia alternativa...");
+    // Buscar TODOS os membros (independente do status) que podem ter mensalidades_pagas
+    const { data: todosMembrosComMensalidades, error: erroMensalidades } = await supabase
+      .from("membros")
+      .select("nome_completo, tipo, status, mensalidades_pagas, ultima_mensalidade, pagamento_inscricao")
+      .not("mensalidades_pagas", "is", null);  // Apenas quem tem algo em mensalidades_pagas
       
-      // Buscar membros que pagaram a inscrição (independente do status)
-      const { data: membrosComPagamento } = await supabase
-        .from("membros")
-        .select("nome_completo, tipo, status, mensalidades_pagas, ultima_mensalidade, pagamento_inscricao, created_at")
-        .eq("pagamento_inscricao", "ok");
-        
-      console.log("   - Membros com pagamento_inscricao='ok':", membrosComPagamento?.length || 0);
+    console.log("   - Membros com mensalidades_pagas preenchido:", todosMembrosComMensalidades?.length || 0);
+    
+    if (todosMembrosComMensalidades && todosMembrosComMensalidades.length > 0) {
+      console.log("   - Amostra mensalidades_pagas:", todosMembrosComMensalidades.slice(0, 3).map(m => ({
+        nome: m.nome_completo,
+        mensalidades: m.mensalidades_pagas,
+        status: m.status
+      })));
       
-      if (membrosComPagamento && membrosComPagamento.length > 0) {
-        membrosParaAnalise = membrosComPagamento;
-        estrategiaUsada = "pagamento_inscricao_ok";
-        console.log("   ✅ Usando membros que pagaram inscrição");
-      } else {
-        console.log("   ❌ Também não há membros com pagamento_inscricao='ok'");
-        return [];
+      // Filtrar quem tem '07/2025' em mensalidades_pagas
+      const membrosComJulho = todosMembrosComMensalidades.filter(m => {
+        const mensalidades = m.mensalidades_pagas || [];
+        return mensalidades.includes('07/2025');
+      });
+      
+      console.log("   - Membros com '07/2025' em mensalidades_pagas:", membrosComJulho.length);
+      
+      if (membrosComJulho.length > 0) {
+        console.log("   ✅ ENCONTRADOS! Membros em dia:", membrosComJulho.map(m => `${m.nome_completo} (${m.tipo})`));
+        return membrosComJulho;
       }
+    }
+    
+    // Fallback: se não conseguiu acessar dados, tentar estratégia original
+    let membrosParaAnalise = todosMembrosComMensalidades || data || membrosCompletos;
+    let estrategiaUsada = "mensalidades_pagas_julho";
+    
+    if (!membrosParaAnalise || membrosParaAnalise.length === 0) {
+      console.log("❌ PROBLEMA: Não conseguimos acessar nenhum membro da tabela");
+      console.log("❌ Possíveis causas: RLS, permissões, ou tabela vazia");
+      return [];
     }
 
     const data_final = membrosParaAnalise;
