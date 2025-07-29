@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../src/components/u
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../src/components/ui/dialog";
 import { Textarea } from "../../src/components/ui/textarea";
 import { toast } from "../../src/components/ui/sonner";
-import { CheckCircle, XCircle, Download, Calendar, User, Building, ChevronLeft, ChevronRight, Users } from "lucide-react";
+import { CheckCircle, XCircle, Download, Calendar, User, Building, ChevronLeft, ChevronRight, Users, MapPin, CreditCard, Shield, Plane, Edit, Save, X } from "lucide-react";
 import RequireAdmin from "../../src/components/RequireAdmin";
 import { useUser } from "../../src/hooks/useUser";
 import { PermissionGuard, CanManage } from "../../src/components/PermissionGuard";
@@ -28,16 +28,34 @@ type Membro = {
   cpf?: string;
   cnpj?: string;
   nome_empresa?: string;
+  
+  // Informações de endereço
+  endereco?: string;
+  cidade?: string;
+  estado?: string;
+  
+  // Certificações e licenças (para pilotos)
   rbac103?: string;
   rbac91?: string;
+  associacao_rbac103?: string;
+  validade_rbac103?: string;
+  codigo_anac?: string;
+  numero_licenca?: string;
+  validade_habilitacao?: string;
+  validade_cma?: string;
+  
+  // Informações de balões
   qtd_baloes?: number;
   volumes_baloes?: any;
+  
+  // Sistema
   observacoes?: string;
   comprovante_url?: string;
   status: 'pendente' | 'ativo' | 'recusado';
   pagamento_inscricao: 'aguardando' | 'ok';
   ultima_mensalidade?: string;
   created_at: string;
+  updated_at?: string;
   mensalidades_pagas?: string[];
 };
 
@@ -497,8 +515,17 @@ export default function AdminAssociados() {
           nome_empresa: editData.nome_empresa,
           cpf: editData.cpf,
           cnpj: editData.cnpj,
+          endereco: editData.endereco,
+          cidade: editData.cidade,
+          estado: editData.estado,
           rbac103: editData.rbac103,
           rbac91: editData.rbac91,
+          associacao_rbac103: editData.associacao_rbac103,
+          validade_rbac103: editData.validade_rbac103,
+          codigo_anac: editData.codigo_anac,
+          numero_licenca: editData.numero_licenca,
+          validade_habilitacao: editData.validade_habilitacao,
+          validade_cma: editData.validade_cma,
           qtd_baloes: editData.qtd_baloes,
           volumes_baloes: editData.volumes_baloes,
           observacoes: editData.observacoes,
@@ -962,165 +989,459 @@ export default function AdminAssociados() {
 
         {/* Modal de Visualização do Associado */}
         {showVisualizarDialog && selectedMembro && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-            <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-2xl relative">
-              <button className="absolute top-3 right-3 text-gray-400 hover:text-red-600 text-2xl" onClick={() => { setShowVisualizarDialog(false); setEditMode(false); setEditData(null); }}>&times;</button>
-              <h2 className="text-2xl font-bold mb-4">Detalhes do Associado</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                {/* Nome */}
-                <div>
-                  <span className="font-semibold">
-                    {selectedMembro.tipo === 'agencia' ? 'Nome da Empresa:' : 'Nome:'}
-                  </span>
-                  {editMode ? (
-                    <input 
-                      type="text" 
-                      className="border rounded px-2 py-1 w-full" 
-                      value={selectedMembro.tipo === 'agencia' ? (editData?.nome_empresa || '') : (editData?.nome_completo || '')} 
-                      onChange={e => setEditData({ 
-                        ...editData, 
-                        ...(selectedMembro.tipo === 'agencia' ? { nome_empresa: e.target.value } : { nome_completo: e.target.value })
-                      })} 
-                    />
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+            <div className="bg-white rounded-xl shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto relative">
+              <button className="absolute top-4 right-4 text-gray-400 hover:text-red-600 text-2xl z-10" onClick={() => { setShowVisualizarDialog(false); setEditMode(false); setEditData(null); }}>&times;</button>
+              
+              <div className="p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  {selectedMembro.tipo === 'piloto' ? (
+                    <User className="h-8 w-8 text-blue-600" />
                   ) : (
-                    <span> {selectedMembro.tipo === 'agencia' ? (selectedMembro.nome_empresa || selectedMembro.nome_completo) : selectedMembro.nome_completo}</span>
+                    <Building className="h-8 w-8 text-purple-600" />
+                  )}
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      {selectedMembro.tipo === 'agencia' ? (selectedMembro.nome_empresa || selectedMembro.nome_completo) : selectedMembro.nome_completo}
+                    </h2>
+                    <p className="text-gray-600 capitalize">{selectedMembro.tipo}</p>
+                  </div>
+                </div>
+
+                {/* Informações Básicas */}
+                <div className="bg-gray-50 rounded-lg p-6 mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <User className="h-5 w-5" />
+                    Informações Básicas
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-gray-600">Tipo de Associado:</span>
+                      <p className="text-gray-900 capitalize">{selectedMembro.tipo}</p>
+                    </div>
+                    
+                    {selectedMembro.tipo === 'agencia' && (
+                      <>
+                        <div>
+                          <span className="text-sm font-medium text-gray-600">Nome da Empresa:</span>
+                          {editMode ? (
+                            <input 
+                              type="text" 
+                              className="w-full mt-1 p-2 border border-gray-300 rounded-md text-sm" 
+                              value={editData?.nome_empresa || ''} 
+                              onChange={e => setEditData({ ...editData, nome_empresa: e.target.value })} 
+                            />
+                          ) : (
+                            <p className="text-gray-900">{selectedMembro.nome_empresa || selectedMembro.nome_completo}</p>
+                          )}
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium text-gray-600">Nome do Responsável:</span>
+                          {editMode ? (
+                            <input 
+                              type="text" 
+                              className="w-full mt-1 p-2 border border-gray-300 rounded-md text-sm" 
+                              value={editData?.nome_completo || ''} 
+                              onChange={e => setEditData({ ...editData, nome_completo: e.target.value })} 
+                            />
+                          ) : (
+                            <p className="text-gray-900">{selectedMembro.nome_completo}</p>
+                          )}
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium text-gray-600">CNPJ:</span>
+                          {editMode ? (
+                            <input 
+                              type="text" 
+                              className="w-full mt-1 p-2 border border-gray-300 rounded-md text-sm" 
+                              value={editData?.cnpj || ''} 
+                              onChange={e => setEditData({ ...editData, cnpj: e.target.value })} 
+                            />
+                          ) : (
+                            <p className="text-gray-900">{selectedMembro.cnpj || '-'}</p>
+                          )}
+                        </div>
+                      </>
+                    )}
+                    
+                    {selectedMembro.tipo === 'piloto' && (
+                      <>
+                        <div>
+                          <span className="text-sm font-medium text-gray-600">Nome Completo:</span>
+                          {editMode ? (
+                            <input 
+                              type="text" 
+                              className="w-full mt-1 p-2 border border-gray-300 rounded-md text-sm" 
+                              value={editData?.nome_completo || ''} 
+                              onChange={e => setEditData({ ...editData, nome_completo: e.target.value })} 
+                            />
+                          ) : (
+                            <p className="text-gray-900">{selectedMembro.nome_completo}</p>
+                          )}
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium text-gray-600">CPF:</span>
+                          {editMode ? (
+                            <input 
+                              type="text" 
+                              className="w-full mt-1 p-2 border border-gray-300 rounded-md text-sm" 
+                              value={editData?.cpf || ''} 
+                              onChange={e => setEditData({ ...editData, cpf: e.target.value })} 
+                            />
+                          ) : (
+                            <p className="text-gray-900">{selectedMembro.cpf || '-'}</p>
+                          )}
+                        </div>
+                      </>
+                    )}
+                    
+                    <div>
+                      <span className="text-sm font-medium text-gray-600">E-mail:</span>
+                      <p className="text-gray-900">{selectedMembro.email}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-600">Telefone:</span>
+                      {editMode ? (
+                        <input 
+                          type="text" 
+                          className="w-full mt-1 p-2 border border-gray-300 rounded-md text-sm" 
+                          value={editData?.telefone || ''} 
+                          onChange={e => setEditData({ ...editData, telefone: e.target.value })} 
+                        />
+                      ) : (
+                        <p className="text-gray-900">{selectedMembro.telefone}</p>
+                      )}
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-600">Status:</span>
+                      <Badge 
+                        variant={selectedMembro.status === 'ativo' ? 'default' : selectedMembro.status === 'pendente' ? 'secondary' : 'destructive'}
+                      >
+                        {selectedMembro.status}
+                      </Badge>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-600">Data de Inscrição:</span>
+                      <p className="text-gray-900">{new Date(selectedMembro.created_at).toLocaleDateString('pt-BR')}</p>
+                    </div>
+                  </div>
+                  
+                  {(selectedMembro.observacoes || editMode) && (
+                    <div className="mt-4">
+                      <span className="text-sm font-medium text-gray-600">Observações:</span>
+                      {editMode ? (
+                        <textarea 
+                          className="w-full mt-1 p-2 border border-gray-300 rounded-md text-sm" 
+                          rows={3}
+                          value={editData?.observacoes || ''} 
+                          onChange={e => setEditData({ ...editData, observacoes: e.target.value })} 
+                          placeholder="Adicione observações sobre este associado..."
+                        />
+                      ) : (
+                        <p className="text-gray-900 mt-1">{selectedMembro.observacoes}</p>
+                      )}
+                    </div>
                   )}
                 </div>
-                {/* Nome do Responsável (somente para agências) */}
-                {selectedMembro.tipo === 'agencia' && (
-                  <div>
-                    <span className="font-semibold">Responsável:</span>
-                    {editMode ? (
-                      <input 
-                        type="text" 
-                        className="border rounded px-2 py-1 w-full" 
-                        value={editData?.nome_completo || ''} 
-                        onChange={e => setEditData({ ...editData, nome_completo: e.target.value })} 
-                      />
-                    ) : (
-                      <span> {selectedMembro.nome_completo}</span>
-                    )}
+
+                {/* Endereço */}
+                <div className="bg-gray-50 rounded-lg p-6 mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <MapPin className="h-5 w-5" />
+                    Endereço
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="md:col-span-2">
+                      <span className="text-sm font-medium text-gray-600">Endereço:</span>
+                      {editMode ? (
+                        <input 
+                          type="text" 
+                          className="w-full mt-1 p-2 border border-gray-300 rounded-md text-sm" 
+                          value={editData?.endereco || ''} 
+                          onChange={e => setEditData({ ...editData, endereco: e.target.value })} 
+                        />
+                      ) : (
+                        <p className="text-gray-900">{selectedMembro.endereco || '-'}</p>
+                      )}
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-600">Cidade:</span>
+                      {editMode ? (
+                        <input 
+                          type="text" 
+                          className="w-full mt-1 p-2 border border-gray-300 rounded-md text-sm" 
+                          value={editData?.cidade || ''} 
+                          onChange={e => setEditData({ ...editData, cidade: e.target.value })} 
+                        />
+                      ) : (
+                        <p className="text-gray-900">{selectedMembro.cidade || '-'}</p>
+                      )}
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-600">Estado:</span>
+                      {editMode ? (
+                        <input 
+                          type="text" 
+                          className="w-full mt-1 p-2 border border-gray-300 rounded-md text-sm" 
+                          value={editData?.estado || ''} 
+                          onChange={e => setEditData({ ...editData, estado: e.target.value })} 
+                        />
+                      ) : (
+                        <p className="text-gray-900">{selectedMembro.estado || '-'}</p>
+                      )}
+                    </div>
                   </div>
-                )}
-                {/* E-mail (não editável) */}
-                <div><span className="font-semibold">E-mail:</span> {selectedMembro.email}</div>
-                {/* Telefone */}
-                <div>
-                  <span className="font-semibold">Telefone:</span>
-                  {editMode ? (
-                    <input type="text" className="border rounded px-2 py-1 w-full" value={editData?.telefone || ''} onChange={e => setEditData({ ...editData, telefone: e.target.value })} />
-                  ) : (
-                    <span> {selectedMembro.telefone}</span>
+                </div>
+
+                {/* Informações de Pagamento */}
+                <div className="bg-gray-50 rounded-lg p-6 mb-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                    <CreditCard className="h-5 w-5" />
+                    Informações de Pagamento
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <span className="text-sm font-medium text-gray-600">Status da Inscrição:</span>
+                      <Badge 
+                        variant={selectedMembro.pagamento_inscricao === 'ok' ? 'default' : 'secondary'}
+                        className="ml-2"
+                      >
+                        {selectedMembro.pagamento_inscricao === 'ok' ? 'Pago' : 'Aguardando'}
+                      </Badge>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-600">Última Mensalidade:</span>
+                      <p className="text-gray-900">{selectedMembro.ultima_mensalidade || '-'}</p>
+                    </div>
+                  </div>
+                  
+                  {selectedMembro.mensalidades_pagas && selectedMembro.mensalidades_pagas.length > 0 && (
+                    <div className="mt-4">
+                      <span className="text-sm font-medium text-gray-600">Mensalidades Pagas:</span>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {selectedMembro.mensalidades_pagas.map((mes, index) => (
+                          <Badge key={index} variant="outline" className="text-xs">
+                            {mes}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
                   )}
                 </div>
-                {/* Tipo (não editável) */}
-                <div><span className="font-semibold">Tipo:</span> {selectedMembro.tipo}</div>
-                <div><span className="font-semibold">Status:</span> {selectedMembro.status}</div>
-                <div><span className="font-semibold">Pagamento Inscrição:</span> {selectedMembro.pagamento_inscricao}</div>
-                <div><span className="font-semibold">Última Mensalidade:</span> {selectedMembro.ultima_mensalidade || '-'}</div>
-                {/* CPF (somente para pilotos) */}
+
+                {/* Certificações e Licenças (apenas para pilotos) */}
                 {selectedMembro.tipo === 'piloto' && (
-                  <div>
-                    <span className="font-semibold">CPF:</span>
-                    {editMode ? (
-                      <input type="text" className="border rounded px-2 py-1 w-full" value={editData?.cpf || ''} onChange={e => setEditData({ ...editData, cpf: e.target.value })} />
-                    ) : (
-                      <span> {selectedMembro.cpf || '-'}</span>
-                    )}
+                  <div className="bg-gray-50 rounded-lg p-6 mb-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <Shield className="h-5 w-5" />
+                      Certificações e Licenças
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <span className="text-sm font-medium text-gray-600">Registro RBAC 103:</span>
+                        {editMode ? (
+                          <input 
+                            type="text" 
+                            className="w-full mt-1 p-2 border border-gray-300 rounded-md text-sm" 
+                            value={editData?.rbac103 || ''} 
+                            onChange={e => setEditData({ ...editData, rbac103: e.target.value })} 
+                          />
+                        ) : (
+                          <p className="text-gray-900">{selectedMembro.rbac103 || '-'}</p>
+                        )}
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium text-gray-600">Validade RBAC 103:</span>
+                        {editMode ? (
+                          <input 
+                            type="date" 
+                            className="w-full mt-1 p-2 border border-gray-300 rounded-md text-sm" 
+                            value={editData?.validade_rbac103 || ''} 
+                            onChange={e => setEditData({ ...editData, validade_rbac103: e.target.value })} 
+                          />
+                        ) : (
+                          <p className="text-gray-900">{selectedMembro.validade_rbac103 || '-'}</p>
+                        )}
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium text-gray-600">Associação RBAC 103:</span>
+                        {editMode ? (
+                          <input 
+                            type="text" 
+                            className="w-full mt-1 p-2 border border-gray-300 rounded-md text-sm" 
+                            value={editData?.associacao_rbac103 || ''} 
+                            onChange={e => setEditData({ ...editData, associacao_rbac103: e.target.value })} 
+                          />
+                        ) : (
+                          <p className="text-gray-900">{selectedMembro.associacao_rbac103 || '-'}</p>
+                        )}
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium text-gray-600">Registro RBAC 91A:</span>
+                        {editMode ? (
+                          <input 
+                            type="text" 
+                            className="w-full mt-1 p-2 border border-gray-300 rounded-md text-sm" 
+                            value={editData?.rbac91 || ''} 
+                            onChange={e => setEditData({ ...editData, rbac91: e.target.value })} 
+                          />
+                        ) : (
+                          <p className="text-gray-900">{selectedMembro.rbac91 || '-'}</p>
+                        )}
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium text-gray-600">Código ANAC:</span>
+                        {editMode ? (
+                          <input 
+                            type="text" 
+                            className="w-full mt-1 p-2 border border-gray-300 rounded-md text-sm" 
+                            value={editData?.codigo_anac || ''} 
+                            onChange={e => setEditData({ ...editData, codigo_anac: e.target.value })} 
+                          />
+                        ) : (
+                          <p className="text-gray-900">{selectedMembro.codigo_anac || '-'}</p>
+                        )}
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium text-gray-600">Número da Licença:</span>
+                        {editMode ? (
+                          <input 
+                            type="text" 
+                            className="w-full mt-1 p-2 border border-gray-300 rounded-md text-sm" 
+                            value={editData?.numero_licenca || ''} 
+                            onChange={e => setEditData({ ...editData, numero_licenca: e.target.value })} 
+                          />
+                        ) : (
+                          <p className="text-gray-900">{selectedMembro.numero_licenca || '-'}</p>
+                        )}
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium text-gray-600">Validade da Habilitação:</span>
+                        {editMode ? (
+                          <input 
+                            type="date" 
+                            className="w-full mt-1 p-2 border border-gray-300 rounded-md text-sm" 
+                            value={editData?.validade_habilitacao || ''} 
+                            onChange={e => setEditData({ ...editData, validade_habilitacao: e.target.value })} 
+                          />
+                        ) : (
+                          <p className="text-gray-900">{selectedMembro.validade_habilitacao || '-'}</p>
+                        )}
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium text-gray-600">Validade do CMA:</span>
+                        {editMode ? (
+                          <input 
+                            type="date" 
+                            className="w-full mt-1 p-2 border border-gray-300 rounded-md text-sm" 
+                            value={editData?.validade_cma || ''} 
+                            onChange={e => setEditData({ ...editData, validade_cma: e.target.value })} 
+                          />
+                        ) : (
+                          <p className="text-gray-900">{selectedMembro.validade_cma || '-'}</p>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 )}
-                {/* CNPJ (somente para agências) */}
-                {selectedMembro.tipo === 'agencia' && (
-                  <div>
-                    <span className="font-semibold">CNPJ:</span>
-                    {editMode ? (
-                      <input type="text" className="border rounded px-2 py-1 w-full" value={editData?.cnpj || ''} onChange={e => setEditData({ ...editData, cnpj: e.target.value })} />
-                    ) : (
-                      <span> {selectedMembro.cnpj || '-'}</span>
-                    )}
+
+                {/* Informações de Balões */}
+                {(selectedMembro.qtd_baloes || selectedMembro.volumes_baloes) && (
+                  <div className="bg-gray-50 rounded-lg p-6 mb-6">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                      <Plane className="h-5 w-5" />
+                      Informações de Balões
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {(selectedMembro.qtd_baloes !== undefined || editMode) && (
+                        <div>
+                          <span className="text-sm font-medium text-gray-600">Quantidade de Balões:</span>
+                          {editMode ? (
+                            <input 
+                              type="number" 
+                              className="w-full mt-1 p-2 border border-gray-300 rounded-md text-sm" 
+                              value={editData?.qtd_baloes || ''} 
+                              onChange={e => setEditData({ ...editData, qtd_baloes: Number(e.target.value) })} 
+                            />
+                          ) : (
+                            <p className="text-gray-900">{selectedMembro.qtd_baloes || '-'}</p>
+                          )}
+                        </div>
+                      )}
+                      {(selectedMembro.volumes_baloes || editMode) && (
+                        <div>
+                          <span className="text-sm font-medium text-gray-600">Volumes dos Balões:</span>
+                          {editMode ? (
+                            <input 
+                              type="text" 
+                              className="w-full mt-1 p-2 border border-gray-300 rounded-md text-sm" 
+                              value={editData?.volumes_baloes || ''} 
+                              onChange={e => setEditData({ ...editData, volumes_baloes: e.target.value })} 
+                            />
+                          ) : (
+                            <p className="text-gray-900">{selectedMembro.volumes_baloes || '-'}</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
-                {/* RBAC 103 (somente para pilotos) */}
-                {selectedMembro.tipo === 'piloto' && (
-                  <div>
-                    <span className="font-semibold">RBAC 103:</span>
-                    {editMode ? (
-                      <input type="text" className="border rounded px-2 py-1 w-full" value={editData?.rbac103 || ''} onChange={e => setEditData({ ...editData, rbac103: e.target.value })} />
-                    ) : (
-                      <span> {selectedMembro.rbac103 || '-'}</span>
-                    )}
-                  </div>
-                )}
-                {/* RBAC 91 (somente para pilotos) */}
-                {selectedMembro.tipo === 'piloto' && (
-                  <div>
-                    <span className="font-semibold">RBAC 91:</span>
-                    {editMode ? (
-                      <input type="text" className="border rounded px-2 py-1 w-full" value={editData?.rbac91 || ''} onChange={e => setEditData({ ...editData, rbac91: e.target.value })} />
-                    ) : (
-                      <span> {selectedMembro.rbac91 || '-'}</span>
-                    )}
-                  </div>
-                )}
-                {/* Qtd. Balões */}
-                {selectedMembro.qtd_baloes !== undefined && (
-                  <div>
-                    <span className="font-semibold">Qtd. Balões:</span>
-                    {editMode ? (
-                      <input type="number" className="border rounded px-2 py-1 w-full" value={editData?.qtd_baloes || ''} onChange={e => setEditData({ ...editData, qtd_baloes: Number(e.target.value) })} />
-                    ) : (
-                      <span> {selectedMembro.qtd_baloes}</span>
-                    )}
-                  </div>
-                )}
-                {/* Volumes Balões */}
-                {selectedMembro.volumes_baloes !== undefined && (
-                  <div>
-                    <span className="font-semibold">Volumes Balões:</span>
-                    {editMode ? (
-                      <input type="text" className="border rounded px-2 py-1 w-full" value={editData?.volumes_baloes || ''} onChange={e => setEditData({ ...editData, volumes_baloes: e.target.value })} />
-                    ) : (
-                      <span> {selectedMembro.volumes_baloes}</span>
-                    )}
-                  </div>
-                )}
-                {/* Observações */}
-                <div className="md:col-span-2">
-                  <span className="font-semibold">Observações:</span>
-                  {editMode ? (
-                    <textarea className="border rounded px-2 py-1 w-full" value={editData?.observacoes || ''} onChange={e => setEditData({ ...editData, observacoes: e.target.value })} rows={2} />
-                  ) : (
-                    <span> {selectedMembro.observacoes}</span>
+
+                {/* Botões de Ação */}
+                <div className="flex flex-wrap gap-3 pt-6 border-t border-gray-200">
+                  {!editMode && (
+                    <Button size="sm" variant="outline" onClick={handleEditar}>
+                      <Edit className="h-4 w-4 mr-2" />
+                      Editar
+                    </Button>
+                  )}
+                  
+                  {editMode && (
+                    <>
+                      <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={handleSalvarEdicao}>
+                        <Save className="h-4 w-4 mr-2" />
+                        Salvar
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={handleCancelarEdicao}>
+                        <X className="h-4 w-4 mr-2" />
+                        Cancelar
+                      </Button>
+                    </>
+                  )}
+                  
+                  {!editMode && selectedMembro.status === 'pendente' && (
+                    <>
+                      <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => { handleAprovar(selectedMembro); setShowVisualizarDialog(false); }}>
+                        <CheckCircle className="h-4 w-4 mr-2" />
+                        Aprovar
+                      </Button>
+                      <Button size="sm" variant="destructive" onClick={() => { setShowRecusaDialog(true); setShowVisualizarDialog(false); }}>
+                        <XCircle className="h-4 w-4 mr-2" />
+                        Recusar
+                      </Button>
+                    </>
+                  )}
+                  
+                  {!editMode && (
+                    <>
+                      <Button size="sm" variant="outline" onClick={() => { handleInscricao(selectedMembro); setShowVisualizarDialog(false); }}>
+                        <CreditCard className="h-4 w-4 mr-2" />
+                        Registrar Pagamento Inscrição
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => { handleMensalidade(selectedMembro); setShowVisualizarDialog(false); }}>
+                        <Calendar className="h-4 w-4 mr-2" />
+                        Registrar Pagamento Mensalidade
+                      </Button>
+                    </>
+                  )}
+                  
+                  {!editMode && selectedMembro.comprovante_url && (
+                    <Button size="sm" variant="outline" onClick={() => downloadComprovante(selectedMembro)}>
+                      <Download className="h-4 w-4 mr-2" />
+                      Baixar Comprovante
+                    </Button>
                   )}
                 </div>
-              </div>
-              {/* Botões de ação */}
-              <div className="flex flex-wrap gap-2 mt-4">
-                {!editMode && (
-                  <Button size="sm" variant="outline" onClick={handleEditar}>Editar</Button>
-                )}
-                {editMode && (
-                  <>
-                    <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={handleSalvarEdicao}>Salvar</Button>
-                    <Button size="sm" variant="outline" onClick={handleCancelarEdicao}>Cancelar</Button>
-                  </>
-                )}
-                {/* Botões já existentes */}
-                {!editMode && selectedMembro.status === 'pendente' && (
-                  <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => { handleAprovar(selectedMembro); setShowVisualizarDialog(false); }}>Aprovar</Button>
-                )}
-                {!editMode && selectedMembro.status === 'pendente' && (
-                  <Button size="sm" variant="destructive" onClick={() => { setShowRecusaDialog(true); setShowVisualizarDialog(false); }}>Recusar</Button>
-                )}
-                {!editMode && (
-                  <Button size="sm" variant="outline" onClick={() => { handleInscricao(selectedMembro); setShowVisualizarDialog(false); }}>Registrar Pagamento Inscrição</Button>
-                )}
-                {!editMode && (
-                  <Button size="sm" variant="outline" onClick={() => { handleMensalidade(selectedMembro); setShowVisualizarDialog(false); }}>Registrar Pagamento Mensalidade</Button>
-                )}
-                {!editMode && selectedMembro.comprovante_url && (
-                  <Button size="sm" variant="outline" onClick={() => downloadComprovante(selectedMembro)}>Baixar Comprovante</Button>
-                )}
               </div>
             </div>
           </div>
