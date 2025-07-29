@@ -1,12 +1,22 @@
 import { useEffect, useState, useCallback, useMemo } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { useUser } from './useUser';
-import { 
-  Permission, 
-  PermissionCheck, 
-  SystemResource, 
-  SystemAction 
-} from '../integrations/supabase/types';
+
+// Local type definitions
+interface Permission {
+  recurso: string;
+  acao: string;
+  permitido: boolean;
+  fonte: 'role' | 'user_specific';
+}
+
+interface PermissionCheck {
+  recurso: string;
+  acao: string;
+}
+
+type SystemResource = 'usuarios' | 'boletins' | 'associados' | 'voos' | 'baloes' | 'permissoes' | 'dashboard' | 'relatorios' | 'configuracoes';
+type SystemAction = 'create' | 'read' | 'update' | 'delete' | 'manage' | 'view_all' | 'view_own' | 'approve' | 'export';
 
 interface UsePermissionsReturn {
   permissions: Permission[];

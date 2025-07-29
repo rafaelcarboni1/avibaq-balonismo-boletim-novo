@@ -5,14 +5,9 @@ import { Button } from '../../src/components/ui/button';
 import { supabase } from '../../src/integrations/supabase/client';
 import { useUser } from '../../src/hooks/useUser';
 import { useToast } from '../../src/hooks/use-toast';
-import { 
-  PermissionAuditLog, 
-  SystemResource, 
-  SystemAction,
-  UserRole 
-} from '../../src/integrations/supabase/types';
+// Removed import of non-existent types from supabase/types
 
-// Tipo local para permissões de usuário
+// Tipos locais para permissões
 interface UserPermission {
   id: number;
   user_id: string;
@@ -23,7 +18,26 @@ interface UserPermission {
   restricoes?: any;
   data_expiracao?: string;
   created_at: string;
+  concedido_em: string;
+  concedido_por?: string;
 }
+
+interface PermissionAuditLog {
+  id: number;
+  user_id: string;
+  target_user_id: string;
+  action: string;
+  acao: string;
+  recurso: string;
+  detalhes?: any;
+  created_at: string;
+  timestamp: string;
+  created_by?: string;
+}
+
+type SystemResource = 'usuarios' | 'boletins' | 'associados' | 'voos' | 'baloes' | 'permissoes' | 'dashboard' | 'relatorios' | 'configuracoes';
+type SystemAction = 'create' | 'read' | 'update' | 'delete' | 'manage' | 'view_all' | 'view_own' | 'approve' | 'export';
+type UserRole = 'admin' | 'piloto' | 'agencia' | 'meteo' | 'tesouraria';
 import { 
   UserIcon, 
   ShieldCheckIcon, 

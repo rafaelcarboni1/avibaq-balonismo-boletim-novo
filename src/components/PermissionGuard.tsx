@@ -1,6 +1,14 @@
 import React from 'react';
 import { usePermissions } from '../hooks/usePermissions';
-import { PermissionCheck, SystemResource, SystemAction } from '../integrations/supabase/types';
+
+// Local type definitions
+interface PermissionCheck {
+  recurso: string;
+  acao: string;
+}
+
+type SystemResource = 'usuarios' | 'boletins' | 'associados' | 'voos' | 'baloes' | 'permissoes' | 'dashboard' | 'relatorios' | 'configuracoes';
+type SystemAction = 'create' | 'read' | 'update' | 'delete' | 'manage' | 'view_all' | 'view_own' | 'approve' | 'export';
 
 interface PermissionGuardProps {
   children: React.ReactNode;
