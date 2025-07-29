@@ -4,30 +4,79 @@ export async function getAssociadosEmDia() {
   console.log("🚀 [SOLUÇÃO DEFINITIVA] Iniciando busca de associados em dia...");
 
   try {
-    // Buscar TODOS os dados disponíveis para tomar decisão inteligente
+    // PRIMEIRO: Verificar quantos membros existem e quais status
+    const { data: todosMembros, error: erroTodos } = await supabase
+      .from("membros")
+      .select("nome_completo, tipo, status, mensalidades_pagas, ultima_mensalidade, pagamento_inscricao, created_at");
+
+    if (erroTodos) {
+      console.error("❌ Erro ao buscar todos os membros:", erroTodos);
+      return [];
+    }
+
+    console.log("🔍 DIAGNÓSTICO COMPLETO:");
+    console.log("   - Total de membros na tabela:", todosMembros?.length || 0);
+    
+    if (todosMembros && todosMembros.length > 0) {
+      const statusCount = todosMembros.reduce((acc: any, m: any) => {
+        acc[m.status] = (acc[m.status] || 0) + 1;
+        return acc;
+      }, {});
+      console.log("   - Membros por status:", statusCount);
+      console.log("   - Amostra dos primeiros 3 membros:", todosMembros.slice(0, 3).map(m => ({
+        nome: m.nome_completo,
+        status: m.status,
+        tipo: m.tipo,
+        pagamento: m.pagamento_inscricao
+      })));
+    }
+
+    // SEGUNDO: Buscar especificamente membros ativos
     const { data, error } = await supabase
       .from("membros")
       .select("nome_completo, tipo, status, mensalidades_pagas, ultima_mensalidade, pagamento_inscricao, created_at")
       .eq("status", "ativo");
 
     if (error) {
-      console.error("❌ Erro ao buscar membros:", error);
-      return [];
+      console.error("❌ Erro ao buscar membros ativos:", error);
     }
 
-    console.log("📊 Total membros ativos encontrados:", data?.length || 0);
+    console.log("📊 Total membros ativos (status='ativo'):", data?.length || 0);
+    
+    // SE NÃO TEM MEMBROS ATIVOS, usar todos que pagaram inscrição
+    let membrosParaAnalise = data;
+    let estrategiaUsada = "membros_ativos";
     
     if (!data || data.length === 0) {
-      console.log("⚠️  Nenhum membro ativo encontrado");
-      return [];
+      console.log("⚠️  Nenhum membro com status='ativo', tentando estratégia alternativa...");
+      
+      // Buscar membros que pagaram a inscrição (independente do status)
+      const { data: membrosComPagamento } = await supabase
+        .from("membros")
+        .select("nome_completo, tipo, status, mensalidades_pagas, ultima_mensalidade, pagamento_inscricao, created_at")
+        .eq("pagamento_inscricao", "ok");
+        
+      console.log("   - Membros com pagamento_inscricao='ok':", membrosComPagamento?.length || 0);
+      
+      if (membrosComPagamento && membrosComPagamento.length > 0) {
+        membrosParaAnalise = membrosComPagamento;
+        estrategiaUsada = "pagamento_inscricao_ok";
+        console.log("   ✅ Usando membros que pagaram inscrição");
+      } else {
+        console.log("   ❌ Também não há membros com pagamento_inscricao='ok'");
+        return [];
+      }
     }
 
+    const data_final = membrosParaAnalise;
+
     // Analisar dados reais para escolher melhor estratégia
-    const analise = analisarDadosReais(data);
+    const analise = analisarDadosReais(data_final);
     console.log("🔍 Análise dos dados:", analise);
+    console.log("🎯 Estratégia sendo usada:", estrategiaUsada);
 
     // Aplicar lógica baseada na análise
-    const membrosEmDia = aplicarLogicaInteligente(data, analise);
+    const membrosEmDia = aplicarLogicaInteligente(data_final, analise);
     
     console.log("✅ RESULTADO FINAL:", {
       total: membrosEmDia.length,
