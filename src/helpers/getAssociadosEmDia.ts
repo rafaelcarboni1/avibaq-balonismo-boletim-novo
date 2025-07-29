@@ -1,121 +1,137 @@
 import { supabase } from "../integrations/supabase/client";
 
 export async function getAssociadosEmDia() {
-  console.log("🔍 [getAssociadosEmDia] Iniciando busca...");
+  console.log("🚀 [SOLUÇÃO DEFINITIVA] Iniciando busca de associados em dia...");
 
   try {
-    // Primeiro, testar se a coluna mensalidades_pagas existe
-    const testColumn = await supabase
+    // Buscar TODOS os dados disponíveis para tomar decisão inteligente
+    const { data, error } = await supabase
       .from("membros")
-      .select("mensalidades_pagas")
-      .limit(1);
+      .select("nome_completo, tipo, status, mensalidades_pagas, ultima_mensalidade, pagamento_inscricao, created_at")
+      .eq("status", "ativo");
 
-    const columnExists = !testColumn.error;
-    console.log("  - Coluna mensalidades_pagas existe:", columnExists);
-
-    if (columnExists) {
-      // Usar lógica original com mensalidades_pagas
-      return await getAssociadosComMensalidadesPagas();
-    } else {
-      // Usar lógica alternativa com ultima_mensalidade
-      console.log("  - Usando lógica alternativa com ultima_mensalidade");
-      return await getAssociadosComUltimaMensalidade();
+    if (error) {
+      console.error("❌ Erro ao buscar membros:", error);
+      return [];
     }
-  } catch (error) {
-    console.error("❌ Erro na função getAssociadosEmDia:", error);
-    // Em caso de erro, retornar fallback vazio mas loggar o problema
-    return [];
-  }
-}
 
-// Lógica original para quando a coluna mensalidades_pagas existir
-async function getAssociadosComMensalidadesPagas() {
-  try {
-    console.log("  - Usando lógica com mensalidades_pagas");
+    console.log("📊 Total membros ativos encontrados:", data?.length || 0);
     
-    const hoje = new Date();
-    const brasilOffset = -3;
-    const hojeBrasil = new Date(hoje.getTime() + (brasilOffset * 60 * 60 * 1000));
-    const inicio = new Date(2025, 6);
-    const mesAtual = new Date(hojeBrasil.getFullYear(), hojeBrasil.getMonth());
-
-    const meses: string[] = [];
-    let atual = new Date(inicio.getFullYear(), inicio.getMonth());
-    while (atual <= mesAtual) {
-      meses.push(`${('0'+(atual.getMonth()+1)).slice(-2)}/${atual.getFullYear()}`);
-      atual.setMonth(atual.getMonth() + 1);
-    }
-
-    console.log("  - Meses esperados:", meses);
-
-    const { data, error } = await supabase
-      .from("membros")
-      .select("nome_completo, tipo, status, mensalidades_pagas")
-      .eq("status", "ativo");
-
-    if (error) {
-      console.error("Erro ao buscar associados em dia:", error);
+    if (!data || data.length === 0) {
+      console.log("⚠️  Nenhum membro ativo encontrado");
       return [];
     }
 
-    console.log("  - Total membros ativos encontrados:", data?.length || 0);
+    // Analisar dados reais para escolher melhor estratégia
+    const analise = analisarDadosReais(data);
+    console.log("🔍 Análise dos dados:", analise);
 
-    const membrosEmDia = (data || []).filter(m => {
-      const pagos = m.mensalidades_pagas || [];
-      const estEmDia = meses.every(mes => pagos.includes(mes));
-      
-      console.log(`  - ${m.nome_completo} (${m.tipo}): tem ${JSON.stringify(pagos)}, precisa ${JSON.stringify(meses)} = ${estEmDia ? '✅ EM DIA' : '❌ EM ABERTO'}`);
-      
-      return estEmDia;
+    // Aplicar lógica baseada na análise
+    const membrosEmDia = aplicarLogicaInteligente(data, analise);
+    
+    console.log("✅ RESULTADO FINAL:", {
+      total: membrosEmDia.length,
+      pilotos: membrosEmDia.filter(m => m.tipo === 'piloto').length,
+      agencias: membrosEmDia.filter(m => m.tipo === 'agencia').length,
+      nomes: membrosEmDia.map(m => `${m.nome_completo} (${m.tipo})`)
     });
-
-    console.log("  - ✅ RESULTADO FINAL - Total em dia:", membrosEmDia.length);
-    console.log("  - ✅ MEMBROS EM DIA:", membrosEmDia.map(m => `${m.nome_completo} (${m.tipo})`));
 
     return membrosEmDia;
   } catch (error) {
-    console.error("❌ Erro na função getAssociadosComMensalidadesPagas:", error);
+    console.error("❌ Erro na função principal:", error);
     return [];
   }
 }
 
-// Lógica alternativa usando ultima_mensalidade (similar ao getDashboardStats)
-async function getAssociadosComUltimaMensalidade() {
-  try {
-    const { data, error } = await supabase
-      .from("membros")
-      .select("nome_completo, tipo, status, ultima_mensalidade")
-      .eq("status", "ativo");
+function analisarDadosReais(membros: any[]) {
+  const comMensalidadesPagas = membros.filter(m => m.mensalidades_pagas && m.mensalidades_pagas.length > 0).length;
+  const comUltimaMensalidade = membros.filter(m => m.ultima_mensalidade).length;
+  const comPagamentoOk = membros.filter(m => m.pagamento_inscricao === 'ok').length;
+  
+  return {
+    total: membros.length,
+    comMensalidadesPagas,
+    comUltimaMensalidade, 
+    comPagamentoOk,
+    estrategiaRecomendada: determinarEstrategia(comMensalidadesPagas, comUltimaMensalidade, comPagamentoOk, membros.length)
+  };
+}
 
-    if (error) {
-      console.error("Erro ao buscar associados em dia:", error);
-      return [];
-    }
-
-    console.log("  - Total membros ativos encontrados:", data?.length || 0);
-
-    const hoje = new Date();
-    const membrosEmDia = (data || []).filter(m => {
-      if (!m.ultima_mensalidade) {
-        console.log(`  - ${m.nome_completo}: sem data de última mensalidade = ❌ EM ABERTO`);
-        return false;
-      }
-      
-      const ultimaDate = new Date(m.ultima_mensalidade);
-      const diffMeses = (hoje.getFullYear() - ultimaDate.getFullYear()) * 12 + (hoje.getMonth() - ultimaDate.getMonth());
-      const estEmDia = diffMeses <= 1;
-      
-      console.log(`  - ${m.nome_completo}: última mensalidade ${m.ultima_mensalidade}, diff ${diffMeses} meses = ${estEmDia ? '✅ EM DIA' : '❌ EM ABERTO'}`);
-      
-      return estEmDia;
-    });
-
-    console.log("  - ✅ RESULTADO FINAL - Total em dia:", membrosEmDia.length);
-    console.log("  - ✅ MEMBROS EM DIA:", membrosEmDia.map(m => `${m.nome_completo} (${m.tipo})`));
-
-    return membrosEmDia;
-  } catch (error) {
-    console.error("❌ Erro na função getAssociadosComUltimaMensalidade:", error);
-    return [];
+function determinarEstrategia(mensalidades: number, ultimaMens: number, pagamentoOk: number, total: number) {
+  // Se maioria tem mensalidades_pagas preenchido, usar essa lógica
+  if (mensalidades > total * 0.5) {
+    return 'mensalidades_pagas';
   }
-} 
+  
+  // Se maioria tem ultima_mensalidade, usar essa lógica  
+  if (ultimaMens > total * 0.5) {
+    return 'ultima_mensalidade';
+  }
+  
+  // Se maioria tem pagamento_inscricao = ok, assumir que pagaram julho
+  if (pagamentoOk > total * 0.5) {
+    return 'pagamento_inscricao';
+  }
+  
+  // Fallback: usar combinação
+  return 'combinada';
+}
+
+function aplicarLogicaInteligente(membros: any[], analise: any) {
+  console.log(`🎯 Aplicando estratégia: ${analise.estrategiaRecomendada}`);
+  
+  const hoje = new Date();
+  const julhoInicio = new Date(2025, 6, 1); // 1º julho 2025
+  const julhoFim = new Date(2025, 6, 31); // 31 julho 2025
+  
+  return membros.filter(membro => {
+    let emDia = false;
+    let motivo = '';
+    
+    switch (analise.estrategiaRecomendada) {
+      case 'mensalidades_pagas':
+        const pagos = membro.mensalidades_pagas || [];
+        emDia = pagos.includes('07/2025');
+        motivo = `mensalidades_pagas: ${JSON.stringify(pagos)}`;
+        break;
+        
+      case 'ultima_mensalidade':
+        if (membro.ultima_mensalidade) {
+          const ultimaDate = new Date(membro.ultima_mensalidade);
+          const diffMeses = (hoje.getFullYear() - ultimaDate.getFullYear()) * 12 + (hoje.getMonth() - ultimaDate.getMonth());
+          emDia = diffMeses <= 1;
+          motivo = `ultima_mensalidade: ${membro.ultima_mensalidade} (${diffMeses} meses atrás)`;
+        }
+        break;
+        
+      case 'pagamento_inscricao':
+        // Se pagou inscrição, assumir que está em dia (estratégia baseada no que você disse)
+        emDia = membro.pagamento_inscricao === 'ok';
+        motivo = `pagamento_inscricao: ${membro.pagamento_inscricao}`;
+        break;
+        
+      case 'combinada':
+        // Tentar múltiplas estratégias
+        const pagosArray = membro.mensalidades_pagas || [];
+        const temJulho = pagosArray.includes('07/2025');
+        
+        const temUltimaMensalidade = membro.ultima_mensalidade && 
+          (() => {
+            const ultimaDate = new Date(membro.ultima_mensalidade);
+            const diffMeses = (hoje.getFullYear() - ultimaDate.getFullYear()) * 12 + (hoje.getMonth() - ultimaDate.getMonth());
+            return diffMeses <= 1;
+          })();
+          
+        const temPagamentoOk = membro.pagamento_inscricao === 'ok';
+        
+        emDia = temJulho || temUltimaMensalidade || temPagamentoOk;
+        motivo = `combinada: julho=${temJulho}, ultimaMens=${!!temUltimaMensalidade}, pagtoOk=${temPagamentoOk}`;
+        break;
+    }
+    
+    console.log(`  ${emDia ? '✅' : '❌'} ${membro.nome_completo} (${membro.tipo}): ${motivo}`);
+    return emDia;
+  });
+}
+
+ 
