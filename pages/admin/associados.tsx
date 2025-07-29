@@ -66,9 +66,6 @@ export default function AdminAssociados() {
   const [selectedMembro, setSelectedMembro] = useState<Membro | null>(null);
   const [motivoRecusa, setMotivoRecusa] = useState("");
   const [showRecusaDialog, setShowRecusaDialog] = useState(false);
-  const [showPagamentoDialog, setShowPagamentoDialog] = useState(false);
-  const [mesPagamento, setMesPagamento] = useState("");
-  const [anoPagamento, setAnoPagamento] = useState("");
   const [showVisualizarDialog, setShowVisualizarDialog] = useState(false);
   const [showInscricaoDialog, setShowInscricaoDialog] = useState(false);
   const [showMensalidadeDialog, setShowMensalidadeDialog] = useState(false);
@@ -172,36 +169,6 @@ export default function AdminAssociados() {
     }
   };
 
-  const handleRegistrarPagamento = async () => {
-    if (!selectedMembro || !mesPagamento || !anoPagamento) {
-      toast.error("Preencha mês e ano");
-      return;
-    }
-
-    try {
-      const dataPagamento = new Date(parseInt(anoPagamento), parseInt(mesPagamento) - 1, 1);
-      
-      const { error } = await supabase
-        .from("membros")
-        .update({
-          ultima_mensalidade: dataPagamento.toISOString().split('T')[0],
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", selectedMembro.id);
-
-      if (error) throw error;
-
-      toast.success("Pagamento registrado com sucesso!");
-      setShowPagamentoDialog(false);
-      setMesPagamento("");
-      setAnoPagamento("");
-      setSelectedMembro(null);
-      fetchMembros();
-    } catch (error) {
-      console.error("Erro ao registrar pagamento:", error);
-      toast.error("Erro ao registrar pagamento");
-    }
-  };
 
   const downloadComprovante = async (membro: Membro) => {
     if (!membro.comprovante_url) {
@@ -416,19 +383,6 @@ export default function AdminAssociados() {
                       </>
                     )}
                     
-                    {membro.status === "ativo" && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setSelectedMembro(membro);
-                          setShowPagamentoDialog(true);
-                        }}
-                      >
-                        <Calendar className="w-3 h-3 mr-1" />
-                        Registrar Pagamento
-                      </Button>
-                    )}
                   </div>
                 </td>
               </tr>
@@ -807,17 +761,6 @@ export default function AdminAssociados() {
                                     >
                                       Visualizar
                                     </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => {
-                                        setSelectedMembro(membro);
-                                        setShowPagamentoDialog(true);
-                                      }}
-                                    >
-                                      <Calendar className="w-4 h-4 mr-1" />
-                                      Registrar Pagamento
-                                    </Button>
                                   </div>
                                 </div>
                               </div>
@@ -926,57 +869,6 @@ export default function AdminAssociados() {
           </DialogContent>
         </Dialog>
 
-        {/* Dialog de Pagamento */}
-        <Dialog open={showPagamentoDialog} onOpenChange={setShowPagamentoDialog}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Registrar Pagamento de Mensalidade</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <p>Registrar pagamento para <strong>{selectedMembro?.nome_completo}</strong>:</p>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Mês</label>
-                  <select
-                    value={mesPagamento}
-                    onChange={(e) => setMesPagamento(e.target.value)}
-                    className="w-full border rounded px-3 py-2"
-                  >
-                    <option value="">Selecione</option>
-                    {Array.from({ length: 12 }, (_, i) => i + 1).map((mes) => (
-                      <option key={mes} value={mes}>
-                        {new Date(2024, mes - 1).toLocaleDateString("pt-BR", { month: "long" })}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium mb-1">Ano</label>
-                  <select
-                    value={anoPagamento}
-                    onChange={(e) => setAnoPagamento(e.target.value)}
-                    className="w-full border rounded px-3 py-2"
-                  >
-                    <option value="">Selecione</option>
-                    {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - 2 + i).map((ano) => (
-                      <option key={ano} value={ano}>
-                        {ano}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => setShowPagamentoDialog(false)}>
-                  Cancelar
-                </Button>
-                <Button onClick={handleRegistrarPagamento}>
-                  Registrar Pagamento
-                </Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
 
         {/* Botão Exportar CSV */}
         <div className="flex justify-end mb-4">
