@@ -4,6 +4,9 @@ import { supabase } from "../../src/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "../../src/components/ui/card";
 import { Button } from "../../src/components/ui/button";
 import { Badge } from "../../src/components/ui/badge";
+import { Input } from "../../src/components/ui/input";
+import { Label } from "../../src/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../src/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../../src/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../../src/components/ui/dialog";
 import { Textarea } from "../../src/components/ui/textarea";
@@ -306,6 +309,11 @@ export default function AdminAssociados() {
   };
 
   const { estados, cidades } = getLocationOptions();
+  
+  // Filtrar cidades pelo estado selecionado
+  const cidadesFiltradas = filterLocation.estado 
+    ? Array.from(new Set(membros.filter(m => m.estado === filterLocation.estado).map(m => m.cidade).filter(Boolean))).sort()
+    : cidades;
 
   // Função para adicionar novo membro
   const handleAddNewMember = async () => {
@@ -763,6 +771,181 @@ export default function AdminAssociados() {
             />
           </div>
 
+          {/* Controles de Busca e Filtros */}
+          <div className="bg-white rounded-xl border border-gray-200/50 shadow-sm">
+            {/* Barra de busca e ações principais */}
+            <div className="p-6 border-b border-gray-100">
+              <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+                {/* Campo de busca */}
+                <div className="relative flex-1 max-w-md">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Input
+                    placeholder="Buscar por nome, email, CPF/CNPJ, telefone..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 bg-gray-50 border-gray-200 focus:border-blue-500 focus:ring-blue-500"
+                  />
+                </div>
+                
+                {/* Botões de ação */}
+                <div className="flex gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="flex items-center gap-2"
+                  >
+                    <Filter className="w-4 h-4" />
+                    Filtros
+                    {(filterType !== "todos" || filterPayment !== "todos" || filterMensalidade !== "todos" || filterLocation.estado || filterLocation.cidade) && (
+                      <Badge variant="secondary" className="ml-1 px-1.5 py-0.5 text-xs">
+                        {[
+                          filterType !== "todos" ? 1 : 0,
+                          filterPayment !== "todos" ? 1 : 0,
+                          filterMensalidade !== "todos" ? 1 : 0,
+                          filterLocation.estado ? 1 : 0,
+                          filterLocation.cidade ? 1 : 0
+                        ].reduce((a, b) => a + b, 0)}
+                      </Badge>
+                    )}
+                  </Button>
+                  
+                  <Button
+                    onClick={() => setShowAddDialog(true)}
+                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Adicionar
+                  </Button>
+                  
+                  <Button
+                    variant="outline"
+                    onClick={handleExportCSV}
+                    className="flex items-center gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    Exportar
+                  </Button>
+                </div>
+              </div>
+            </div>
+
+            {/* Painel de filtros colapsível */}
+            {showFilters && (
+              <div className="p-6 bg-gray-50/50 border-t border-gray-100">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                  {/* Filtro por tipo */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-gray-700">Tipo</Label>
+                    <Select value={filterType} onValueChange={(value) => setFilterType(value as "piloto" | "agencia" | "todos")}>
+                      <SelectTrigger className="bg-white">
+                        <SelectValue placeholder="Todos os tipos" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="todos">Todos os tipos</SelectItem>
+                        <SelectItem value="piloto">Pilotos</SelectItem>
+                        <SelectItem value="agencia">Agências</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Filtro por pagamento da inscrição */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-gray-700">Inscrição</Label>
+                    <Select value={filterPayment} onValueChange={(value) => setFilterPayment(value as "todos" | "pago" | "pendente")}>
+                      <SelectTrigger className="bg-white">
+                        <SelectValue placeholder="Status do pagamento" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="todos">Todos os status</SelectItem>
+                        <SelectItem value="pago">Pago</SelectItem>
+                        <SelectItem value="pendente">Pendente</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Filtro por mensalidade */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-gray-700">Mensalidade</Label>
+                    <Select value={filterMensalidade} onValueChange={(value) => setFilterMensalidade(value as "todos" | "em_dia" | "atrasado")}>
+                      <SelectTrigger className="bg-white">
+                        <SelectValue placeholder="Status mensalidade" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="todos">Todos os status</SelectItem>
+                        <SelectItem value="em_dia">Em dia</SelectItem>
+                        <SelectItem value="atrasado">Atrasado</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Filtro por estado */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-gray-700">Estado</Label>
+                    <Select 
+                      value={filterLocation.estado || ""} 
+                      onValueChange={(value) => setFilterLocation(prev => ({ 
+                        estado: value || null, 
+                        cidade: null 
+                      }))}
+                    >
+                      <SelectTrigger className="bg-white">
+                        <SelectValue placeholder="Todos os estados" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Todos os estados</SelectItem>
+                        {estados.map(estado => (
+                          <SelectItem key={estado} value={estado}>{estado}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {/* Filtro por cidade */}
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium text-gray-700">Cidade</Label>
+                    <Select 
+                      value={filterLocation.cidade || ""} 
+                      onValueChange={(value) => setFilterLocation(prev => ({ 
+                        ...prev, 
+                        cidade: value || null 
+                      }))}
+                      disabled={!filterLocation.estado}
+                    >
+                      <SelectTrigger className="bg-white">
+                        <SelectValue placeholder="Todas as cidades" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Todas as cidades</SelectItem>
+                        {cidadesFiltradas.map(cidade => (
+                          <SelectItem key={cidade} value={cidade}>{cidade}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Botão para limpar filtros */}
+                {(filterType !== "todos" || filterPayment !== "todos" || filterMensalidade !== "todos" || filterLocation.estado || filterLocation.cidade) && (
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        setFilterType("todos");
+                        setFilterPayment("todos");
+                        setFilterMensalidade("todos");
+                        setFilterLocation({ estado: null, cidade: null });
+                      }}
+                      className="text-gray-600 hover:text-gray-800"
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Limpar todos os filtros
+                    </Button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* Tabs com design moderno */}
           <div>
             <Tabs defaultValue="pendentes" className="w-full">
@@ -1051,147 +1234,6 @@ export default function AdminAssociados() {
           </DialogContent>
         </Dialog>
 
-
-        {/* Barra de Controles e Filtros */}
-        <div className="bg-white rounded-xl border border-gray-200/50 shadow-sm mb-6">
-          {/* Header da barra de controles */}
-          <div className="p-4 border-b border-gray-200/50">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-              {/* Busca */}
-              <div className="flex-1 max-w-md">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                  <input
-                    type="text"
-                    placeholder="Buscar por nome, email, CPF/CNPJ, telefone..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
-              </div>
-
-              {/* Botões de ação */}
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => setShowFilters(!showFilters)}
-                  className="flex items-center gap-2"
-                >
-                  <Filter className="h-4 w-4" />
-                  Filtros
-                  {(filterType !== "todos" || filterPayment !== "todos" || filterMensalidade !== "todos" || filterLocation.estado || filterLocation.cidade) && (
-                    <span className="ml-1 px-1.5 py-0.5 text-xs bg-blue-100 text-blue-800 rounded-full">●</span>
-                  )}
-                </Button>
-                
-                <CanManage recurso="associados">
-                  <Button
-                    variant="outline"
-                    onClick={() => setShowAddDialog(true)}
-                    className="flex items-center gap-2"
-                  >
-                    <Plus className="h-4 w-4" />
-                    Adicionar
-                  </Button>
-                </CanManage>
-                
-                <CanManage recurso="associados">
-                  <Button
-                    variant="outline"
-                    onClick={handleExportCSV}
-                    className="flex items-center gap-2"
-                  >
-                    <Download className="h-4 w-4" />
-                    Exportar
-                  </Button>
-                </CanManage>
-              </div>
-            </div>
-          </div>
-
-          {/* Painel de filtros colapsível */}
-          {showFilters && (
-            <div className="p-4 bg-gray-50/50 border-b border-gray-200/50">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* Filtro por tipo */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Tipo</label>
-                  <select
-                    value={filterType}
-                    onChange={(e) => setFilterType(e.target.value as any)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="todos">Todos</option>
-                    <option value="piloto">Apenas Pilotos</option>
-                    <option value="agencia">Apenas Agências</option>
-                  </select>
-                </div>
-
-                {/* Filtro por pagamento inscrição */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Pagamento Inscrição</label>
-                  <select
-                    value={filterPayment}
-                    onChange={(e) => setFilterPayment(e.target.value as any)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="todos">Todos</option>
-                    <option value="pago">Pago</option>
-                    <option value="pendente">Pendente</option>
-                  </select>
-                </div>
-
-                {/* Filtro por mensalidade */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Mensalidades</label>
-                  <select
-                    value={filterMensalidade}
-                    onChange={(e) => setFilterMensalidade(e.target.value as any)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="todos">Todos</option>
-                    <option value="em_dia">Em Dia</option>
-                    <option value="atrasado">Atrasado</option>
-                  </select>
-                </div>
-
-                {/* Filtro por estado */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Estado</label>
-                  <select
-                    value={filterLocation.estado}
-                    onChange={(e) => setFilterLocation({...filterLocation, estado: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="">Todos</option>
-                    {estados.map(estado => (
-                      <option key={estado} value={estado}>{estado}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Botão para limpar filtros */}
-              <div className="mt-4 flex justify-end">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => {
-                    setSearchTerm("");
-                    setFilterType("todos");
-                    setFilterPayment("todos");
-                    setFilterMensalidade("todos");
-                    setFilterLocation({ estado: "", cidade: "" });
-                  }}
-                  className="text-gray-600 hover:text-gray-800"
-                >
-                  Limpar Filtros
-                </Button>
-              </div>
-            </div>
-          )}
-        </div>
 
         {/* Modal de Cadastro de Novo Associado */}
         {showAddDialog && (
