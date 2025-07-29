@@ -316,7 +316,9 @@ export default function AdminAssociados() {
               <tr key={membro.id} className="hover:bg-gray-50">
                 <td className="border border-gray-200 px-4 py-2">
                   <div>
-                    <div className="font-medium">{membro.nome_completo}</div>
+                    <div className="font-medium">
+                      {membro.tipo === 'agencia' ? (membro.nome_empresa || membro.nome_completo) : membro.nome_completo}
+                    </div>
                     <div className="text-sm text-gray-500">{membro.email}</div>
                   </div>
                 </td>
@@ -423,7 +425,7 @@ export default function AdminAssociados() {
   const handleExportCSV = () => {
     const headers = ['Nome', 'Tipo', 'Status', 'Pagamento Inscrição', 'Última Mensalidade'];
     const rows = membros.map(m => [
-      m.nome_completo,
+      m.tipo === 'agencia' ? (m.nome_empresa || m.nome_completo) : m.nome_completo,
       m.tipo,
       m.status,
       m.pagamento_inscricao,
@@ -961,13 +963,39 @@ export default function AdminAssociados() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 {/* Nome */}
                 <div>
-                  <span className="font-semibold">Nome:</span>
+                  <span className="font-semibold">
+                    {selectedMembro.tipo === 'agencia' ? 'Nome da Empresa:' : 'Nome:'}
+                  </span>
                   {editMode ? (
-                    <input type="text" className="border rounded px-2 py-1 w-full" value={editData?.nome_completo || ''} onChange={e => setEditData({ ...editData, nome_completo: e.target.value })} />
+                    <input 
+                      type="text" 
+                      className="border rounded px-2 py-1 w-full" 
+                      value={selectedMembro.tipo === 'agencia' ? (editData?.nome_empresa || '') : (editData?.nome_completo || '')} 
+                      onChange={e => setEditData({ 
+                        ...editData, 
+                        ...(selectedMembro.tipo === 'agencia' ? { nome_empresa: e.target.value } : { nome_completo: e.target.value })
+                      })} 
+                    />
                   ) : (
-                    <span> {selectedMembro.nome_completo}</span>
+                    <span> {selectedMembro.tipo === 'agencia' ? (selectedMembro.nome_empresa || selectedMembro.nome_completo) : selectedMembro.nome_completo}</span>
                   )}
                 </div>
+                {/* Nome do Responsável (somente para agências) */}
+                {selectedMembro.tipo === 'agencia' && (
+                  <div>
+                    <span className="font-semibold">Responsável:</span>
+                    {editMode ? (
+                      <input 
+                        type="text" 
+                        className="border rounded px-2 py-1 w-full" 
+                        value={editData?.nome_completo || ''} 
+                        onChange={e => setEditData({ ...editData, nome_completo: e.target.value })} 
+                      />
+                    ) : (
+                      <span> {selectedMembro.nome_completo}</span>
+                    )}
+                  </div>
+                )}
                 {/* E-mail (não editável) */}
                 <div><span className="font-semibold">E-mail:</span> {selectedMembro.email}</div>
                 {/* Telefone */}
@@ -984,58 +1012,47 @@ export default function AdminAssociados() {
                 <div><span className="font-semibold">Status:</span> {selectedMembro.status}</div>
                 <div><span className="font-semibold">Pagamento Inscrição:</span> {selectedMembro.pagamento_inscricao}</div>
                 <div><span className="font-semibold">Última Mensalidade:</span> {selectedMembro.ultima_mensalidade || '-'}</div>
-                {/* Empresa */}
-                {selectedMembro.nome_empresa !== undefined && (
-                  <div>
-                    <span className="font-semibold">Empresa:</span>
-                    {editMode ? (
-                      <input type="text" className="border rounded px-2 py-1 w-full" value={editData?.nome_empresa || ''} onChange={e => setEditData({ ...editData, nome_empresa: e.target.value })} />
-                    ) : (
-                      <span> {selectedMembro.nome_empresa}</span>
-                    )}
-                  </div>
-                )}
-                {/* CPF */}
-                {selectedMembro.cpf !== undefined && (
+                {/* CPF (somente para pilotos) */}
+                {selectedMembro.tipo === 'piloto' && (
                   <div>
                     <span className="font-semibold">CPF:</span>
                     {editMode ? (
                       <input type="text" className="border rounded px-2 py-1 w-full" value={editData?.cpf || ''} onChange={e => setEditData({ ...editData, cpf: e.target.value })} />
                     ) : (
-                      <span> {selectedMembro.cpf}</span>
+                      <span> {selectedMembro.cpf || '-'}</span>
                     )}
                   </div>
                 )}
-                {/* CNPJ */}
-                {selectedMembro.cnpj !== undefined && (
+                {/* CNPJ (somente para agências) */}
+                {selectedMembro.tipo === 'agencia' && (
                   <div>
                     <span className="font-semibold">CNPJ:</span>
                     {editMode ? (
                       <input type="text" className="border rounded px-2 py-1 w-full" value={editData?.cnpj || ''} onChange={e => setEditData({ ...editData, cnpj: e.target.value })} />
                     ) : (
-                      <span> {selectedMembro.cnpj}</span>
+                      <span> {selectedMembro.cnpj || '-'}</span>
                     )}
                   </div>
                 )}
-                {/* RBAC 103 */}
-                {selectedMembro.rbac103 !== undefined && (
+                {/* RBAC 103 (somente para pilotos) */}
+                {selectedMembro.tipo === 'piloto' && (
                   <div>
                     <span className="font-semibold">RBAC 103:</span>
                     {editMode ? (
                       <input type="text" className="border rounded px-2 py-1 w-full" value={editData?.rbac103 || ''} onChange={e => setEditData({ ...editData, rbac103: e.target.value })} />
                     ) : (
-                      <span> {selectedMembro.rbac103}</span>
+                      <span> {selectedMembro.rbac103 || '-'}</span>
                     )}
                   </div>
                 )}
-                {/* RBAC 91 */}
-                {selectedMembro.rbac91 !== undefined && (
+                {/* RBAC 91 (somente para pilotos) */}
+                {selectedMembro.tipo === 'piloto' && (
                   <div>
                     <span className="font-semibold">RBAC 91:</span>
                     {editMode ? (
                       <input type="text" className="border rounded px-2 py-1 w-full" value={editData?.rbac91 || ''} onChange={e => setEditData({ ...editData, rbac91: e.target.value })} />
                     ) : (
-                      <span> {selectedMembro.rbac91}</span>
+                      <span> {selectedMembro.rbac91 || '-'}</span>
                     )}
                   </div>
                 )}
