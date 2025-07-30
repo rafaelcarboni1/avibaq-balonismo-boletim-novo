@@ -29,6 +29,7 @@ export function useUser() {
           const userWithUsersData = { 
             ...user, 
             // Manter o ID original do Supabase Auth para RLS policies
+            id: user.id, // Mantém o ID original do auth para RLS
             auth_id: user.id, // Preserva o ID original para logs
             users_table_id: data.id, // ID da tabela users para referências
             role: data.role,
