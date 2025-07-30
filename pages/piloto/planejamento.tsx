@@ -301,7 +301,7 @@ export default function PlanejamentoVoo() {
           adultos_previstos: totalAdultos,
           criancas_previstas: totalCriancas,
           observacoes_planejamento: formData.observacoes_planejamento.trim() || null,
-          created_by: user?.id
+          created_by: (user as any)?.users_table_id || null
         }])
         .select()
         .single();
