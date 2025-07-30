@@ -25,17 +25,19 @@ export function useUser() {
         if (data && !error) {
           setRole(data.role);
           setNome(data.nome || "");
-          // IMPORTANTE: Substituir o ID do auth pelo ID da tabela users e incluir campos WhatsApp
-          const userWithCorrectId = { 
+          // CORREÇÃO: Manter ID original do auth e adicionar dados da tabela users
+          const userWithUsersData = { 
             ...user, 
-            id: data.id,
+            // Manter o ID original do Supabase Auth para RLS policies
+            auth_id: user.id, // Preserva o ID original para logs
+            users_table_id: data.id, // ID da tabela users para referências
             role: data.role,
             whatsapp_group_joined: data.whatsapp_group_joined,
             whatsapp_modal_shown: data.whatsapp_modal_shown
           };
-          console.log('[useUser] ID CORRIGIDO - auth ID:', user.id, '-> users table ID:', data.id);
-          console.log('[useUser] user final:', userWithCorrectId);
-          setUser(userWithCorrectId);
+          console.log('[useUser] DADOS INTEGRADOS - auth ID:', user.id, 'users table ID:', data.id);
+          console.log('[useUser] user final:', userWithUsersData);
+          setUser(userWithUsersData);
         }
       } else {
         setUser(null);

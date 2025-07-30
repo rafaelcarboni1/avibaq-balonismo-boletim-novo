@@ -210,11 +210,14 @@ export default function PilotoDashboard() {
       let membro = null;
       let membroError = null;
 
-      // Tentar primeiro por user_id
+      // Tentar primeiro por users_table_id, depois por user_id
+      const searchUserId = (user as any)?.users_table_id || user?.id;
+      console.log('[Dashboard] Buscando membro com user_id:', searchUserId);
+      
       const { data: membroPorId, error: errorPorId } = await supabase
         .from('membros')
         .select('id')
-        .eq('user_id', user?.id)
+        .eq('user_id', searchUserId)
         .eq('tipo', 'piloto')
         .single();
 
@@ -236,13 +239,13 @@ export default function PilotoDashboard() {
           console.log('[Dashboard] Membro encontrado por email. User_id atual:', membroPorEmail.user_id);
           
           // Se encontrou por email mas user_id está null, tentar atualizar
-          if (!membroPorEmail.user_id && user?.id) {
+          if (!membroPorEmail.user_id && searchUserId) {
             console.log('[Dashboard] Tentando vincular user_id ao membro...');
             await supabase
               .from('membros')
-              .update({ user_id: user.id })
+              .update({ user_id: searchUserId })
               .eq('id', membroPorEmail.id);
-            console.log('[Dashboard] Vinculação user_id tentada');
+            console.log('[Dashboard] Vinculação user_id tentada com ID:', searchUserId);
           }
         } else {
           membroError = errorPorEmail || errorPorId;

@@ -71,9 +71,26 @@ export function usePermissions(): UsePermissionsReturn {
       }
 
       // Buscar permissões combinadas (role + específicas do usuário)
-      const { data, error } = await supabase.rpc('get_user_combined_permissions', {
-        p_user_id: userId
-      });
+      // CORREÇÃO: Usar users_table_id se disponível, senão usar o userId diretamente
+      const finalUserId = (user as any)?.users_table_id || userId;
+      console.log('[usePermissions] Buscando permissões com ID:', finalUserId, 'original:', userId);
+      
+      // Tentar primeira função, se falhar usar alternativa
+      let data, error;
+      try {
+        const result = await supabase.rpc('get_user_combined_permissions', {
+          p_user_id: finalUserId
+        });
+        data = result.data;
+        error = result.error;
+      } catch (firstError) {
+        console.log('[usePermissions] Tentando função alternativa...');
+        const result = await supabase.rpc('get_combined_user_permissions_v2', {
+          p_user_id: finalUserId
+        });
+        data = result.data;
+        error = result.error;
+      }
 
       if (error) {
         console.error('[usePermissions] Erro ao buscar permissões:', error);
@@ -121,7 +138,9 @@ export function usePermissions(): UsePermissionsReturn {
         setLoading(true);
         setError(null);
         
-        const userPermissions = await fetchPermissions(user.id);
+        // CORREÇÃO: Usar users_table_id se disponível para permissões
+        const permissionsUserId = (user as any)?.users_table_id || user.id;
+        const userPermissions = await fetchPermissions(permissionsUserId);
         
         if (isMounted) {
           setPermissions(userPermissions);
@@ -218,7 +237,9 @@ export function usePermissions(): UsePermissionsReturn {
       setLoading(true);
       setError(null);
       
-      const userPermissions = await fetchPermissions(user.id);
+      // CORREÇÃO: Usar users_table_id se disponível para refresh de permissões
+      const permissionsUserId = (user as any)?.users_table_id || user.id;
+      const userPermissions = await fetchPermissions(permissionsUserId);
       setPermissions(userPermissions);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao atualizar permissões');
@@ -230,7 +251,12 @@ export function usePermissions(): UsePermissionsReturn {
   // Função para limpar cache
   const clearCache = useCallback((): void => {
     if (user?.id) {
+      // Limpar cache usando ambos IDs para garantir
       delete permissionsCache[user.id];
+      const usersTableId = (user as any)?.users_table_id;
+      if (usersTableId) {
+        delete permissionsCache[usersTableId];
+      }
     }
   }, [user?.id]);
 
