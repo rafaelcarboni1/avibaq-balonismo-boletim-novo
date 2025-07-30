@@ -2,9 +2,10 @@
 -- Para corrigir a função RPC e permitir acesso a TODOS os 62 membros
 
 -- 1. Atualizar a função existente para retornar todos os membros com mensalidades_pagas
+-- Para empresas, mostra nome_empresa em vez do nome do responsável
 CREATE OR REPLACE FUNCTION get_members_public_info()
 RETURNS TABLE (
-  nome_completo TEXT,
+  nome_exibicao TEXT,
   tipo membro_tipo,
   status membro_status,
   mensalidades_pagas TEXT[]
@@ -14,10 +15,14 @@ SECURITY DEFINER
 AS $$
 BEGIN
   -- Retorna TODOS os membros que têm mensalidades_pagas preenchido
-  -- não apenas os com status 'ativo'
+  -- Para empresas, mostra nome_empresa; para pilotos, mostra nome_completo
   RETURN QUERY
   SELECT 
-    m.nome_completo,
+    CASE 
+      WHEN m.tipo = 'agencia' AND m.nome_empresa IS NOT NULL AND m.nome_empresa != '' 
+      THEN m.nome_empresa
+      ELSE m.nome_completo
+    END as nome_exibicao,
     m.tipo,
     m.status,
     m.mensalidades_pagas
@@ -33,7 +38,7 @@ COMMENT ON FUNCTION get_members_public_info() IS 'Retorna todos os membros que t
 -- 3. Criar uma função específica para membros em dia com julho 2025
 CREATE OR REPLACE FUNCTION get_members_julho_2025()
 RETURNS TABLE (
-  nome_completo TEXT,
+  nome_exibicao TEXT,
   tipo membro_tipo,
   status membro_status
 )
@@ -43,7 +48,11 @@ AS $$
 BEGIN
   RETURN QUERY
   SELECT 
-    m.nome_completo,
+    CASE 
+      WHEN m.tipo = 'agencia' AND m.nome_empresa IS NOT NULL AND m.nome_empresa != '' 
+      THEN m.nome_empresa
+      ELSE m.nome_completo
+    END as nome_exibicao,
     m.tipo,
     m.status
   FROM membros m

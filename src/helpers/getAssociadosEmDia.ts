@@ -12,11 +12,14 @@ export async function getAssociadosEmDia() {
     if (!errorRPC && membrosRPC) {
       console.log("📊 RPC retornou:", membrosRPC.length, "membros");
       
-      // Filtrar quem tem '07/2025'
+      // Filtrar quem tem '07/2025' e ajustar nome de exibição
       const membrosComJulho = membrosRPC.filter(membro => {
         const mensalidades = membro.mensalidades_pagas || [];
         return mensalidades.includes('07/2025');
-      });
+      }).map(membro => ({
+        ...membro,
+        nome_completo: membro.nome_exibicao || membro.nome_completo
+      }));
       
       if (membrosComJulho.length >= 50) {
         console.log("✅ RPC encontrou", membrosComJulho.length, "membros em dia");
@@ -30,7 +33,7 @@ export async function getAssociadosEmDia() {
     console.log("🔍 Tentativa 2: Consulta direta com service role");
     const { data: membros, error } = await supabase
       .from("membros")
-      .select("nome_completo, tipo, mensalidades_pagas, status")
+      .select("nome_completo, nome_empresa, tipo, mensalidades_pagas, status")
       .not("mensalidades_pagas", "is", null);
 
     if (error) {
@@ -41,7 +44,7 @@ export async function getAssociadosEmDia() {
       return [
         { nome_completo: "Giulia da Luz Jorge", tipo: "piloto", mensalidades_pagas: ["07/2025"] },
         { nome_completo: "Eduardo de Melo", tipo: "piloto", mensalidades_pagas: ["07/2025"] },
-        { nome_completo: "Voe nos Canyons", tipo: "agencia", mensalidades_pagas: ["07/2025"] }
+        { nome_completo: "iFlyBalloon Balonismo", tipo: "agencia", mensalidades_pagas: ["07/2025"] }
       ];
     }
 
@@ -52,17 +55,26 @@ export async function getAssociadosEmDia() {
       return [];
     }
 
-    // Filtrar quem tem '07/2025' no array
+    // Filtrar quem tem '07/2025' no array e ajustar nome de exibição
     const membrosEmDia = membros.filter(membro => {
       const mensalidades = membro.mensalidades_pagas || [];
       const temJulho = mensalidades.includes('07/2025');
       
       if (temJulho) {
-        console.log(`✅ ${membro.nome_completo} (${membro.tipo || 'SEM_TIPO'}): ${JSON.stringify(mensalidades)}`);
+        // Para empresas, usar nome_empresa se disponível
+        const nomeExibicao = membro.tipo === 'agencia' && membro.nome_empresa 
+          ? membro.nome_empresa 
+          : membro.nome_completo;
+        console.log(`✅ ${nomeExibicao} (${membro.tipo || 'SEM_TIPO'}): ${JSON.stringify(mensalidades)}`);
       }
       
       return temJulho;
-    });
+    }).map(membro => ({
+      ...membro,
+      nome_completo: membro.tipo === 'agencia' && membro.nome_empresa 
+        ? membro.nome_empresa 
+        : membro.nome_completo
+    }));
 
     console.log("✅ RESULTADO FINAL:");
     console.log(`   - Total em dia: ${membrosEmDia.length}`);
