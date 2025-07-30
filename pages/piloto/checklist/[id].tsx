@@ -167,23 +167,72 @@ export default function ChecklistVoo() {
         return;
       }
 
-      // Verificar se o piloto tem acesso a este voo
-      const { data: membro, error: membroError } = await supabase
+      // Verificar se o piloto tem acesso a este voo (primeiro por user_id, depois por email como fallback)
+      let membro = null;
+      let membroError = null;
+
+      console.log('[Checklist] Verificando acesso para usuário:', { userId: user?.id, email: user?.email });
+
+      // Tentar primeiro por user_id
+      const { data: membroPorId, error: errorPorId } = await supabase
         .from('membros')
-        .select('id')
+        .select('id, user_id')
         .eq('user_id', user?.id)
         .eq('tipo', 'piloto')
         .single();
 
+      if (membroPorId && !errorPorId) {
+        membro = membroPorId;
+        console.log('[Checklist] Membro encontrado por user_id:', membro.id);
+      } else {
+        console.log('[Checklist] Membro não encontrado por user_id, tentando por email:', user?.email);
+        
+        // Fallback: buscar por email se user_id não funcionou
+        const { data: membroPorEmail, error: errorPorEmail } = await supabase
+          .from('membros')
+          .select('id, user_id')
+          .eq('email', user?.email)
+          .eq('tipo', 'piloto')
+          .single();
+
+        if (membroPorEmail && !errorPorEmail) {
+          membro = membroPorEmail;
+          console.log('[Checklist] Membro encontrado por email. User_id atual:', membroPorEmail.user_id);
+          
+          // Se encontrou por email mas user_id está null, tentar atualizar
+          if (!membroPorEmail.user_id && user?.id) {
+            console.log('[Checklist] Tentando vincular user_id ao membro...');
+            await supabase
+              .from('membros')
+              .update({ user_id: user.id })
+              .eq('id', membroPorEmail.id);
+            console.log('[Checklist] Vinculação user_id tentada');
+          }
+        } else {
+          membroError = errorPorEmail || errorPorId;
+        }
+      }
+
       if (membroError || !membro || vooData.piloto_id !== membro.id) {
+        console.error('[Checklist] Erro ao buscar membro ou acesso negado:', { 
+          errorPorId, 
+          errorPorEmail: membroError, 
+          userEmail: user?.email, 
+          userId: user?.id,
+          vooPilotoId: vooData.piloto_id,
+          membroId: membro?.id
+        });
+        
         toast({
           title: "Acesso negado",
-          description: "Você não tem permissão para acessar este voo",
+          description: membroError ? "Piloto não encontrado no sistema. Entre em contato com o administrador." : "Você não tem permissão para acessar este voo",
           variant: "destructive"
         });
         router.push('/piloto/dashboard');
         return;
       }
+
+      console.log('[Checklist] Acesso autorizado para piloto:', membro.id);
 
       // Buscar balões do voo
       const { data: baloesData, error: baloesError } = await supabase

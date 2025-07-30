@@ -106,22 +106,69 @@ export default function PlanejamentoAgencia() {
     try {
       setLoading(true);
       
-      // Buscar membro agência associado ao usuário
-      const { data: membro, error: membroError } = await supabase
+      // Buscar membro agência associado ao usuário (primeiro por user_id, depois por email como fallback)
+      let membro = null;
+      let membroError = null;
+
+      console.log('[AgenciaPlanejamento] Carregando pilotos para usuário:', { userId: user?.id, email: user?.email });
+
+      // Tentar primeiro por user_id
+      const { data: membroPorId, error: errorPorId } = await supabase
         .from('membros')
-        .select('id')
+        .select('id, user_id')
         .eq('user_id', user?.id)
         .eq('tipo', 'agencia')
         .single();
 
+      if (membroPorId && !errorPorId) {
+        membro = membroPorId;
+        console.log('[AgenciaPlanejamento] Membro encontrado por user_id:', membro.id);
+      } else {
+        console.log('[AgenciaPlanejamento] Membro não encontrado por user_id, tentando por email:', user?.email);
+        
+        // Fallback: buscar por email se user_id não funcionou
+        const { data: membroPorEmail, error: errorPorEmail } = await supabase
+          .from('membros')
+          .select('id, user_id')
+          .eq('email', user?.email)
+          .eq('tipo', 'agencia')
+          .single();
+
+        if (membroPorEmail && !errorPorEmail) {
+          membro = membroPorEmail;
+          console.log('[AgenciaPlanejamento] Membro encontrado por email. User_id atual:', membroPorEmail.user_id);
+          
+          // Se encontrou por email mas user_id está null, tentar atualizar
+          if (!membroPorEmail.user_id && user?.id) {
+            console.log('[AgenciaPlanejamento] Tentando vincular user_id ao membro...');
+            await supabase
+              .from('membros')
+              .update({ user_id: user.id })
+              .eq('id', membroPorEmail.id);
+            console.log('[AgenciaPlanejamento] Vinculação user_id tentada');
+          }
+        } else {
+          membroError = errorPorEmail || errorPorId;
+        }
+      }
+
       if (membroError || !membro) {
+        console.error('[AgenciaPlanejamento] Erro ao buscar membro:', { 
+          errorPorId, 
+          errorPorEmail: membroError, 
+          userEmail: user?.email, 
+          userId: user?.id 
+        });
+        
         toast({
-          title: "Erro",
-          description: "Agência não encontrada no sistema",
+          title: "Erro ao carregar dados",
+          description: "Agência não encontrada no sistema. Entre em contato com o administrador.",
           variant: "destructive"
         });
         return;
       }
+
+      console.log('[AgenciaPlanejamento] Membro encontrado, carregando pilotos:', membro.id);
 
       // Buscar pilotos vinculados com status 'aceito'
       const { data, error } = await supabase
@@ -172,22 +219,69 @@ export default function PlanejamentoAgencia() {
     try {
       if (!formData.piloto_id) return;
 
-      // Buscar membro agência associado ao usuário
-      const { data: membro, error: membroError } = await supabase
+      // Buscar membro agência associado ao usuário (primeiro por user_id, depois por email como fallback)
+      let membro = null;
+      let membroError = null;
+
+      console.log('[AgenciaPlanejamento] Carregando balões para usuário:', { userId: user?.id, email: user?.email });
+
+      // Tentar primeiro por user_id
+      const { data: membroPorId, error: errorPorId } = await supabase
         .from('membros')
-        .select('id')
+        .select('id, user_id')
         .eq('user_id', user?.id)
         .eq('tipo', 'agencia')
         .single();
 
+      if (membroPorId && !errorPorId) {
+        membro = membroPorId;
+        console.log('[AgenciaPlanejamento] Membro encontrado por user_id:', membro.id);
+      } else {
+        console.log('[AgenciaPlanejamento] Membro não encontrado por user_id, tentando por email:', user?.email);
+        
+        // Fallback: buscar por email se user_id não funcionou
+        const { data: membroPorEmail, error: errorPorEmail } = await supabase
+          .from('membros')
+          .select('id, user_id')
+          .eq('email', user?.email)
+          .eq('tipo', 'agencia')
+          .single();
+
+        if (membroPorEmail && !errorPorEmail) {
+          membro = membroPorEmail;
+          console.log('[AgenciaPlanejamento] Membro encontrado por email. User_id atual:', membroPorEmail.user_id);
+          
+          // Se encontrou por email mas user_id está null, tentar atualizar
+          if (!membroPorEmail.user_id && user?.id) {
+            console.log('[AgenciaPlanejamento] Tentando vincular user_id ao membro...');
+            await supabase
+              .from('membros')
+              .update({ user_id: user.id })
+              .eq('id', membroPorEmail.id);
+            console.log('[AgenciaPlanejamento] Vinculação user_id tentada');
+          }
+        } else {
+          membroError = errorPorEmail || errorPorId;
+        }
+      }
+
       if (membroError || !membro) {
+        console.error('[AgenciaPlanejamento] Erro ao buscar membro:', { 
+          errorPorId, 
+          errorPorEmail: membroError, 
+          userEmail: user?.email, 
+          userId: user?.id 
+        });
+        
         toast({
-          title: "Erro",
-          description: "Agência não encontrada no sistema",
+          title: "Erro ao carregar dados",
+          description: "Agência não encontrada no sistema. Entre em contato com o administrador.",
           variant: "destructive"
         });
         return;
       }
+
+      console.log('[AgenciaPlanejamento] Membro encontrado, carregando balões:', membro.id);
 
       // Buscar balões ativos do piloto selecionado E da agência
       const { data, error } = await supabase
@@ -289,22 +383,69 @@ export default function PlanejamentoAgencia() {
         return;
       }
 
-      // Buscar membro agência associado ao usuário
-      const { data: membro, error: membroError } = await supabase
+      // Buscar membro agência associado ao usuário (primeiro por user_id, depois por email como fallback)
+      let membro = null;
+      let membroError = null;
+
+      console.log('[AgenciaPlanejamento] Submit - Buscando membro para usuário:', { userId: user?.id, email: user?.email });
+
+      // Tentar primeiro por user_id
+      const { data: membroPorId, error: errorPorId } = await supabase
         .from('membros')
-        .select('id')
+        .select('id, user_id')
         .eq('user_id', user?.id)
         .eq('tipo', 'agencia')
         .single();
 
+      if (membroPorId && !errorPorId) {
+        membro = membroPorId;
+        console.log('[AgenciaPlanejamento] Submit - Membro encontrado por user_id:', membro.id);
+      } else {
+        console.log('[AgenciaPlanejamento] Submit - Membro não encontrado por user_id, tentando por email:', user?.email);
+        
+        // Fallback: buscar por email se user_id não funcionou
+        const { data: membroPorEmail, error: errorPorEmail } = await supabase
+          .from('membros')
+          .select('id, user_id')
+          .eq('email', user?.email)
+          .eq('tipo', 'agencia')
+          .single();
+
+        if (membroPorEmail && !errorPorEmail) {
+          membro = membroPorEmail;
+          console.log('[AgenciaPlanejamento] Submit - Membro encontrado por email. User_id atual:', membroPorEmail.user_id);
+          
+          // Se encontrou por email mas user_id está null, tentar atualizar
+          if (!membroPorEmail.user_id && user?.id) {
+            console.log('[AgenciaPlanejamento] Submit - Tentando vincular user_id ao membro...');
+            await supabase
+              .from('membros')
+              .update({ user_id: user.id })
+              .eq('id', membroPorEmail.id);
+            console.log('[AgenciaPlanejamento] Submit - Vinculação user_id tentada');
+          }
+        } else {
+          membroError = errorPorEmail || errorPorId;
+        }
+      }
+
       if (membroError || !membro) {
+        console.error('[AgenciaPlanejamento] Submit - Erro ao buscar membro:', { 
+          errorPorId, 
+          errorPorEmail: membroError, 
+          userEmail: user?.email, 
+          userId: user?.id 
+        });
+        
         toast({
-          title: "Erro",
-          description: "Agência não encontrada no sistema",
+          title: "Erro ao carregar dados",
+          description: "Agência não encontrada no sistema. Entre em contato com o administrador.",
           variant: "destructive"
         });
         return;
       }
+
+      console.log('[AgenciaPlanejamento] Submit - Membro encontrado, preparando dados do voo:', membro.id);
 
       // Calcular totais
       const totalAdultos = baloesSelecionados.reduce((sum, b) => sum + b.adultos_previstos, 0);

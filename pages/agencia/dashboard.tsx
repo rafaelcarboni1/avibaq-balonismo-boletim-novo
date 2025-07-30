@@ -142,7 +142,7 @@ export default function AgenciaDashboard() {
       // Tentar primeiro por user_id
       const { data: membroPorId, error: errorPorId } = await supabase
         .from('membros')
-        .select('id')
+        .select('id, user_id')
         .eq('user_id', user?.id)
         .eq('tipo', 'agencia')
         .single();
