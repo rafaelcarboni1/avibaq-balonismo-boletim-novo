@@ -21,11 +21,14 @@ export async function getAssociadosEmDia() {
         nome_completo: membro.nome_exibicao || membro.nome_completo
       }));
       
-      if (membrosComJulho.length >= 50) {
-        console.log("✅ RPC encontrou", membrosComJulho.length, "membros em dia");
-        return membrosComJulho;
+      // Aplicar ordem aleatória no frontend também (dupla garantia)
+      const membrosAleatorios = [...membrosComJulho].sort(() => Math.random() - 0.5);
+      
+      if (membrosAleatorios.length >= 50) {
+        console.log("✅ RPC encontrou", membrosAleatorios.length, "membros em dia (ordem aleatória aplicada)");
+        return membrosAleatorios;
       } else {
-        console.log("⚠️ RPC retornou apenas", membrosComJulho.length, "membros - tentando estratégia alternativa");
+        console.log("⚠️ RPC retornou apenas", membrosAleatorios.length, "membros - tentando estratégia alternativa");
       }
     }
 
@@ -76,12 +79,15 @@ export async function getAssociadosEmDia() {
         : membro.nome_completo
     }));
 
-    console.log("✅ RESULTADO FINAL:");
-    console.log(`   - Total em dia: ${membrosEmDia.length}`);
-    console.log(`   - Pilotos: ${membrosEmDia.filter(m => m.tipo === 'piloto').length}`);
-    console.log(`   - Agências: ${membrosEmDia.filter(m => m.tipo === 'agencia').length}`);
+    // Aplicar ordem aleatória também na consulta direta
+    const membrosAleatorios = [...membrosEmDia].sort(() => Math.random() - 0.5);
+    
+    console.log("✅ RESULTADO FINAL (ordem aleatória aplicada):");
+    console.log(`   - Total em dia: ${membrosAleatorios.length}`);
+    console.log(`   - Pilotos: ${membrosAleatorios.filter(m => m.tipo === 'piloto').length}`);
+    console.log(`   - Agências: ${membrosAleatorios.filter(m => m.tipo === 'agencia').length}`);
 
-    return membrosEmDia;
+    return membrosAleatorios;
     
   } catch (error) {
     console.error("❌ Erro na função:", error);

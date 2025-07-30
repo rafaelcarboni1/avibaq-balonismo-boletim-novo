@@ -4,7 +4,7 @@
 -- 1. DROPAR função existente primeiro (resolve o erro 42P13)
 DROP FUNCTION IF EXISTS get_members_public_info();
 
--- 2. RECRIAR função com novo nome do campo (nome_exibicao)
+-- 2. RECRIAR função com novo nome do campo (nome_exibicao) + ORDEM ALEATÓRIA
 CREATE OR REPLACE FUNCTION get_members_public_info()
 RETURNS TABLE (
   nome_exibicao TEXT,
@@ -17,6 +17,7 @@ SECURITY DEFINER
 AS $$
 BEGIN
   -- Para empresas, mostra nome_empresa; para pilotos, mostra nome_completo
+  -- ORDEM ALEATÓRIA para evitar sempre os mesmos nomes primeiro
   RETURN QUERY
   SELECT 
     CASE 
@@ -29,7 +30,8 @@ BEGIN
     m.mensalidades_pagas
   FROM membros m
   WHERE m.mensalidades_pagas IS NOT NULL 
-    AND array_length(m.mensalidades_pagas, 1) > 0;
+    AND array_length(m.mensalidades_pagas, 1) > 0
+  ORDER BY RANDOM();  -- ✨ ORDEM ALEATÓRIA SEMPRE
 END;
 $$;
 
@@ -57,7 +59,8 @@ BEGIN
     m.status
   FROM membros m
   WHERE m.mensalidades_pagas IS NOT NULL 
-    AND '07/2025' = ANY(m.mensalidades_pagas);
+    AND '07/2025' = ANY(m.mensalidades_pagas)
+  ORDER BY RANDOM();  -- ✨ ORDEM ALEATÓRIA SEMPRE
 END;
 $$;
 

@@ -22,8 +22,14 @@ export default function MembrosPage() {
       });
   }, []);
 
-  const pilotos = membros.filter(m => m.tipo === "piloto" || !m.tipo); // Inclui membros sem tipo definido
-  const agencias = membros.filter(m => m.tipo === "agencia");
+  // Aplicar ordem aleatória separadamente para pilotos e agências
+  const pilotos = membros
+    .filter(m => m.tipo === "piloto" || !m.tipo) // Inclui membros sem tipo definido
+    .sort(() => Math.random() - 0.5); // Ordem aleatória para pilotos
+    
+  const agencias = membros
+    .filter(m => m.tipo === "agencia")
+    .sort(() => Math.random() - 0.5); // Ordem aleatória para agências
   
   console.log("🔄 [MembrosPage] Estado atual:", {
     membros: membros.length,

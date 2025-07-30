@@ -15,8 +15,15 @@ export default function HomeSectionMembros() {
     getAssociadosEmDia().then(setMembros);
   }, []);
 
-  const pilotos = useMemo(() => membros.filter(m => m.tipo === "piloto"), [membros]);
-  const agencias = useMemo(() => membros.filter(m => m.tipo === "agencia"), [membros]);
+  // Aplicar ordem aleatória para pilotos e agências (evita sempre os mesmos primeiro)
+  const pilotos = useMemo(() => 
+    membros.filter(m => m.tipo === "piloto").sort(() => Math.random() - 0.5), 
+    [membros]
+  );
+  const agencias = useMemo(() => 
+    membros.filter(m => m.tipo === "agencia").sort(() => Math.random() - 0.5), 
+    [membros]
+  );
   const totalPilotos = pilotos.length;
   const totalEmpresas = agencias.length;
 
