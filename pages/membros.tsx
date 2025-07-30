@@ -5,12 +5,33 @@ import { UserIcon, BuildingOfficeIcon } from "@heroicons/react/24/outline";
 
 export default function MembrosPage() {
   const [membros, setMembros] = useState<any[]>([]);
+  
   useEffect(() => {
-    getAssociadosEmDia().then(setMembros);
+    console.log("🔄 [MembrosPage] Iniciando carregamento...");
+    
+    getAssociadosEmDia()
+      .then((resultado) => {
+        console.log("🔄 [MembrosPage] Resultado recebido:", resultado);
+        console.log("🔄 [MembrosPage] Tipo do resultado:", typeof resultado);
+        console.log("🔄 [MembrosPage] É array?", Array.isArray(resultado));
+        setMembros(resultado);
+      })
+      .catch((error) => {
+        console.error("❌ [MembrosPage] Erro ao carregar:", error);
+        setMembros([]);
+      });
   }, []);
 
-  const pilotos = membros.filter(m => m.tipo === "piloto");
+  const pilotos = membros.filter(m => m.tipo === "piloto" || !m.tipo); // Inclui membros sem tipo definido
   const agencias = membros.filter(m => m.tipo === "agencia");
+  
+  console.log("🔄 [MembrosPage] Estado atual:", {
+    membros: membros.length,
+    pilotos: pilotos.length,
+    agencias: agencias.length,
+    primeirMembro: membros[0] || null,
+    todosOsMembros: membros
+  });
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
