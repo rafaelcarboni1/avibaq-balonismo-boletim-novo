@@ -206,22 +206,66 @@ export default function PilotoDashboard() {
     try {
       setLoading(true);
       
-      // Buscar membro associado ao usuário
-      const { data: membro, error: membroError } = await supabase
+      // Buscar membro associado ao usuário (primeiro por user_id, depois por email como fallback)
+      let membro = null;
+      let membroError = null;
+
+      // Tentar primeiro por user_id
+      const { data: membroPorId, error: errorPorId } = await supabase
         .from('membros')
         .select('id')
         .eq('user_id', user?.id)
         .eq('tipo', 'piloto')
         .single();
 
+      if (membroPorId && !errorPorId) {
+        membro = membroPorId;
+      } else {
+        console.log('[Dashboard] Membro não encontrado por user_id, tentando por email:', user?.email);
+        
+        // Fallback: buscar por email se user_id não funcionou
+        const { data: membroPorEmail, error: errorPorEmail } = await supabase
+          .from('membros')
+          .select('id, user_id')
+          .eq('email', user?.email)
+          .eq('tipo', 'piloto')
+          .single();
+
+        if (membroPorEmail && !errorPorEmail) {
+          membro = membroPorEmail;
+          console.log('[Dashboard] Membro encontrado por email. User_id atual:', membroPorEmail.user_id);
+          
+          // Se encontrou por email mas user_id está null, tentar atualizar
+          if (!membroPorEmail.user_id && user?.id) {
+            console.log('[Dashboard] Tentando vincular user_id ao membro...');
+            await supabase
+              .from('membros')
+              .update({ user_id: user.id })
+              .eq('id', membroPorEmail.id);
+            console.log('[Dashboard] Vinculação user_id tentada');
+          }
+        } else {
+          membroError = errorPorEmail || errorPorId;
+        }
+      }
+
       if (membroError || !membro) {
+        console.error('[Dashboard] Erro ao buscar membro:', { 
+          errorPorId, 
+          errorPorEmail: membroError, 
+          userEmail: user?.email, 
+          userId: user?.id 
+        });
+        
         toast({
-          title: "Erro",
-          description: "Piloto não encontrado no sistema",
+          title: "Erro ao carregar dados",
+          description: "Piloto não encontrado no sistema. Entre em contato com o administrador.",
           variant: "destructive"
         });
         return;
       }
+
+      console.log('[Dashboard] Membro encontrado:', membro.id);
 
       // Carregar estatísticas em paralelo
       const [
