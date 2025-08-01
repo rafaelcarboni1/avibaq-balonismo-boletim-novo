@@ -67,7 +67,7 @@ export function useOfflineSync() {
       const { data, error } = await supabase
         .from('vw_stats_sincronizacao')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('user_id', user.users_table_id || user.id)
         .single();
       
       if (error && error.code !== 'PGRST116') {
@@ -100,7 +100,7 @@ export function useOfflineSync() {
       // Buscar itens pendentes para sincronização
       const { data: pendingItems, error } = await supabase
         .rpc('processar_fila_sincronizacao', {
-          p_user_id: user.id,
+          p_user_id: user.users_table_id || user.id,
           p_limite: 10
         });
       
@@ -326,7 +326,7 @@ export function useOfflineSync() {
       const { data, error } = await supabase
         .from('dados_offline')
         .insert([{
-          user_id: user.id,
+          user_id: user.users_table_id || user.id,  // CORREÇÃO: usar ID da tabela users
           tipo_dados: tipo,
           operacao,
           dados_json: dados,
