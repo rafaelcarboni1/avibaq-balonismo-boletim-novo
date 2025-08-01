@@ -126,7 +126,7 @@ export function usePermissions(): UsePermissionsReturn {
     const loadPermissions = async () => {
       if (userLoading) return;
       
-      if (!user?.id) {
+      if (!user?.id && !user?.users_table_id) {
         console.log('[usePermissions] Usuário não autenticado, limpando permissões');
         setPermissions([]);
         setLoading(false);
@@ -162,11 +162,11 @@ export function usePermissions(): UsePermissionsReturn {
     return () => {
       isMounted = false;
     };
-  }, [user?.id, userLoading, fetchPermissions]);
+  }, [user?.id, user?.users_table_id, userLoading, fetchPermissions]);
 
   // Função principal para verificar uma permissão específica
   const hasPermission = useCallback((recurso: string, acao: string): boolean => {
-    if (!user?.id || permissions.length === 0) {
+    if ((!user?.id && !user?.users_table_id) || permissions.length === 0) {
       return false;
     }
 
@@ -226,7 +226,7 @@ export function usePermissions(): UsePermissionsReturn {
 
   // Função para forçar refresh das permissões
   const refreshPermissions = useCallback(async (): Promise<void> => {
-    if (!user?.id) return;
+    if (!user?.id && !user?.users_table_id) return;
 
     try {
       console.log('[usePermissions] Forçando refresh das permissões');
@@ -246,19 +246,21 @@ export function usePermissions(): UsePermissionsReturn {
     } finally {
       setLoading(false);
     }
-  }, [user?.id, fetchPermissions]);
+  }, [user?.id, user?.users_table_id, fetchPermissions]);
 
   // Função para limpar cache
   const clearCache = useCallback((): void => {
-    if (user?.id) {
+    if (user?.id || user?.users_table_id) {
       // Limpar cache usando ambos IDs para garantir
-      delete permissionsCache[user.id];
+      if (user.id) {
+        delete permissionsCache[user.id]; 
+      }
       const usersTableId = (user as any)?.users_table_id;
       if (usersTableId) {
         delete permissionsCache[usersTableId];
       }
     }
-  }, [user?.id]);
+  }, [user?.id, user?.users_table_id]);
 
   // Estatísticas das permissões (para debug)
   const permissionStats = useMemo(() => {
