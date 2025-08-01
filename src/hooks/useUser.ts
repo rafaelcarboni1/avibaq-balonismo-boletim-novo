@@ -77,11 +77,15 @@ export function useUser() {
           };
           
           console.log('[useUser] ✅ Dados integrados - auth ID:', user.id, 'users table ID:', data.id);
+          console.log('[useUser] 🔍 CRITICAL DEBUG - users_table_id:', userWithUsersData.users_table_id);
+          console.log('[useUser] 🔍 CRITICAL DEBUG - userWithUsersData completo:', JSON.stringify(userWithUsersData, null, 2));
           setUser(userWithUsersData);
           
         } else {
           console.warn('[useUser] ⚠️ Usuário não encontrado na tabela users:', user.email);
           console.warn('[useUser] Error:', error);
+          console.warn('[useUser] 🚨 CRITICAL: Este usuário CAUSARÁ erro de foreign key!');
+          console.warn('[useUser] 🚨 Auth ID:', user.id, 'não existe em public.users');
           
           // COMPORTAMENTO CONSERVADOR: Manter usuário com dados mínimos
           // (não quebra o sistema, apenas fica sem role)
@@ -89,12 +93,13 @@ export function useUser() {
             ...user,
             id: user.id,
             auth_id: user.id,
-            users_table_id: null,
+            users_table_id: null,  // ❌ ESTE NULL CAUSA O ERRO!
             role: null,
             whatsapp_group_joined: false,
             whatsapp_modal_shown: false
           };
           
+          console.warn('[useUser] 🚨 DEFININDO users_table_id como NULL - ISSO CAUSARÁ ERRO!');
           setUser(userWithoutRole);
           setRole(null);
           setNome("");
