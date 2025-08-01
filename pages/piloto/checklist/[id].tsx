@@ -171,13 +171,13 @@ export default function ChecklistVoo() {
       let membro = null;
       let membroError = null;
 
-      console.log('[Checklist] Verificando acesso para usuário:', { userId: user?.id, email: user?.email });
+      console.log('[Checklist] Verificando acesso para usuário:', { userId: user?.users_table_id, authId: user?.id, email: user?.email });
 
       // Tentar primeiro por user_id
       const { data: membroPorId, error: errorPorId } = await supabase
         .from('membros')
         .select('id, user_id')
-        .eq('user_id', user?.id)
+        .eq('user_id', user?.users_table_id)
         .eq('tipo', 'piloto')
         .single();
 
@@ -200,11 +200,11 @@ export default function ChecklistVoo() {
           console.log('[Checklist] Membro encontrado por email. User_id atual:', membroPorEmail.user_id);
           
           // Se encontrou por email mas user_id está null, tentar atualizar
-          if (!membroPorEmail.user_id && user?.id) {
+          if (!membroPorEmail.user_id && user?.users_table_id) {
             console.log('[Checklist] Tentando vincular user_id ao membro...');
             await supabase
               .from('membros')
-              .update({ user_id: user.id })
+              .update({ user_id: user.users_table_id })
               .eq('id', membroPorEmail.id);
             console.log('[Checklist] Vinculação user_id tentada');
           }
@@ -218,7 +218,7 @@ export default function ChecklistVoo() {
           errorPorId, 
           errorPorEmail: membroError, 
           userEmail: user?.email, 
-          userId: user?.id,
+          userId: user?.users_table_id,
           vooPilotoId: vooData.piloto_id,
           membroId: membro?.id
         });
@@ -350,7 +350,7 @@ export default function ChecklistVoo() {
     const updateData: any = {
       marcado,
       marcado_em: new Date().toISOString(),
-      marcado_por: user?.id
+      marcado_por: user?.users_table_id  // CORREÇÃO: usar ID da tabela users ao invés de auth.uid()
     };
 
     if (!marcado && motivo) {
