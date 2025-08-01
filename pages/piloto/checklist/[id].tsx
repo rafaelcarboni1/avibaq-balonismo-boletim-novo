@@ -7,6 +7,7 @@ import { supabase } from '../../../src/integrations/supabase/client';
 import { useUser } from '../../../src/hooks/useUser';
 import { useToast } from '../../../src/hooks/use-toast';
 import { formatDateSafe } from '../../../src/utils/dateUtils';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface ChecklistItem {
   id: string;
@@ -92,6 +93,7 @@ export default function ChecklistVoo() {
   const { id } = router.query;
   const { user, loading: userLoading } = useUser();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   
   const [voo, setVoo] = useState<VooComBaloes | null>(null);
   const [checklistItems, setChecklistItems] = useState<ChecklistItem[]>([]);
@@ -110,14 +112,24 @@ export default function ChecklistVoo() {
     }
   }, [user, userLoading]); // Removido router das dependências
 
+  // LIMPAR CACHE e força reload quando user muda
+  useEffect(() => {
+    if (user?.users_table_id) {
+      console.log('[ChecklistVoo] 🔥 FORÇA LIMPEZA DE CACHE - user mudou:', user.users_table_id);
+      queryClient.invalidateQueries();
+      queryClient.clear();
+    }
+  }, [user?.users_table_id, queryClient]);
+
   // Carregar dados do voo e checklist
   useEffect(() => {
-    if (id && user) {
+    if (id && user?.users_table_id) {
+      console.log('[ChecklistVoo] 🔄 CARREGANDO COM users_table_id:', user.users_table_id);
       carregarVoo();
       carregarChecklist();
       loadDraftFromStorage();
     }
-  }, [id, user]);
+  }, [id, user?.users_table_id]); // Mudou user para user?.users_table_id
 
   // Monitorar status de conexão
   useEffect(() => {
