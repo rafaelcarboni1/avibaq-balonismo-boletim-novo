@@ -11,13 +11,16 @@ import { useQueryClient } from '@tanstack/react-query';
 
 interface ChecklistItem {
   id: string;
-  bloco: number;
-  item_numero: number;
-  descricao: string;
+  checklist_id?: number;        // Novo campo da estrutura real
+  secao_id?: number;            // Novo campo da estrutura real  
+  item_id?: number;             // Novo campo da estrutura real
+  bloco?: number;               // Mantido para compatibilidade
+  item_numero?: number;         // Mantido para compatibilidade
+  descricao?: string;           // Mantido para compatibilidade
   marcado: boolean;
-  motivo_nao_marcado: string | null;
-  marcado_em: string | null;
-  marcado_por: string | null;
+  observacao: string | null;    // ADAPTADO: motivo_nao_marcado → observacao
+  preenchido_em: string | null; // ADAPTADO: marcado_em → preenchido_em
+  marcado_por: string | null;   // ADAPTADO: preenchido_por → marcado_por
 }
 
 interface Voo {
@@ -337,7 +340,7 @@ export default function ChecklistVoo() {
             item_numero: index + 1,
             descricao: descricao,
             marcado: false,
-            motivo_nao_marcado: null
+            observacao: null
           });
         });
       });
@@ -361,14 +364,14 @@ export default function ChecklistVoo() {
   const handleItemChange = async (itemId: string, marcado: boolean, motivo?: string) => {
     const updateData: any = {
       marcado,
-      marcado_em: new Date().toISOString(),
+      preenchido_em: new Date().toISOString(),
       marcado_por: user?.users_table_id  // CORREÇÃO: usar ID da tabela users ao invés de auth.uid()
     };
 
     if (!marcado && motivo) {
-      updateData.motivo_nao_marcado = motivo;
+      updateData.observacao = motivo;
     } else if (marcado) {
-      updateData.motivo_nao_marcado = null;
+      updateData.observacao = null;
     }
 
     // Atualizar estado local primeiro
@@ -378,8 +381,8 @@ export default function ChecklistVoo() {
           ? { 
               ...item, 
               marcado, 
-              motivo_nao_marcado: updateData.motivo_nao_marcado,
-              marcado_em: updateData.marcado_em,
+              observacao: updateData.observacao,
+              preenchido_em: updateData.preenchido_em,
               marcado_por: updateData.marcado_por
             }
           : item
@@ -539,7 +542,7 @@ export default function ChecklistVoo() {
       const itensNaoMarcados = itensBloco.filter(item => !item.marcado);
 
       // Verificar se todos os itens não marcados têm motivo
-      const semMotivo = itensNaoMarcados.filter(item => !item.motivo_nao_marcado?.trim());
+      const semMotivo = itensNaoMarcados.filter(item => !item.observacao?.trim());
       
       if (semMotivo.length > 0) {
         toast({
@@ -618,7 +621,7 @@ export default function ChecklistVoo() {
 
   const canCompleteBloco = (bloco: number) => {
     const items = getItemsBloco(bloco);
-    return items.every(item => item.marcado || item.motivo_nao_marcado?.trim());
+    return items.every(item => item.marcado || item.observacao?.trim());
   };
 
   const getBlocoTitle = (bloco: number) => {
@@ -832,7 +835,7 @@ interface ChecklistItemComponentProps {
 
 function ChecklistItemComponent({ item, onChange }: ChecklistItemComponentProps) {
   const [showMotivoInput, setShowMotivoInput] = useState(false);
-  const [motivo, setMotivo] = useState(item.motivo_nao_marcado || '');
+  const [motivo, setMotivo] = useState(item.observacao || '');
 
   const handleCheckChange = (checked: boolean) => {
     if (checked) {
@@ -851,7 +854,7 @@ function ChecklistItemComponent({ item, onChange }: ChecklistItemComponentProps)
   };
 
   const handleMotivoCancel = () => {
-    setMotivo(item.motivo_nao_marcado || '');
+    setMotivo(item.observacao || '');
     setShowMotivoInput(false);
   };
 
@@ -859,7 +862,7 @@ function ChecklistItemComponent({ item, onChange }: ChecklistItemComponentProps)
     <div className={`border rounded-lg p-4 transition-all ${
       item.marcado 
         ? 'border-green-300 bg-green-50' 
-        : item.motivo_nao_marcado
+        : item.observacao
         ? 'border-amber-300 bg-amber-50'
         : 'border-gray-200'
     }`}>
@@ -879,20 +882,20 @@ function ChecklistItemComponent({ item, onChange }: ChecklistItemComponentProps)
         
         <div className="flex items-center gap-1">
           {item.marcado && <CheckCircleIcon className="h-5 w-5 text-green-600" />}
-          {!item.marcado && item.motivo_nao_marcado && (
+          {!item.marcado && item.observacao && (
             <ExclamationTriangleIcon className="h-5 w-5 text-amber-600" />
           )}
-          {!item.marcado && !item.motivo_nao_marcado && !showMotivoInput && (
+          {!item.marcado && !item.observacao && !showMotivoInput && (
             <XCircleIcon className="h-5 w-5 text-gray-400" />
           )}
         </div>
       </div>
 
       {/* Motivo existente */}
-      {!showMotivoInput && item.motivo_nao_marcado && (
+      {!showMotivoInput && item.observacao && (
         <div className="mt-3 p-3 bg-amber-100 rounded-lg">
           <p className="text-sm text-amber-800">
-            <strong>Motivo:</strong> {item.motivo_nao_marcado}
+            <strong>Motivo:</strong> {item.observacao}
           </p>
           <button
             onClick={() => setShowMotivoInput(true)}
