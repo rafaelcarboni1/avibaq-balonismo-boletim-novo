@@ -168,7 +168,7 @@ export default function ChecklistVoo() {
       const { data: vooData, error: vooError } = await supabase
         .from('vw_voos_com_baloes')
         .select('*')
-        .eq('voo_id', id)
+        .eq('checklist_id', id)  // MUDANÇA: usar checklist_id em vez de voo_id
         .single();
 
       if (vooError) {
@@ -261,7 +261,7 @@ export default function ChecklistVoo() {
             volume_m3
           )
         `)
-        .eq('voo_id', id);
+        .eq('checklist_id', id)  // MUDANÇA: usar checklist_id em vez de voo_id;
 
       if (baloesError) {
         console.error('Erro ao carregar balões:', baloesError);
@@ -305,11 +305,26 @@ export default function ChecklistVoo() {
     try {
       if (!id) return;
 
+      console.log('[carregarChecklist] 🔍 Tentando carregar checklist para voo:', id);
+      
       const { data, error } = await supabase
         .from('checklist_itens')
-        .select('*')
-        .eq('voo_id', id)
-        .order('bloco, item_numero');
+        .select(`
+          id,
+          checklist_id,
+          secao_id,
+          item_id,
+          marcado,
+          observacao,
+          marcado_por,
+          created_at,
+          preenchido_em,
+          updated_at
+        `)
+        .eq('checklist_id', id)  // MUDANÇA: usar checklist_id em vez de voo_id
+        .order('secao_id, item_id');
+        
+      console.log('[carregarChecklist] 🔍 Resultado da query:', { data, error });
 
       if (error) {
         console.error('Erro ao carregar checklist:', error);
