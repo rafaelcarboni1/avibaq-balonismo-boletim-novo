@@ -1,0 +1,5895 @@
+{
+  "timestamp": "2025-08-04T21:21:36.072Z",
+  "database_info": {
+    "database_name": "postgres",
+    "current_user": "postgres",
+    "postgres_version": "PostgreSQL 17.4 on aarch64-unknown-linux-gnu, compiled by gcc (GCC) 13.2.0, 64-bit"
+  },
+  "tables": {
+    "assinantes": {
+      "table_name": "assinantes",
+      "table_type": "BASE TABLE",
+      "table_comment": null,
+      "columns": [
+        {
+          "column_name": "id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": "gen_random_uuid()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "nome",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "email",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "eh_piloto",
+          "data_type": "boolean",
+          "is_nullable": "YES",
+          "column_default": "false",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "ativo",
+          "data_type": "boolean",
+          "is_nullable": "YES",
+          "column_default": "true",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "confirmado",
+          "data_type": "boolean",
+          "is_nullable": "YES",
+          "column_default": "false",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "token_confirmacao",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "token_descadastro",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": "(gen_random_uuid())::text",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "created_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        }
+      ],
+      "primary_keys": [
+        {
+          "column_name": "id"
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "index_name": "assinantes_pkey",
+          "column_name": "id",
+          "is_unique": true,
+          "is_primary": true
+        },
+        {
+          "index_name": "assinantes_email_key",
+          "column_name": "email",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "assinantes_token_confirmacao_key",
+          "column_name": "token_confirmacao",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "assinantes_token_descadastro_key",
+          "column_name": "token_descadastro",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_assinantes_email",
+          "column_name": "email",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_assinantes_ativo",
+          "column_name": "ativo",
+          "is_unique": false,
+          "is_primary": false
+        }
+      ],
+      "row_count": 46
+    },
+    "baloes": {
+      "table_name": "baloes",
+      "table_type": "BASE TABLE",
+      "table_comment": null,
+      "columns": [
+        {
+          "column_name": "id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": "gen_random_uuid()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "prefixo",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "volume_m3",
+          "data_type": "integer",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": 32,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "nome_batismo",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "proprietario_id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "ativo",
+          "data_type": "boolean",
+          "is_nullable": "YES",
+          "column_default": "true",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "observacoes",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "created_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        }
+      ],
+      "primary_keys": [
+        {
+          "column_name": "id"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column_name": "proprietario_id",
+          "foreign_table_name": "membros",
+          "foreign_column_name": "id",
+          "constraint_name": "baloes_proprietario_id_fkey"
+        }
+      ],
+      "indexes": [
+        {
+          "index_name": "baloes_pkey",
+          "column_name": "id",
+          "is_unique": true,
+          "is_primary": true
+        },
+        {
+          "index_name": "baloes_prefixo_key",
+          "column_name": "prefixo",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_baloes_proprietario",
+          "column_name": "proprietario_id",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_baloes_ativo",
+          "column_name": "ativo",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_baloes_prefixo",
+          "column_name": "prefixo",
+          "is_unique": false,
+          "is_primary": false
+        }
+      ],
+      "row_count": 5
+    },
+    "boletins": {
+      "table_name": "boletins",
+      "table_type": "BASE TABLE",
+      "table_comment": null,
+      "columns": [
+        {
+          "column_name": "id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": "gen_random_uuid()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "data",
+          "data_type": "date",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "periodo",
+          "data_type": "USER-DEFINED",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "bandeira",
+          "data_type": "USER-DEFINED",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "status_voo",
+          "data_type": "USER-DEFINED",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "titulo_curto",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "motivo",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "publicado",
+          "data_type": "boolean",
+          "is_nullable": "YES",
+          "column_default": "true",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "publicado_em",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "publicado_por",
+          "data_type": "uuid",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "created_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "audios_urls",
+          "data_type": "ARRAY",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "fotos_urls",
+          "data_type": "ARRAY",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "atualizado_em",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        }
+      ],
+      "primary_keys": [
+        {
+          "column_name": "id"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column_name": "publicado_por",
+          "foreign_table_name": "usuarios_admin",
+          "foreign_column_name": "id",
+          "constraint_name": "boletins_publicado_por_fkey"
+        }
+      ],
+      "indexes": [
+        {
+          "index_name": "boletins_pkey",
+          "column_name": "id",
+          "is_unique": true,
+          "is_primary": true
+        },
+        {
+          "index_name": "boletins_data_periodo_key",
+          "column_name": "data",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "boletins_data_periodo_key",
+          "column_name": "periodo",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_boletins_data_periodo",
+          "column_name": "data",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_boletins_data_periodo",
+          "column_name": "periodo",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_boletins_publicado",
+          "column_name": "publicado",
+          "is_unique": false,
+          "is_primary": false
+        }
+      ],
+      "row_count": 36
+    },
+    "checklist_itens": {
+      "table_name": "checklist_itens",
+      "table_type": "BASE TABLE",
+      "table_comment": null,
+      "columns": [
+        {
+          "column_name": "id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": "gen_random_uuid()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "voo_id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "bloco",
+          "data_type": "integer",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": 32,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "item_numero",
+          "data_type": "integer",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": 32,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "descricao",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "marcado",
+          "data_type": "boolean",
+          "is_nullable": "YES",
+          "column_default": "false",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "motivo_nao_marcado",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "observacoes",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "marcado_em",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "marcado_por",
+          "data_type": "uuid",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "created_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "created_by",
+          "data_type": "uuid",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "preenchido_por",
+          "data_type": "uuid",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": "Timestamp da �ltima atualiza��o do registro"
+        }
+      ],
+      "primary_keys": [
+        {
+          "column_name": "id"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column_name": "created_by",
+          "foreign_table_name": "users",
+          "foreign_column_name": "id",
+          "constraint_name": "checklist_itens_created_by_fkey"
+        },
+        {
+          "column_name": "marcado_por",
+          "foreign_table_name": "users",
+          "foreign_column_name": "id",
+          "constraint_name": "checklist_itens_marcado_por_fkey"
+        },
+        {
+          "column_name": "preenchido_por",
+          "foreign_table_name": "users",
+          "foreign_column_name": "id",
+          "constraint_name": "checklist_itens_preenchido_por_fkey"
+        },
+        {
+          "column_name": "voo_id",
+          "foreign_table_name": "voos",
+          "foreign_column_name": "id",
+          "constraint_name": "checklist_itens_voo_id_fkey"
+        }
+      ],
+      "indexes": [
+        {
+          "index_name": "checklist_itens_pkey",
+          "column_name": "id",
+          "is_unique": true,
+          "is_primary": true
+        },
+        {
+          "index_name": "unique_voo_bloco_item",
+          "column_name": "bloco",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "unique_voo_bloco_item",
+          "column_name": "item_numero",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "unique_voo_bloco_item",
+          "column_name": "voo_id",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_checklist_voo",
+          "column_name": "voo_id",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_checklist_bloco",
+          "column_name": "bloco",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_checklist_marcado",
+          "column_name": "marcado",
+          "is_unique": false,
+          "is_primary": false
+        }
+      ],
+      "row_count": 468
+    },
+    "dados_offline": {
+      "table_name": "dados_offline",
+      "table_type": "BASE TABLE",
+      "table_comment": "Fila de sincronização para funcionalidade offline PWA",
+      "columns": [
+        {
+          "column_name": "id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": "gen_random_uuid()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "user_id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": "ID do usuário que criou o item offline"
+        },
+        {
+          "column_name": "tipo_dados",
+          "data_type": "USER-DEFINED",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": "Tipo de dados: voo, checklist, anexo, balao, vinculo"
+        },
+        {
+          "column_name": "dados_json",
+          "data_type": "jsonb",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": "Dados completos do item em formato JSON"
+        },
+        {
+          "column_name": "operacao",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": "Operação realizada: CREATE, UPDATE, DELETE"
+        },
+        {
+          "column_name": "status",
+          "data_type": "USER-DEFINED",
+          "is_nullable": "YES",
+          "column_default": "'pendente'::status_sync",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "tentativas_sync",
+          "data_type": "integer",
+          "is_nullable": "YES",
+          "column_default": "0",
+          "character_maximum_length": null,
+          "numeric_precision": 32,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "max_tentativas",
+          "data_type": "integer",
+          "is_nullable": "YES",
+          "column_default": "5",
+          "character_maximum_length": null,
+          "numeric_precision": 32,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "ultimo_erro",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "erro_detalhado",
+          "data_type": "jsonb",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "temp_id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": "ID temporário gerado no cliente (UUID)"
+        },
+        {
+          "column_name": "real_id",
+          "data_type": "uuid",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": "ID real no servidor após sincronização"
+        },
+        {
+          "column_name": "conflito_detectado",
+          "data_type": "boolean",
+          "is_nullable": "YES",
+          "column_default": "false",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "dados_servidor",
+          "data_type": "jsonb",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "created_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "sincronizado_em",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "ultima_tentativa",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        }
+      ],
+      "primary_keys": [
+        {
+          "column_name": "id"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column_name": "user_id",
+          "foreign_table_name": "users",
+          "foreign_column_name": "id",
+          "constraint_name": "dados_offline_user_id_fkey"
+        }
+      ],
+      "indexes": [
+        {
+          "index_name": "dados_offline_pkey",
+          "column_name": "id",
+          "is_unique": true,
+          "is_primary": true
+        },
+        {
+          "index_name": "idx_dados_offline_user",
+          "column_name": "user_id",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_dados_offline_status",
+          "column_name": "status",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_dados_offline_tipo",
+          "column_name": "tipo_dados",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_dados_offline_temp_id",
+          "column_name": "temp_id",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_dados_offline_real_id",
+          "column_name": "real_id",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_dados_offline_created_at",
+          "column_name": "created_at",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_dados_offline_user_status",
+          "column_name": "status",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_dados_offline_user_status",
+          "column_name": "user_id",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_dados_offline_pendentes",
+          "column_name": "status",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_dados_offline_pendentes",
+          "column_name": "user_id",
+          "is_unique": false,
+          "is_primary": false
+        }
+      ],
+      "row_count": 0
+    },
+    "logs_atividade": {
+      "table_name": "logs_atividade",
+      "table_type": "BASE TABLE",
+      "table_comment": null,
+      "columns": [
+        {
+          "column_name": "id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": "gen_random_uuid()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "usuario_id",
+          "data_type": "uuid",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "acao",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "detalhes",
+          "data_type": "jsonb",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "created_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        }
+      ],
+      "primary_keys": [
+        {
+          "column_name": "id"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column_name": "usuario_id",
+          "foreign_table_name": "usuarios_admin",
+          "foreign_column_name": "id",
+          "constraint_name": "logs_atividade_usuario_id_fkey"
+        }
+      ],
+      "indexes": [
+        {
+          "index_name": "logs_atividade_pkey",
+          "column_name": "id",
+          "is_unique": true,
+          "is_primary": true
+        },
+        {
+          "index_name": "idx_logs_usuario_data",
+          "column_name": "created_at",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_logs_usuario_data",
+          "column_name": "usuario_id",
+          "is_unique": false,
+          "is_primary": false
+        }
+      ],
+      "row_count": 6
+    },
+    "membros": {
+      "table_name": "membros",
+      "table_type": "BASE TABLE",
+      "table_comment": null,
+      "columns": [
+        {
+          "column_name": "id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": "gen_random_uuid()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "nome_completo",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "email",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "telefone",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "tipo",
+          "data_type": "USER-DEFINED",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "cpf",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "cnpj",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "nome_empresa",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "volumes_baloes",
+          "data_type": "jsonb",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "observacoes",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "comprovante_url",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "status",
+          "data_type": "USER-DEFINED",
+          "is_nullable": "YES",
+          "column_default": "'pendente'::membro_status",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "pagamento_inscricao",
+          "data_type": "USER-DEFINED",
+          "is_nullable": "YES",
+          "column_default": "'aguardando'::membro_pagto_inscricao",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "ultima_mensalidade",
+          "data_type": "date",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "created_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "mensalidades_pagas",
+          "data_type": "ARRAY",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "endereco",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "cidade",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "estado",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "validade_rbac103",
+          "data_type": "date",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "associacao_rbac103",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "codigo_anac",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "validade_habilitacao",
+          "data_type": "date",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "numero_licenca",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "validade_cma",
+          "data_type": "date",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "username",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "senha_hash",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "user_id",
+          "data_type": "uuid",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        }
+      ],
+      "primary_keys": [
+        {
+          "column_name": "id"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column_name": "user_id",
+          "foreign_table_name": "users",
+          "foreign_column_name": "id",
+          "constraint_name": "membros_user_id_fkey"
+        }
+      ],
+      "indexes": [
+        {
+          "index_name": "membros_pkey",
+          "column_name": "id",
+          "is_unique": true,
+          "is_primary": true
+        },
+        {
+          "index_name": "idx_membros_status",
+          "column_name": "status",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_membros_tipo",
+          "column_name": "tipo",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_membros_email",
+          "column_name": "email",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_membros_created_at",
+          "column_name": "created_at",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_membros_ultima_mensalidade",
+          "column_name": "ultima_mensalidade",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "membros_username_key",
+          "column_name": "username",
+          "is_unique": true,
+          "is_primary": false
+        }
+      ],
+      "row_count": 68
+    },
+    "paginas_cms": {
+      "table_name": "paginas_cms",
+      "table_type": "BASE TABLE",
+      "table_comment": null,
+      "columns": [
+        {
+          "column_name": "id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": "gen_random_uuid()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "slug",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "titulo",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "conteudo",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "updated_by",
+          "data_type": "uuid",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        }
+      ],
+      "primary_keys": [
+        {
+          "column_name": "id"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column_name": "updated_by",
+          "foreign_table_name": "usuarios_admin",
+          "foreign_column_name": "id",
+          "constraint_name": "paginas_cms_updated_by_fkey"
+        }
+      ],
+      "indexes": [
+        {
+          "index_name": "paginas_cms_pkey",
+          "column_name": "id",
+          "is_unique": true,
+          "is_primary": true
+        },
+        {
+          "index_name": "paginas_cms_slug_key",
+          "column_name": "slug",
+          "is_unique": true,
+          "is_primary": false
+        }
+      ],
+      "row_count": 6
+    },
+    "permission_audit_log": {
+      "table_name": "permission_audit_log",
+      "table_type": "BASE TABLE",
+      "table_comment": "Log de auditoria para todas as mudan�as de permiss�es",
+      "columns": [
+        {
+          "column_name": "id",
+          "data_type": "bigint",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": 64,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "timestamp",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "NO",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "admin_user_id",
+          "data_type": "uuid",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "target_user_id",
+          "data_type": "uuid",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "action",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "permission_type",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "recurso",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "acao",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "old_value",
+          "data_type": "jsonb",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "new_value",
+          "data_type": "jsonb",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "reason",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "ip_address",
+          "data_type": "inet",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "user_agent",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        }
+      ],
+      "primary_keys": [
+        {
+          "column_name": "id"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column_name": "admin_user_id",
+          "foreign_table_name": "users",
+          "foreign_column_name": "id",
+          "constraint_name": "permission_audit_log_admin_user_id_fkey"
+        },
+        {
+          "column_name": "target_user_id",
+          "foreign_table_name": "users",
+          "foreign_column_name": "id",
+          "constraint_name": "permission_audit_log_target_user_id_fkey"
+        }
+      ],
+      "indexes": [
+        {
+          "index_name": "permission_audit_log_pkey",
+          "column_name": "id",
+          "is_unique": true,
+          "is_primary": true
+        },
+        {
+          "index_name": "idx_permission_audit_log_timestamp",
+          "column_name": "timestamp",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_permission_audit_log_target_user",
+          "column_name": "target_user_id",
+          "is_unique": false,
+          "is_primary": false
+        }
+      ],
+      "row_count": 4
+    },
+    "permissoes": {
+      "table_name": "permissoes",
+      "table_type": "BASE TABLE",
+      "table_comment": null,
+      "columns": [
+        {
+          "column_name": "id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": "gen_random_uuid()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "role",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "recurso",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "acao",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "permitido",
+          "data_type": "boolean",
+          "is_nullable": "NO",
+          "column_default": "true",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "criado_em",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "atualizado_em",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        }
+      ],
+      "primary_keys": [
+        {
+          "column_name": "id"
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "index_name": "permissoes_pkey",
+          "column_name": "id",
+          "is_unique": true,
+          "is_primary": true
+        },
+        {
+          "index_name": "idx_permissoes_role_recurso_acao",
+          "column_name": "acao",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_permissoes_role_recurso_acao",
+          "column_name": "recurso",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_permissoes_role_recurso_acao",
+          "column_name": "role",
+          "is_unique": false,
+          "is_primary": false
+        }
+      ],
+      "row_count": 120
+    },
+    "push_delivery_logs": {
+      "table_name": "push_delivery_logs",
+      "table_type": "BASE TABLE",
+      "table_comment": null,
+      "columns": [
+        {
+          "column_name": "id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": "gen_random_uuid()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "notification_id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "subscription_id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "user_id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "delivery_status",
+          "data_type": "character varying",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": 20,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "http_status",
+          "data_type": "integer",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": 32,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "error_message",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "push_service_response",
+          "data_type": "jsonb",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "user_agent",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "clicked_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "sent_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "created_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        }
+      ],
+      "primary_keys": [
+        {
+          "column_name": "id"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column_name": "notification_id",
+          "foreign_table_name": "push_notifications",
+          "foreign_column_name": "id",
+          "constraint_name": "push_delivery_logs_notification_id_fkey"
+        },
+        {
+          "column_name": "subscription_id",
+          "foreign_table_name": "push_subscriptions",
+          "foreign_column_name": "id",
+          "constraint_name": "push_delivery_logs_subscription_id_fkey"
+        },
+        {
+          "column_name": "user_id",
+          "foreign_table_name": "users",
+          "foreign_column_name": "id",
+          "constraint_name": "push_delivery_logs_user_id_fkey"
+        }
+      ],
+      "indexes": [
+        {
+          "index_name": "push_delivery_logs_pkey",
+          "column_name": "id",
+          "is_unique": true,
+          "is_primary": true
+        },
+        {
+          "index_name": "idx_push_delivery_notification",
+          "column_name": "notification_id",
+          "is_unique": false,
+          "is_primary": false
+        }
+      ],
+      "row_count": 9
+    },
+    "push_notifications": {
+      "table_name": "push_notifications",
+      "table_type": "BASE TABLE",
+      "table_comment": null,
+      "columns": [
+        {
+          "column_name": "id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": "gen_random_uuid()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "created_by",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "title",
+          "data_type": "character varying",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": 50,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "message",
+          "data_type": "character varying",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": 120,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "internal_link",
+          "data_type": "character varying",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": 200,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "icon_url",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "target_audience",
+          "data_type": "jsonb",
+          "is_nullable": "NO",
+          "column_default": "'{}'::jsonb",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "send_type",
+          "data_type": "character varying",
+          "is_nullable": "NO",
+          "column_default": "'immediate'::character varying",
+          "character_maximum_length": 20,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "scheduled_date",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "recurring_rule",
+          "data_type": "jsonb",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "status",
+          "data_type": "character varying",
+          "is_nullable": "NO",
+          "column_default": "'draft'::character varying",
+          "character_maximum_length": 20,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "total_targeted",
+          "data_type": "integer",
+          "is_nullable": "YES",
+          "column_default": "0",
+          "character_maximum_length": null,
+          "numeric_precision": 32,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "total_sent",
+          "data_type": "integer",
+          "is_nullable": "YES",
+          "column_default": "0",
+          "character_maximum_length": null,
+          "numeric_precision": 32,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "total_delivered",
+          "data_type": "integer",
+          "is_nullable": "YES",
+          "column_default": "0",
+          "character_maximum_length": null,
+          "numeric_precision": 32,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "total_failed",
+          "data_type": "integer",
+          "is_nullable": "YES",
+          "column_default": "0",
+          "character_maximum_length": null,
+          "numeric_precision": 32,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "total_expired",
+          "data_type": "integer",
+          "is_nullable": "YES",
+          "column_default": "0",
+          "character_maximum_length": null,
+          "numeric_precision": 32,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "sent_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "created_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        }
+      ],
+      "primary_keys": [
+        {
+          "column_name": "id"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column_name": "created_by",
+          "foreign_table_name": "users",
+          "foreign_column_name": "id",
+          "constraint_name": "push_notifications_created_by_fkey"
+        }
+      ],
+      "indexes": [
+        {
+          "index_name": "push_notifications_pkey",
+          "column_name": "id",
+          "is_unique": true,
+          "is_primary": true
+        },
+        {
+          "index_name": "idx_push_notifications_created_by",
+          "column_name": "created_by",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_push_notifications_status",
+          "column_name": "status",
+          "is_unique": false,
+          "is_primary": false
+        }
+      ],
+      "row_count": 11
+    },
+    "push_scheduled_jobs": {
+      "table_name": "push_scheduled_jobs",
+      "table_type": "BASE TABLE",
+      "table_comment": null,
+      "columns": [
+        {
+          "column_name": "id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": "gen_random_uuid()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "notification_id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "job_type",
+          "data_type": "character varying",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": 20,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "next_run_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "recurring_rule",
+          "data_type": "jsonb",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "status",
+          "data_type": "character varying",
+          "is_nullable": "NO",
+          "column_default": "'pending'::character varying",
+          "character_maximum_length": 20,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "last_run_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "run_count",
+          "data_type": "integer",
+          "is_nullable": "YES",
+          "column_default": "0",
+          "character_maximum_length": null,
+          "numeric_precision": 32,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "max_runs",
+          "data_type": "integer",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": 32,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "failure_count",
+          "data_type": "integer",
+          "is_nullable": "YES",
+          "column_default": "0",
+          "character_maximum_length": null,
+          "numeric_precision": 32,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "last_error",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "created_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        }
+      ],
+      "primary_keys": [
+        {
+          "column_name": "id"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column_name": "notification_id",
+          "foreign_table_name": "push_notifications",
+          "foreign_column_name": "id",
+          "constraint_name": "push_scheduled_jobs_notification_id_fkey"
+        }
+      ],
+      "indexes": [
+        {
+          "index_name": "push_scheduled_jobs_pkey",
+          "column_name": "id",
+          "is_unique": true,
+          "is_primary": true
+        },
+        {
+          "index_name": "idx_push_jobs_next_run",
+          "column_name": "next_run_at",
+          "is_unique": false,
+          "is_primary": false
+        }
+      ],
+      "row_count": 4
+    },
+    "push_subscriptions": {
+      "table_name": "push_subscriptions",
+      "table_type": "BASE TABLE",
+      "table_comment": null,
+      "columns": [
+        {
+          "column_name": "id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": "gen_random_uuid()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "user_id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "endpoint",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "p256dh_key",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "auth_key",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "user_agent",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "ip_address",
+          "data_type": "inet",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "platform",
+          "data_type": "character varying",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": 50,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "active",
+          "data_type": "boolean",
+          "is_nullable": "YES",
+          "column_default": "true",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "last_used_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "expires_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "created_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        }
+      ],
+      "primary_keys": [
+        {
+          "column_name": "id"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column_name": "user_id",
+          "foreign_table_name": "users",
+          "foreign_column_name": "id",
+          "constraint_name": "push_subscriptions_user_id_fkey"
+        }
+      ],
+      "indexes": [
+        {
+          "index_name": "push_subscriptions_pkey",
+          "column_name": "id",
+          "is_unique": true,
+          "is_primary": true
+        },
+        {
+          "index_name": "push_subscriptions_user_id_endpoint_key",
+          "column_name": "endpoint",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "push_subscriptions_user_id_endpoint_key",
+          "column_name": "user_id",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_push_subscriptions_user_id",
+          "column_name": "user_id",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_push_subscriptions_active",
+          "column_name": "active",
+          "is_unique": false,
+          "is_primary": false
+        }
+      ],
+      "row_count": 3
+    },
+    "user_permissions": {
+      "table_name": "user_permissions",
+      "table_type": "BASE TABLE",
+      "table_comment": "Permiss�es espec�ficas por usu�rio individual, complementam as permiss�es por role",
+      "columns": [
+        {
+          "column_name": "id",
+          "data_type": "bigint",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": 64,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "user_id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "recurso",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "acao",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "permitido",
+          "data_type": "boolean",
+          "is_nullable": "NO",
+          "column_default": "true",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "nivel_acesso",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": "'basico'::text",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "restricoes",
+          "data_type": "jsonb",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "concedido_por",
+          "data_type": "uuid",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "concedido_em",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "NO",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "data_expiracao",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "created_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "NO",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "NO",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        }
+      ],
+      "primary_keys": [
+        {
+          "column_name": "id"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column_name": "concedido_por",
+          "foreign_table_name": "users",
+          "foreign_column_name": "id",
+          "constraint_name": "user_permissions_concedido_por_fkey"
+        },
+        {
+          "column_name": "user_id",
+          "foreign_table_name": "users",
+          "foreign_column_name": "id",
+          "constraint_name": "user_permissions_user_id_fkey"
+        }
+      ],
+      "indexes": [
+        {
+          "index_name": "user_permissions_pkey",
+          "column_name": "id",
+          "is_unique": true,
+          "is_primary": true
+        },
+        {
+          "index_name": "user_permissions_user_id_recurso_acao_key",
+          "column_name": "acao",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "user_permissions_user_id_recurso_acao_key",
+          "column_name": "recurso",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "user_permissions_user_id_recurso_acao_key",
+          "column_name": "user_id",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_user_permissions_user_id",
+          "column_name": "user_id",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_user_permissions_recurso",
+          "column_name": "recurso",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_user_permissions_acao",
+          "column_name": "acao",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_user_permissions_permitido",
+          "column_name": "permitido",
+          "is_unique": false,
+          "is_primary": false
+        }
+      ],
+      "row_count": 2
+    },
+    "users": {
+      "table_name": "users",
+      "table_type": "BASE TABLE",
+      "table_comment": "Auth: Stores user login data within a secure schema.",
+      "columns": [
+        {
+          "column_name": "id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": "gen_random_uuid()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": "gen_random_uuid()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "email",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "email",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "role",
+          "data_type": "USER-DEFINED",
+          "is_nullable": "NO",
+          "column_default": "'leitura'::user_role",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "role",
+          "data_type": "USER-DEFINED",
+          "is_nullable": "NO",
+          "column_default": "'leitura'::user_role",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "created_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "created_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "nome",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "nome",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "username",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "username",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "senha_hash",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "senha_hash",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "ativo",
+          "data_type": "boolean",
+          "is_nullable": "YES",
+          "column_default": "true",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "ativo",
+          "data_type": "boolean",
+          "is_nullable": "YES",
+          "column_default": "true",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "primeira_senha",
+          "data_type": "boolean",
+          "is_nullable": "YES",
+          "column_default": "true",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "primeira_senha",
+          "data_type": "boolean",
+          "is_nullable": "YES",
+          "column_default": "true",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "auth_id",
+          "data_type": "uuid",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "auth_id",
+          "data_type": "uuid",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": "UUID linking to auth.users.id for Supabase authentication integration"
+        },
+        {
+          "column_name": "migrated_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "migrated_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": "Timestamp when user was migrated to Supabase Auth system"
+        },
+        {
+          "column_name": "cnpj",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "cnpj",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "razao_social",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "razao_social",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "nome_fantasia",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "nome_fantasia",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "telefone",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "telefone",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "celular",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "celular",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "endereco",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "endereco",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "cidade",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "cidade",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "cep",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "cep",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "whatsapp_group_joined",
+          "data_type": "boolean",
+          "is_nullable": "YES",
+          "column_default": "false",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "whatsapp_group_joined",
+          "data_type": "boolean",
+          "is_nullable": "YES",
+          "column_default": "false",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "whatsapp_modal_shown",
+          "data_type": "boolean",
+          "is_nullable": "YES",
+          "column_default": "false",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "whatsapp_modal_shown",
+          "data_type": "boolean",
+          "is_nullable": "YES",
+          "column_default": "false",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        }
+      ],
+      "primary_keys": [
+        {
+          "column_name": "id"
+        },
+        {
+          "column_name": "id"
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "index_name": "users_pkey",
+          "column_name": "id",
+          "is_unique": true,
+          "is_primary": true
+        },
+        {
+          "index_name": "users_instance_id_idx",
+          "column_name": "instance_id",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "users_instance_id_email_idx",
+          "column_name": "instance_id",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "confirmation_token_idx",
+          "column_name": "confirmation_token",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "recovery_token_idx",
+          "column_name": "recovery_token",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "email_change_token_current_idx",
+          "column_name": "email_change_token_current",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "email_change_token_new_idx",
+          "column_name": "email_change_token_new",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "reauthentication_token_idx",
+          "column_name": "reauthentication_token",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "users_email_partial_key",
+          "column_name": "email",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "users_phone_key",
+          "column_name": "phone",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "users_is_anonymous_idx",
+          "column_name": "is_anonymous",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_users_auth_id",
+          "column_name": "auth_id",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "users_pkey",
+          "column_name": "id",
+          "is_unique": true,
+          "is_primary": true
+        },
+        {
+          "index_name": "users_email_key",
+          "column_name": "email",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "users_username_key",
+          "column_name": "username",
+          "is_unique": true,
+          "is_primary": false
+        }
+      ],
+      "row_count": 79
+    },
+    "usuarios_admin": {
+      "table_name": "usuarios_admin",
+      "table_type": "BASE TABLE",
+      "table_comment": null,
+      "columns": [
+        {
+          "column_name": "id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": "gen_random_uuid()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "email",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "senha_hash",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "nome",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "perfil",
+          "data_type": "USER-DEFINED",
+          "is_nullable": "NO",
+          "column_default": "'editor'::perfil_usuario",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "ativo",
+          "data_type": "boolean",
+          "is_nullable": "YES",
+          "column_default": "true",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "created_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        }
+      ],
+      "primary_keys": [
+        {
+          "column_name": "id"
+        }
+      ],
+      "foreign_keys": [],
+      "indexes": [
+        {
+          "index_name": "usuarios_admin_pkey",
+          "column_name": "id",
+          "is_unique": true,
+          "is_primary": true
+        },
+        {
+          "index_name": "usuarios_admin_email_key",
+          "column_name": "email",
+          "is_unique": true,
+          "is_primary": false
+        }
+      ],
+      "row_count": 2
+    },
+    "vinculos_agencia_piloto": {
+      "table_name": "vinculos_agencia_piloto",
+      "table_type": "BASE TABLE",
+      "table_comment": null,
+      "columns": [
+        {
+          "column_name": "id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": "gen_random_uuid()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "agencia_id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "piloto_id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "status",
+          "data_type": "USER-DEFINED",
+          "is_nullable": "YES",
+          "column_default": "'pendente'::vinculo_status",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "observacoes",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "convite_enviado_em",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "respondido_em",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "created_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        }
+      ],
+      "primary_keys": [
+        {
+          "column_name": "id"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column_name": "agencia_id",
+          "foreign_table_name": "membros",
+          "foreign_column_name": "id",
+          "constraint_name": "vinculos_agencia_piloto_agencia_id_fkey"
+        },
+        {
+          "column_name": "piloto_id",
+          "foreign_table_name": "membros",
+          "foreign_column_name": "id",
+          "constraint_name": "vinculos_agencia_piloto_piloto_id_fkey"
+        }
+      ],
+      "indexes": [
+        {
+          "index_name": "vinculos_agencia_piloto_pkey",
+          "column_name": "id",
+          "is_unique": true,
+          "is_primary": true
+        },
+        {
+          "index_name": "unique_agencia_piloto",
+          "column_name": "agencia_id",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "unique_agencia_piloto",
+          "column_name": "piloto_id",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_vinculos_agencia",
+          "column_name": "agencia_id",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_vinculos_piloto",
+          "column_name": "piloto_id",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_vinculos_status",
+          "column_name": "status",
+          "is_unique": false,
+          "is_primary": false
+        }
+      ],
+      "row_count": 2
+    },
+    "voos": {
+      "table_name": "voos",
+      "table_type": "BASE TABLE",
+      "table_comment": "RLS policies fixed on 2025-07-21 - Added multiple policy approaches to ensure pilot access",
+      "columns": [
+        {
+          "column_name": "id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": "gen_random_uuid()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "piloto_id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "agencia_id",
+          "data_type": "uuid",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "data_voo",
+          "data_type": "date",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "periodo",
+          "data_type": "USER-DEFINED",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "horario_previsto",
+          "data_type": "time without time zone",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "horario_real_decolagem",
+          "data_type": "time without time zone",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "horario_real_pouso",
+          "data_type": "time without time zone",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "local_decolagem_previsto",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "local_decolagem_real",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "local_pouso_real",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "adultos_previstos",
+          "data_type": "integer",
+          "is_nullable": "YES",
+          "column_default": "0",
+          "character_maximum_length": null,
+          "numeric_precision": 32,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "criancas_previstas",
+          "data_type": "integer",
+          "is_nullable": "YES",
+          "column_default": "0",
+          "character_maximum_length": null,
+          "numeric_precision": 32,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "adultos_reais",
+          "data_type": "integer",
+          "is_nullable": "YES",
+          "column_default": "0",
+          "character_maximum_length": null,
+          "numeric_precision": 32,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "criancas_reais",
+          "data_type": "integer",
+          "is_nullable": "YES",
+          "column_default": "0",
+          "character_maximum_length": null,
+          "numeric_precision": 32,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "observacoes_planejamento",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "observacoes_pos_voo",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "status",
+          "data_type": "USER-DEFINED",
+          "is_nullable": "YES",
+          "column_default": "'rascunho'::voo_status",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "motivo_cancelamento",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "created_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "created_by",
+          "data_type": "uuid",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": "ID do usuário que criou o voo"
+        },
+        {
+          "column_name": "adultos_transportados",
+          "data_type": "integer",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": 32,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "criancas_transportadas",
+          "data_type": "integer",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": 32,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "duracao_minutos",
+          "data_type": "integer",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": 32,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "altitude_maxima",
+          "data_type": "integer",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": 32,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "local_pouso",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        }
+      ],
+      "primary_keys": [
+        {
+          "column_name": "id"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column_name": "agencia_id",
+          "foreign_table_name": "membros",
+          "foreign_column_name": "id",
+          "constraint_name": "voos_agencia_id_fkey"
+        },
+        {
+          "column_name": "created_by",
+          "foreign_table_name": "users",
+          "foreign_column_name": "id",
+          "constraint_name": "voos_created_by_fkey"
+        },
+        {
+          "column_name": "piloto_id",
+          "foreign_table_name": "membros",
+          "foreign_column_name": "id",
+          "constraint_name": "voos_piloto_id_fkey"
+        }
+      ],
+      "indexes": [
+        {
+          "index_name": "voos_pkey",
+          "column_name": "id",
+          "is_unique": true,
+          "is_primary": true
+        },
+        {
+          "index_name": "idx_voos_piloto",
+          "column_name": "piloto_id",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_voos_agencia",
+          "column_name": "agencia_id",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_voos_data",
+          "column_name": "data_voo",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_voos_status",
+          "column_name": "status",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_voos_periodo",
+          "column_name": "periodo",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_voos_created_by",
+          "column_name": "created_by",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_voos_data_status",
+          "column_name": "data_voo",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_voos_data_status",
+          "column_name": "status",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_voos_piloto_data",
+          "column_name": "data_voo",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_voos_piloto_data",
+          "column_name": "piloto_id",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "voos_data_voo_periodo_piloto_id_key",
+          "column_name": "data_voo",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "voos_data_voo_periodo_piloto_id_key",
+          "column_name": "periodo",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "voos_data_voo_periodo_piloto_id_key",
+          "column_name": "piloto_id",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_voos_data_periodo_status",
+          "column_name": "data_voo",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_voos_data_periodo_status",
+          "column_name": "periodo",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_voos_data_periodo_status",
+          "column_name": "status",
+          "is_unique": false,
+          "is_primary": false
+        }
+      ],
+      "row_count": 13
+    },
+    "voos_anexos": {
+      "table_name": "voos_anexos",
+      "table_type": "BASE TABLE",
+      "table_comment": "Anexos dos voos: track-logs, fotos e regulamentos assinados",
+      "columns": [
+        {
+          "column_name": "id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": "gen_random_uuid()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "voo_id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": "ID do voo relacionado"
+        },
+        {
+          "column_name": "tipo",
+          "data_type": "USER-DEFINED",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": "Tipo do anexo: track_log, foto_voo ou regulamento_assinado"
+        },
+        {
+          "column_name": "nome_arquivo",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": "Nome único do arquivo no storage"
+        },
+        {
+          "column_name": "nome_original",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": "Nome original do arquivo enviado pelo usuário"
+        },
+        {
+          "column_name": "url_storage",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": "Caminho completo no Supabase Storage"
+        },
+        {
+          "column_name": "tamanho_bytes",
+          "data_type": "bigint",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": 64,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "mime_type",
+          "data_type": "text",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "uploaded_em",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "NO",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "uploaded_por",
+          "data_type": "uuid",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "metadata",
+          "data_type": "jsonb",
+          "is_nullable": "YES",
+          "column_default": "'{}'::jsonb",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "publico",
+          "data_type": "boolean",
+          "is_nullable": "NO",
+          "column_default": "false",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": "Se o anexo pode ser acessado publicamente"
+        },
+        {
+          "column_name": "created_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "NO",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "updated_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "NO",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        }
+      ],
+      "primary_keys": [
+        {
+          "column_name": "id"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column_name": "voo_id",
+          "foreign_table_name": "voos",
+          "foreign_column_name": "id",
+          "constraint_name": "voos_anexos_voo_id_fkey"
+        }
+      ],
+      "indexes": [
+        {
+          "index_name": "voos_anexos_pkey",
+          "column_name": "id",
+          "is_unique": true,
+          "is_primary": true
+        },
+        {
+          "index_name": "idx_voos_anexos_voo_id",
+          "column_name": "voo_id",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_voos_anexos_tipo",
+          "column_name": "tipo",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_voos_anexos_uploaded_em",
+          "column_name": "uploaded_em",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_voos_anexos_publico",
+          "column_name": "publico",
+          "is_unique": false,
+          "is_primary": false
+        }
+      ],
+      "row_count": 2
+    },
+    "voos_baloes": {
+      "table_name": "voos_baloes",
+      "table_type": "BASE TABLE",
+      "table_comment": null,
+      "columns": [
+        {
+          "column_name": "id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": "gen_random_uuid()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "voo_id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "balao_id",
+          "data_type": "uuid",
+          "is_nullable": "NO",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "adultos_previstos",
+          "data_type": "integer",
+          "is_nullable": "YES",
+          "column_default": "0",
+          "character_maximum_length": null,
+          "numeric_precision": 32,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "criancas_previstas",
+          "data_type": "integer",
+          "is_nullable": "YES",
+          "column_default": "0",
+          "character_maximum_length": null,
+          "numeric_precision": 32,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "adultos_reais",
+          "data_type": "integer",
+          "is_nullable": "YES",
+          "column_default": "0",
+          "character_maximum_length": null,
+          "numeric_precision": 32,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "criancas_reais",
+          "data_type": "integer",
+          "is_nullable": "YES",
+          "column_default": "0",
+          "character_maximum_length": null,
+          "numeric_precision": 32,
+          "numeric_scale": 0,
+          "column_comment": null
+        },
+        {
+          "column_name": "observacoes",
+          "data_type": "text",
+          "is_nullable": "YES",
+          "column_default": null,
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        },
+        {
+          "column_name": "created_at",
+          "data_type": "timestamp with time zone",
+          "is_nullable": "YES",
+          "column_default": "now()",
+          "character_maximum_length": null,
+          "numeric_precision": null,
+          "numeric_scale": null,
+          "column_comment": null
+        }
+      ],
+      "primary_keys": [
+        {
+          "column_name": "id"
+        }
+      ],
+      "foreign_keys": [
+        {
+          "column_name": "balao_id",
+          "foreign_table_name": "baloes",
+          "foreign_column_name": "id",
+          "constraint_name": "voos_baloes_balao_id_fkey"
+        },
+        {
+          "column_name": "voo_id",
+          "foreign_table_name": "voos",
+          "foreign_column_name": "id",
+          "constraint_name": "voos_baloes_voo_id_fkey"
+        }
+      ],
+      "indexes": [
+        {
+          "index_name": "voos_baloes_pkey",
+          "column_name": "id",
+          "is_unique": true,
+          "is_primary": true
+        },
+        {
+          "index_name": "unique_voo_balao",
+          "column_name": "balao_id",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "unique_voo_balao",
+          "column_name": "voo_id",
+          "is_unique": true,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_voos_baloes_voo",
+          "column_name": "voo_id",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_voos_baloes_balao",
+          "column_name": "balao_id",
+          "is_unique": false,
+          "is_primary": false
+        },
+        {
+          "index_name": "idx_vw_voos_balao_data_periodo",
+          "column_name": "balao_id",
+          "is_unique": false,
+          "is_primary": false
+        }
+      ],
+      "row_count": 8
+    }
+  },
+  "functions": [
+    {
+      "function_name": "atualizar_status_voo_por_checklist",
+      "return_type": "trigger",
+      "arguments": "",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "cleanup_expired_subscriptions",
+      "return_type": "integer",
+      "arguments": "",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "contar_anexos_voo",
+      "return_type": "integer",
+      "arguments": "p_voo_id uuid, p_tipo tipo_anexo DEFAULT NULL::tipo_anexo",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "criar_checklist_padrao",
+      "return_type": "void",
+      "arguments": "p_voo_id uuid",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "criar_checklist_sob_demanda",
+      "return_type": "void",
+      "arguments": "voo_id uuid",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "debug_admin_check",
+      "return_type": "TABLE(current_auth_uid text, auth_uid_is_null boolean, total_users_count bigint, admin_users_count bigint)",
+      "arguments": "",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "debug_all_policies",
+      "return_type": "json",
+      "arguments": "",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "debug_auth_uid",
+      "return_type": "json",
+      "arguments": "",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "debug_pilot_access",
+      "return_type": "TABLE(user_authenticated boolean, user_id uuid, is_pilot boolean, member_id uuid, member_status text)",
+      "arguments": "pilot_member_id uuid",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "fix_orphaned_users_safe",
+      "return_type": "TABLE(fixed_count integer, admin_fixed integer, pilot_fixed integer)",
+      "arguments": "",
+      "description": "Versão segura que não afeta cadastros existentes nem novos",
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "generate_slug",
+      "return_type": "text",
+      "arguments": "brand text, model text, year_model integer",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "gerar_nome_arquivo_unico",
+      "return_type": "text",
+      "arguments": "p_voo_id uuid, p_tipo tipo_anexo, p_extensao text",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "get_members_julho_2025",
+      "return_type": "TABLE(nome_exibicao text, tipo membro_tipo, status membro_status)",
+      "arguments": "",
+      "description": "Retorna membros que pagaram julho/2025 com nome correto para exibição.",
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "get_members_public_info",
+      "return_type": "TABLE(nome_exibicao text, tipo membro_tipo, status membro_status, mensalidades_pagas text[])",
+      "arguments": "",
+      "description": "Retorna todos os membros com mensalidades_pagas. Para empresas mostra nome_empresa, para pilotos mostra nome_completo.",
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "get_user_by_auth_id",
+      "return_type": "TABLE(id uuid, auth_id uuid, email text, nome text, role text, whatsapp_group_joined boolean, whatsapp_modal_shown boolean)",
+      "arguments": "p_auth_id uuid",
+      "description": "Função auxiliar para otimizar hook useUser",
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "get_user_combined_permissions",
+      "return_type": "TABLE(recurso text, acao text, permitido boolean, fonte text)",
+      "arguments": "p_user_id uuid",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "get_user_combined_permissions_debug_simple",
+      "return_type": "TABLE(recurso text, acao text, permitido boolean, fonte text, nivel_acesso text, restricoes jsonb)",
+      "arguments": "p_user_id uuid",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "get_user_combined_permissions_debug_v1",
+      "return_type": "TABLE(recurso text, acao text, permitido boolean, fonte text, nivel_acesso text, restricoes jsonb)",
+      "arguments": "p_user_id uuid",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "get_user_combined_permissions_debug_v2",
+      "return_type": "TABLE(recurso text, acao text, permitido boolean, fonte text, nivel_acesso text, restricoes jsonb)",
+      "arguments": "p_user_id uuid",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "handle_new_user",
+      "return_type": "trigger",
+      "arguments": "",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "is_admin_compatible",
+      "return_type": "boolean",
+      "arguments": "",
+      "description": "Verificação de admin compatível - versão final segura",
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "is_admin_user",
+      "return_type": "boolean",
+      "arguments": "",
+      "description": "Verifica se o usuário autenticado é admin por email",
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "is_member_owner",
+      "return_type": "boolean",
+      "arguments": "member_id uuid",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "is_member_owner_compatible",
+      "return_type": "boolean",
+      "arguments": "membro_id uuid",
+      "description": "Verificação de propriedade compatível - versão final segura",
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "is_user_member_owner",
+      "return_type": "boolean",
+      "arguments": "membro_id uuid",
+      "description": "Verifica se o usuário autenticado é dono do membro por user_id ou email",
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "limpar_dados_sincronizados",
+      "return_type": "integer",
+      "arguments": "p_dias_retencao integer DEFAULT 7",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "log_permission_change",
+      "return_type": "trigger",
+      "arguments": "",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "marcar_conflito",
+      "return_type": "boolean",
+      "arguments": "p_item_id uuid, p_dados_servidor jsonb",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "marcar_erro_sincronizacao",
+      "return_type": "boolean",
+      "arguments": "p_item_id uuid, p_erro text, p_erro_detalhado jsonb DEFAULT NULL::jsonb",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "marcar_sincronizado",
+      "return_type": "boolean",
+      "arguments": "p_item_id uuid, p_real_id uuid",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "obter_url_anexo_assinada",
+      "return_type": "text",
+      "arguments": "p_anexo_id uuid, p_duracao_segundos integer DEFAULT 3600",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "processar_fila_sincronizacao",
+      "return_type": "TABLE(item_id uuid, tipo_dados tipo_dados_offline, operacao text, dados_json jsonb, temp_id uuid)",
+      "arguments": "p_user_id uuid, p_limite integer DEFAULT 10",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "resolver_conflito",
+      "return_type": "boolean",
+      "arguments": "p_item_id uuid, p_usar_servidor boolean DEFAULT false",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "set_tractor_slug",
+      "return_type": "trigger",
+      "arguments": "",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "test_balao_policy",
+      "return_type": "json",
+      "arguments": "",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "test_insert_real",
+      "return_type": "json",
+      "arguments": "test_prefixo text, test_volume integer, test_nome text, test_obs text",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "trigger_anexos_cleanup_storage",
+      "return_type": "trigger",
+      "arguments": "",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "trigger_anexos_validation",
+      "return_type": "trigger",
+      "arguments": "",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "trigger_checklist_update_status_voo",
+      "return_type": "trigger",
+      "arguments": "",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "trigger_criar_checklist",
+      "return_type": "trigger",
+      "arguments": "",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "trigger_criar_checklist_automatico",
+      "return_type": "trigger",
+      "arguments": "",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "trigger_dados_offline_validation",
+      "return_type": "trigger",
+      "arguments": "",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "trigger_updated_at",
+      "return_type": "trigger",
+      "arguments": "",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "trigger_validar_balao",
+      "return_type": "trigger",
+      "arguments": "",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "trigger_validar_prefixo_balao",
+      "return_type": "trigger",
+      "arguments": "",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "trigger_voos_criar_checklist",
+      "return_type": "trigger",
+      "arguments": "",
+      "description": "Trigger que cria checklist usando ID correto da tabela users. Busca por auth_id primeiro, depois por email. Se falhar, cria sem associação.",
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "trigger_voos_insert_validation",
+      "return_type": "trigger",
+      "arguments": "",
+      "description": "Valida dados de voos na inserção, corrigindo created_by para usar users.id em vez de auth.uid()",
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "update_notification_stats",
+      "return_type": "trigger",
+      "arguments": "",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "update_updated_at_column",
+      "return_type": "trigger",
+      "arguments": "",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "user_has_permission",
+      "return_type": "boolean",
+      "arguments": "p_user_id uuid, p_recurso text, p_acao text",
+      "description": "Fun��o para verificar se usu�rio tem permiss�o espec�fica",
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "validar_dados_voo",
+      "return_type": "trigger",
+      "arguments": "",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "validar_motivo_checklist",
+      "return_type": "trigger",
+      "arguments": "",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "validar_prefixo_balao",
+      "return_type": "boolean",
+      "arguments": "prefixo text",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "validar_tipo_arquivo",
+      "return_type": "boolean",
+      "arguments": "p_tipo tipo_anexo, p_mime_type text, p_nome_arquivo text",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "validar_tipos_membros_vinculos",
+      "return_type": "trigger",
+      "arguments": "",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "validar_tipos_membros_voos",
+      "return_type": "trigger",
+      "arguments": "",
+      "description": null,
+      "language": "plpgsql"
+    },
+    {
+      "function_name": "verificar_disponibilidade_balao",
+      "return_type": "boolean",
+      "arguments": "p_balao_id uuid, p_data_voo date, p_periodo voo_periodo, p_voo_id uuid DEFAULT NULL::uuid",
+      "description": null,
+      "language": "plpgsql"
+    }
+  ],
+  "triggers": [
+    {
+      "trigger_name": "trigger_baloes_validar_prefixo",
+      "event_manipulation": "INSERT",
+      "event_object_table": "baloes",
+      "action_timing": "BEFORE",
+      "action_statement": "EXECUTE FUNCTION trigger_validar_prefixo_balao()"
+    },
+    {
+      "trigger_name": "trigger_baloes_validar_prefixo",
+      "event_manipulation": "UPDATE",
+      "event_object_table": "baloes",
+      "action_timing": "BEFORE",
+      "action_statement": "EXECUTE FUNCTION trigger_validar_prefixo_balao()"
+    },
+    {
+      "trigger_name": "trigger_validar_balao",
+      "event_manipulation": "UPDATE",
+      "event_object_table": "baloes",
+      "action_timing": "BEFORE",
+      "action_statement": "EXECUTE FUNCTION trigger_validar_balao()"
+    },
+    {
+      "trigger_name": "trigger_validar_balao",
+      "event_manipulation": "INSERT",
+      "event_object_table": "baloes",
+      "action_timing": "BEFORE",
+      "action_statement": "EXECUTE FUNCTION trigger_validar_balao()"
+    },
+    {
+      "trigger_name": "trigger_atualizar_status_voo",
+      "event_manipulation": "UPDATE",
+      "event_object_table": "checklist_itens",
+      "action_timing": "AFTER",
+      "action_statement": "EXECUTE FUNCTION atualizar_status_voo_por_checklist()"
+    },
+    {
+      "trigger_name": "trigger_checklist_update_status_voo",
+      "event_manipulation": "UPDATE",
+      "event_object_table": "checklist_itens",
+      "action_timing": "AFTER",
+      "action_statement": "EXECUTE FUNCTION trigger_checklist_update_status_voo()"
+    },
+    {
+      "trigger_name": "trigger_validar_motivo_checklist",
+      "event_manipulation": "INSERT",
+      "event_object_table": "checklist_itens",
+      "action_timing": "BEFORE",
+      "action_statement": "EXECUTE FUNCTION validar_motivo_checklist()"
+    },
+    {
+      "trigger_name": "trigger_validar_motivo_checklist",
+      "event_manipulation": "UPDATE",
+      "event_object_table": "checklist_itens",
+      "action_timing": "BEFORE",
+      "action_statement": "EXECUTE FUNCTION validar_motivo_checklist()"
+    },
+    {
+      "trigger_name": "trigger_dados_offline_validation",
+      "event_manipulation": "INSERT",
+      "event_object_table": "dados_offline",
+      "action_timing": "BEFORE",
+      "action_statement": "EXECUTE FUNCTION trigger_dados_offline_validation()"
+    },
+    {
+      "trigger_name": "trigger_push_notifications_updated_at",
+      "event_manipulation": "UPDATE",
+      "event_object_table": "push_notifications",
+      "action_timing": "BEFORE",
+      "action_statement": "EXECUTE FUNCTION trigger_updated_at()"
+    },
+    {
+      "trigger_name": "trigger_push_jobs_updated_at",
+      "event_manipulation": "UPDATE",
+      "event_object_table": "push_scheduled_jobs",
+      "action_timing": "BEFORE",
+      "action_statement": "EXECUTE FUNCTION trigger_updated_at()"
+    },
+    {
+      "trigger_name": "trigger_push_subscriptions_updated_at",
+      "event_manipulation": "UPDATE",
+      "event_object_table": "push_subscriptions",
+      "action_timing": "BEFORE",
+      "action_statement": "EXECUTE FUNCTION trigger_updated_at()"
+    },
+    {
+      "trigger_name": "update_user_permissions_updated_at",
+      "event_manipulation": "UPDATE",
+      "event_object_table": "user_permissions",
+      "action_timing": "BEFORE",
+      "action_statement": "EXECUTE FUNCTION update_updated_at_column()"
+    },
+    {
+      "trigger_name": "user_permissions_audit",
+      "event_manipulation": "INSERT",
+      "event_object_table": "user_permissions",
+      "action_timing": "AFTER",
+      "action_statement": "EXECUTE FUNCTION log_permission_change()"
+    },
+    {
+      "trigger_name": "user_permissions_audit",
+      "event_manipulation": "UPDATE",
+      "event_object_table": "user_permissions",
+      "action_timing": "AFTER",
+      "action_statement": "EXECUTE FUNCTION log_permission_change()"
+    },
+    {
+      "trigger_name": "user_permissions_audit",
+      "event_manipulation": "DELETE",
+      "event_object_table": "user_permissions",
+      "action_timing": "AFTER",
+      "action_statement": "EXECUTE FUNCTION log_permission_change()"
+    },
+    {
+      "trigger_name": "update_users_updated_at",
+      "event_manipulation": "UPDATE",
+      "event_object_table": "users",
+      "action_timing": "BEFORE",
+      "action_statement": "EXECUTE FUNCTION update_updated_at_column()"
+    },
+    {
+      "trigger_name": "trigger_validar_tipos_vinculos",
+      "event_manipulation": "UPDATE",
+      "event_object_table": "vinculos_agencia_piloto",
+      "action_timing": "BEFORE",
+      "action_statement": "EXECUTE FUNCTION validar_tipos_membros_vinculos()"
+    },
+    {
+      "trigger_name": "trigger_validar_tipos_vinculos",
+      "event_manipulation": "INSERT",
+      "event_object_table": "vinculos_agencia_piloto",
+      "action_timing": "BEFORE",
+      "action_statement": "EXECUTE FUNCTION validar_tipos_membros_vinculos()"
+    },
+    {
+      "trigger_name": "update_vinculos_updated_at",
+      "event_manipulation": "UPDATE",
+      "event_object_table": "vinculos_agencia_piloto",
+      "action_timing": "BEFORE",
+      "action_statement": "EXECUTE FUNCTION update_updated_at_column()"
+    },
+    {
+      "trigger_name": "trigger_validar_tipos_voos",
+      "event_manipulation": "UPDATE",
+      "event_object_table": "voos",
+      "action_timing": "BEFORE",
+      "action_statement": "EXECUTE FUNCTION validar_tipos_membros_voos()"
+    },
+    {
+      "trigger_name": "trigger_validar_tipos_voos",
+      "event_manipulation": "INSERT",
+      "event_object_table": "voos",
+      "action_timing": "BEFORE",
+      "action_statement": "EXECUTE FUNCTION validar_tipos_membros_voos()"
+    },
+    {
+      "trigger_name": "trigger_validar_voo",
+      "event_manipulation": "INSERT",
+      "event_object_table": "voos",
+      "action_timing": "BEFORE",
+      "action_statement": "EXECUTE FUNCTION validar_dados_voo()"
+    },
+    {
+      "trigger_name": "trigger_validar_voo",
+      "event_manipulation": "UPDATE",
+      "event_object_table": "voos",
+      "action_timing": "BEFORE",
+      "action_statement": "EXECUTE FUNCTION validar_dados_voo()"
+    },
+    {
+      "trigger_name": "trigger_voos_criar_checklist",
+      "event_manipulation": "INSERT",
+      "event_object_table": "voos",
+      "action_timing": "AFTER",
+      "action_statement": "EXECUTE FUNCTION trigger_criar_checklist_automatico()"
+    },
+    {
+      "trigger_name": "update_voos_updated_at",
+      "event_manipulation": "UPDATE",
+      "event_object_table": "voos",
+      "action_timing": "BEFORE",
+      "action_statement": "EXECUTE FUNCTION update_updated_at_column()"
+    },
+    {
+      "trigger_name": "trigger_anexos_cleanup_storage",
+      "event_manipulation": "DELETE",
+      "event_object_table": "voos_anexos",
+      "action_timing": "AFTER",
+      "action_statement": "EXECUTE FUNCTION trigger_anexos_cleanup_storage()"
+    },
+    {
+      "trigger_name": "trigger_anexos_validation",
+      "event_manipulation": "UPDATE",
+      "event_object_table": "voos_anexos",
+      "action_timing": "BEFORE",
+      "action_statement": "EXECUTE FUNCTION trigger_anexos_validation()"
+    },
+    {
+      "trigger_name": "trigger_anexos_validation",
+      "event_manipulation": "INSERT",
+      "event_object_table": "voos_anexos",
+      "action_timing": "BEFORE",
+      "action_statement": "EXECUTE FUNCTION trigger_anexos_validation()"
+    }
+  ],
+  "policies": [
+    {
+      "schemaname": "public",
+      "tablename": "assinantes",
+      "policyname": "Admins podem ver todos os assinantes",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(auth.uid() IS NOT NULL)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "assinantes",
+      "policyname": "Descadastro por token",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "UPDATE",
+      "qual": "true",
+      "with_check": "true"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "assinantes",
+      "policyname": "Qualquer um pode se inscrever",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "true"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "assinantes",
+      "policyname": "Select para todos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "baloes",
+      "policyname": "Admins podem ver todos os balões",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "is_admin_user()",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "baloes",
+      "policyname": "Agencias podem ver baloes de pilotos contratados",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (vinculos_agencia_piloto v\n     JOIN membros agencia ON ((v.agencia_id = agencia.id)))\n  WHERE ((v.piloto_id = baloes.proprietario_id) AND ((agencia.user_id)::text = (auth.uid())::text))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "baloes",
+      "policyname": "Proprietários podem atualizar seus balões",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "UPDATE",
+      "qual": "(is_member_owner_compatible(proprietario_id) OR is_admin_compatible())",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "baloes",
+      "policyname": "Proprietários podem criar balões",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "is_member_owner_compatible(proprietario_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "baloes",
+      "policyname": "Proprietários podem deletar seus balões",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "DELETE",
+      "qual": "(is_user_member_owner(proprietario_id) OR is_admin_user())",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "baloes",
+      "policyname": "Proprietários podem ver seus balões",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(is_member_owner_compatible(proprietario_id) OR is_admin_compatible())",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "boletins",
+      "policyname": "Apenas admins podem atualizar boletins",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "UPDATE",
+      "qual": "(auth.uid() IS NOT NULL)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "boletins",
+      "policyname": "Apenas admins podem criar boletins",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "(auth.uid() IS NOT NULL)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "boletins",
+      "policyname": "Apenas admins podem deletar boletins",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "DELETE",
+      "qual": "(auth.uid() IS NOT NULL)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "boletins",
+      "policyname": "Boletins são públicos para leitura",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "boletins",
+      "policyname": "Dev insert/update boletins",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": "true"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "checklist_itens",
+      "policyname": "Atualizar checklist através dos voos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "UPDATE",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (voos v\n     JOIN membros m ON ((v.piloto_id = m.id)))\n  WHERE ((v.id = checklist_itens.voo_id) AND ((m.user_id)::text = (auth.uid())::text))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "checklist_itens",
+      "policyname": "Inserir checklist através dos voos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "(EXISTS ( SELECT 1\n   FROM (voos v\n     JOIN membros m ON ((v.piloto_id = m.id)))\n  WHERE ((v.id = checklist_itens.voo_id) AND ((m.user_id)::text = (auth.uid())::text))))"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "checklist_itens",
+      "policyname": "Usuários podem gerenciar checklist",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "ALL",
+      "qual": "(EXISTS ( SELECT 1\n   FROM voos v\n  WHERE ((v.id = checklist_itens.voo_id) AND (is_member_owner_compatible(v.piloto_id) OR ((v.agencia_id IS NOT NULL) AND is_member_owner_compatible(v.agencia_id)) OR is_admin_compatible()))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "checklist_itens",
+      "policyname": "Ver checklist através dos voos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM (voos v\n     JOIN membros m ON ((v.piloto_id = m.id)))\n  WHERE ((v.id = checklist_itens.voo_id) AND ((m.user_id)::text = (auth.uid())::text))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "dados_offline",
+      "policyname": "Admins podem ver todos os dados offline",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM users\n  WHERE ((users.id = auth.uid()) AND (users.role = 'admin'::user_role))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "dados_offline",
+      "policyname": "Usuários podem atualizar seus dados offline",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "UPDATE",
+      "qual": "(user_id = auth.uid())",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "dados_offline",
+      "policyname": "Usuários podem deletar seus dados offline",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "DELETE",
+      "qual": "(user_id = auth.uid())",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "dados_offline",
+      "policyname": "Usuários podem inserir seus dados offline",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "(user_id = auth.uid())"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "dados_offline",
+      "policyname": "Usuários veem apenas seus dados offline",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(user_id = auth.uid())",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "logs_atividade",
+      "policyname": "Apenas admins podem ver logs",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(auth.uid() IS NOT NULL)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "logs_atividade",
+      "policyname": "Sistema pode inserir logs",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "true"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "membros",
+      "policyname": "Allow public signup for membros",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "true"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "membros",
+      "policyname": "Apenas admins podem atualizar membros",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "UPDATE",
+      "qual": "(auth.uid() IS NOT NULL)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "membros",
+      "policyname": "Apenas admins podem deletar membros",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "DELETE",
+      "qual": "(auth.uid() IS NOT NULL)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "membros",
+      "policyname": "Apenas admins podem ver membros",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(auth.uid() IS NOT NULL)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "membros",
+      "policyname": "Qualquer um pode se inscrever",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "true"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "paginas_cms",
+      "policyname": "Apenas admins podem modificar páginas CMS",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "ALL",
+      "qual": "(auth.uid() IS NOT NULL)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "paginas_cms",
+      "policyname": "Páginas CMS são públicas para leitura",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "permission_audit_log",
+      "policyname": "Emergency total access audit_log",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": "true"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "permission_audit_log",
+      "policyname": "audit_log_admin_select",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM users u\n  WHERE ((u.id = auth.uid()) AND (u.role = 'admin'::user_role))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "permission_audit_log",
+      "policyname": "audit_log_system_insert",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "true"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "permissoes",
+      "policyname": "Política temporária permissões",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "ALL",
+      "qual": "(EXISTS ( SELECT 1\n   FROM users\n  WHERE ((users.auth_id = auth.uid()) AND (users.role = ANY (ARRAY['admin'::user_role, 'meteo'::user_role, 'tesouraria'::user_role])))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "push_delivery_logs",
+      "policyname": "Apenas admins podem ver logs de entrega",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "ALL",
+      "qual": "(EXISTS ( SELECT 1\n   FROM users\n  WHERE ((users.id = auth.uid()) AND (users.role = ANY (ARRAY['admin'::user_role, 'meteo'::user_role, 'tesouraria'::user_role])))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "push_notifications",
+      "policyname": "Apenas admins podem gerenciar notificações",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "ALL",
+      "qual": "(EXISTS ( SELECT 1\n   FROM users\n  WHERE ((users.id = auth.uid()) AND (users.role = ANY (ARRAY['admin'::user_role, 'meteo'::user_role, 'tesouraria'::user_role])))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "push_scheduled_jobs",
+      "policyname": "Apenas admins podem gerenciar jobs agendados",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "ALL",
+      "qual": "(EXISTS ( SELECT 1\n   FROM users\n  WHERE ((users.id = auth.uid()) AND (users.role = ANY (ARRAY['admin'::user_role, 'meteo'::user_role, 'tesouraria'::user_role])))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "push_subscriptions",
+      "policyname": "Usuários podem gerenciar suas próprias subscriptions",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "ALL",
+      "qual": "(user_id = auth.uid())",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "user_permissions",
+      "policyname": "Emergency total access user_permissions",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": "true"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "user_permissions",
+      "policyname": "user_permissions_admin_delete",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "DELETE",
+      "qual": "(EXISTS ( SELECT 1\n   FROM users u\n  WHERE ((u.id = auth.uid()) AND (u.role = 'admin'::user_role))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "user_permissions",
+      "policyname": "user_permissions_admin_insert",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "(EXISTS ( SELECT 1\n   FROM users u\n  WHERE ((u.id = auth.uid()) AND (u.role = 'admin'::user_role))))"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "user_permissions",
+      "policyname": "user_permissions_admin_select",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM users u\n  WHERE ((u.id = auth.uid()) AND (u.role = 'admin'::user_role))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "user_permissions",
+      "policyname": "user_permissions_admin_update",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "UPDATE",
+      "qual": "(EXISTS ( SELECT 1\n   FROM users u\n  WHERE ((u.id = auth.uid()) AND (u.role = 'admin'::user_role))))",
+      "with_check": "(EXISTS ( SELECT 1\n   FROM users u\n  WHERE ((u.id = auth.uid()) AND (u.role = 'admin'::user_role))))"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "users",
+      "policyname": "Allow public signup",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "true"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "users",
+      "policyname": "Allow user insert by trigger",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "true"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "users",
+      "policyname": "Authenticated users can delete users",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "DELETE",
+      "qual": "(auth.uid() IS NOT NULL)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "users",
+      "policyname": "Authenticated users can insert users",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "(auth.uid() IS NOT NULL)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "users",
+      "policyname": "Authenticated users can read users table",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(auth.uid() IS NOT NULL)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "users",
+      "policyname": "Authenticated users can update users",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "UPDATE",
+      "qual": "(auth.uid() IS NOT NULL)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "users",
+      "policyname": "Emergency total access users",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": "true"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "users",
+      "policyname": "Service role can manage users",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "ALL",
+      "qual": "(auth.role() = 'service_role'::text)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "users",
+      "policyname": "Users can read for login and admin\n  management",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(auth.uid() IS NOT NULL)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "users",
+      "policyname": "Users can update their own data",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "UPDATE",
+      "qual": "((auth.uid())::text = (id)::text)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "users",
+      "policyname": "Users can update their own profile",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "UPDATE",
+      "qual": "(auth.uid() = id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "users",
+      "policyname": "Users can view their own profile",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(auth.uid() = id)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "usuarios_admin",
+      "policyname": "Usuários admin podem ser atualizados por si mesmos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "UPDATE",
+      "qual": "((auth.uid())::text = (id)::text)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "usuarios_admin",
+      "policyname": "Usuários admin podem ver outros usuários",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(auth.uid() IS NOT NULL)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "vinculos_agencia_piloto",
+      "policyname": "Admins podem ver todos os vínculos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "is_admin_user()",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "vinculos_agencia_piloto",
+      "policyname": "Agências podem atualizar seus vínculos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "UPDATE",
+      "qual": "(is_user_member_owner(agencia_id) OR is_admin_user())",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "vinculos_agencia_piloto",
+      "policyname": "Agências podem criar vínculos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "is_member_owner_compatible(agencia_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "vinculos_agencia_piloto",
+      "policyname": "Agências podem deletar vínculos pendentes",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "DELETE",
+      "qual": "((is_user_member_owner(agencia_id) AND (status = 'pendente'::vinculo_status)) OR is_admin_user())",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "vinculos_agencia_piloto",
+      "policyname": "Agências podem ver vínculos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(is_member_owner_compatible(agencia_id) OR is_member_owner_compatible(piloto_id) OR is_admin_compatible())",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "vinculos_agencia_piloto",
+      "policyname": "Pilotos podem responder convites",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "UPDATE",
+      "qual": "(is_user_member_owner(piloto_id) OR is_admin_user())",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "vinculos_agencia_piloto",
+      "policyname": "Pilotos podem responder vínculos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "UPDATE",
+      "qual": "(EXISTS ( SELECT 1\n   FROM membros m\n  WHERE ((m.id = vinculos_agencia_piloto.piloto_id) AND ((m.user_id)::text = (auth.uid())::text))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "vinculos_agencia_piloto",
+      "policyname": "Pilotos podem ver seus vínculos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM membros m\n  WHERE ((m.id = vinculos_agencia_piloto.piloto_id) AND ((m.user_id)::text = (auth.uid())::text))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "vinculos_agencia_piloto",
+      "policyname": "Pilotos podem ver vínculos direcionados a eles",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(is_user_member_owner(piloto_id) OR is_admin_user())",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "voos",
+      "policyname": "Agências podem criar voos para pilotos vinculados",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "(EXISTS ( SELECT 1\n   FROM (membros m\n     JOIN vinculos_agencia_piloto v ON ((m.id = v.agencia_id)))\n  WHERE (((m.user_id)::text = (auth.uid())::text) AND (v.piloto_id = voos.piloto_id) AND (v.status = 'aceito'::vinculo_status))))"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "voos",
+      "policyname": "Agências podem ver voos de pilotos vinculados",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM membros m\n  WHERE ((m.id = voos.agencia_id) AND ((m.user_id)::text = (auth.uid())::text))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "voos",
+      "policyname": "Agências podem ver voos de seus pilotos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "((agencia_id IS NOT NULL) AND (EXISTS ( SELECT 1\n   FROM (membros m\n     JOIN users u ON ((((m.user_id = u.id) AND (u.id = auth.uid())) OR ((m.user_id IS NULL) AND (m.email = u.email) AND (u.id = auth.uid())))))\n  WHERE ((m.id = voos.agencia_id) AND (m.tipo = 'agencia'::membro_tipo) AND (m.status = 'ativo'::membro_status)))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "voos",
+      "policyname": "Pilotos podem atualizar seus voos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "UPDATE",
+      "qual": "(is_member_owner_compatible(piloto_id) OR ((agencia_id IS NOT NULL) AND is_member_owner_compatible(agencia_id)) OR is_admin_compatible())",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "voos",
+      "policyname": "Pilotos podem criar seus voos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "is_member_owner_compatible(piloto_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "voos",
+      "policyname": "Pilotos podem criar voos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "(EXISTS ( SELECT 1\n   FROM (membros m\n     JOIN users u ON ((((m.user_id = u.id) AND (u.id = auth.uid())) OR ((m.user_id IS NULL) AND (m.email = u.email) AND (u.id = auth.uid())))))\n  WHERE ((m.id = voos.piloto_id) AND (m.tipo = 'piloto'::membro_tipo) AND (m.status = 'ativo'::membro_status))))"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "voos",
+      "policyname": "Pilotos podem deletar seus voos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "DELETE",
+      "qual": "((EXISTS ( SELECT 1\n   FROM (membros m\n     JOIN users u ON ((((m.user_id = u.id) AND (u.id = auth.uid())) OR ((m.user_id IS NULL) AND (m.email = u.email) AND (u.id = auth.uid())))))\n  WHERE ((m.id = voos.piloto_id) AND (m.tipo = 'piloto'::membro_tipo) AND (m.status = 'ativo'::membro_status)))) AND (status = ANY (ARRAY['rascunho'::voo_status, 'planejado'::voo_status])))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "voos",
+      "policyname": "Pilotos podem ver seus voos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(is_member_owner_compatible(piloto_id) OR ((agencia_id IS NOT NULL) AND is_member_owner_compatible(agencia_id)) OR is_admin_compatible())",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "voos",
+      "policyname": "Política temporária voos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "ALL",
+      "qual": "(auth.uid() IS NOT NULL)",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "voos",
+      "policyname": "Usuários podem atualizar seus voos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "UPDATE",
+      "qual": "((EXISTS ( SELECT 1\n   FROM membros m\n  WHERE ((m.id = voos.piloto_id) AND (m.user_id = auth.uid())))) OR (EXISTS ( SELECT 1\n   FROM membros m\n  WHERE ((m.id = voos.agencia_id) AND (m.user_id = auth.uid())))) OR (created_by = auth.uid()))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "voos",
+      "policyname": "Usuários podem criar voos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "((EXISTS ( SELECT 1\n   FROM membros m\n  WHERE ((m.id = voos.piloto_id) AND (m.user_id = auth.uid())))) OR (EXISTS ( SELECT 1\n   FROM membros m\n  WHERE ((m.id = voos.agencia_id) AND (m.user_id = auth.uid())))))"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "voos",
+      "policyname": "Usuários podem ver seus próprios voos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "((EXISTS ( SELECT 1\n   FROM membros m\n  WHERE ((m.id = voos.piloto_id) AND (m.user_id = auth.uid())))) OR (EXISTS ( SELECT 1\n   FROM membros m\n  WHERE ((m.id = voos.agencia_id) AND (m.user_id = auth.uid())))) OR (created_by = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM users u\n  WHERE ((u.id = auth.uid()) AND (u.role = ANY (ARRAY['admin'::user_role, 'meteo'::user_role]))))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "voos_anexos",
+      "policyname": "Usuários podem atualizar anexos dos voos que podem editar",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "UPDATE",
+      "qual": "(EXISTS ( SELECT 1\n   FROM ((voos v\n     JOIN membros m_piloto ON ((m_piloto.id = v.piloto_id)))\n     LEFT JOIN membros m_agencia ON ((m_agencia.id = v.agencia_id)))\n  WHERE ((v.id = voos_anexos.voo_id) AND ((m_piloto.user_id = auth.uid()) OR (m_agencia.user_id = auth.uid()) OR (EXISTS ( SELECT 1\n           FROM usuarios_admin ua\n          WHERE ((ua.id = auth.uid()) AND (ua.ativo = true))))))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "voos_anexos",
+      "policyname": "Usuários podem deletar anexos dos voos que podem editar",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "DELETE",
+      "qual": "(EXISTS ( SELECT 1\n   FROM ((voos v\n     JOIN membros m_piloto ON ((m_piloto.id = v.piloto_id)))\n     LEFT JOIN membros m_agencia ON ((m_agencia.id = v.agencia_id)))\n  WHERE ((v.id = voos_anexos.voo_id) AND ((m_piloto.user_id = auth.uid()) OR (m_agencia.user_id = auth.uid()) OR (EXISTS ( SELECT 1\n           FROM usuarios_admin ua\n          WHERE ((ua.id = auth.uid()) AND (ua.ativo = true))))))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "voos_anexos",
+      "policyname": "Usuários podem inserir anexos nos voos que podem editar",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "(EXISTS ( SELECT 1\n   FROM ((voos v\n     JOIN membros m_piloto ON ((m_piloto.id = v.piloto_id)))\n     LEFT JOIN membros m_agencia ON ((m_agencia.id = v.agencia_id)))\n  WHERE ((v.id = voos_anexos.voo_id) AND ((m_piloto.user_id = auth.uid()) OR (m_agencia.user_id = auth.uid()) OR (EXISTS ( SELECT 1\n           FROM usuarios_admin ua\n          WHERE ((ua.id = auth.uid()) AND (ua.ativo = true))))))))"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "voos_anexos",
+      "policyname": "Usuários podem ver anexos dos voos que têm acesso",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM ((voos v\n     JOIN membros m_piloto ON ((m_piloto.id = v.piloto_id)))\n     LEFT JOIN membros m_agencia ON ((m_agencia.id = v.agencia_id)))\n  WHERE ((v.id = voos_anexos.voo_id) AND ((m_piloto.user_id = auth.uid()) OR (m_agencia.user_id = auth.uid()) OR (EXISTS ( SELECT 1\n           FROM usuarios_admin ua\n          WHERE ((ua.id = auth.uid()) AND (ua.ativo = true))))))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "voos_baloes",
+      "policyname": "Atualizar voos_baloes através dos voos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "UPDATE",
+      "qual": "((EXISTS ( SELECT 1\n   FROM (voos v\n     JOIN membros m ON ((v.piloto_id = m.id)))\n  WHERE ((v.id = voos_baloes.voo_id) AND ((m.user_id)::text = (auth.uid())::text)))) OR (EXISTS ( SELECT 1\n   FROM (voos v\n     JOIN membros m ON ((v.agencia_id = m.id)))\n  WHERE ((v.id = voos_baloes.voo_id) AND ((m.user_id)::text = (auth.uid())::text)))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "voos_baloes",
+      "policyname": "Inserir voos_baloes através dos voos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "((EXISTS ( SELECT 1\n   FROM (voos v\n     JOIN membros m ON ((v.piloto_id = m.id)))\n  WHERE ((v.id = voos_baloes.voo_id) AND ((m.user_id)::text = (auth.uid())::text)))) OR (EXISTS ( SELECT 1\n   FROM (voos v\n     JOIN membros m ON ((v.agencia_id = m.id)))\n  WHERE ((v.id = voos_baloes.voo_id) AND ((m.user_id)::text = (auth.uid())::text)))))"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "voos_baloes",
+      "policyname": "Usuários podem associar balões aos seus voos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "((EXISTS ( SELECT 1\n   FROM voos v\n  WHERE ((v.id = voos_baloes.voo_id) AND (is_member_owner_compatible(v.piloto_id) OR ((v.agencia_id IS NOT NULL) AND is_member_owner_compatible(v.agencia_id)))))) AND (EXISTS ( SELECT 1\n   FROM (voos v\n     JOIN baloes b ON ((b.id = voos_baloes.balao_id)))\n  WHERE ((v.id = voos_baloes.voo_id) AND ((b.proprietario_id = v.piloto_id) OR ((v.agencia_id IS NOT NULL) AND (b.proprietario_id = v.agencia_id)))))))"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "voos_baloes",
+      "policyname": "Usuários podem atualizar balões de seus voos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "UPDATE",
+      "qual": "(EXISTS ( SELECT 1\n   FROM voos v\n  WHERE ((v.id = voos_baloes.voo_id) AND (is_member_owner_compatible(v.piloto_id) OR ((v.agencia_id IS NOT NULL) AND is_member_owner_compatible(v.agencia_id)) OR is_admin_compatible()))))",
+      "with_check": "((EXISTS ( SELECT 1\n   FROM voos v\n  WHERE ((v.id = voos_baloes.voo_id) AND (is_member_owner_compatible(v.piloto_id) OR ((v.agencia_id IS NOT NULL) AND is_member_owner_compatible(v.agencia_id)))))) AND (EXISTS ( SELECT 1\n   FROM (voos v\n     JOIN baloes b ON ((b.id = voos_baloes.balao_id)))\n  WHERE ((v.id = voos_baloes.voo_id) AND ((b.proprietario_id = v.piloto_id) OR ((v.agencia_id IS NOT NULL) AND (b.proprietario_id = v.agencia_id)))))))"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "voos_baloes",
+      "policyname": "Usuários podem remover balões de seus voos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "DELETE",
+      "qual": "(EXISTS ( SELECT 1\n   FROM voos v\n  WHERE ((v.id = voos_baloes.voo_id) AND (is_member_owner_compatible(v.piloto_id) OR ((v.agencia_id IS NOT NULL) AND is_member_owner_compatible(v.agencia_id)) OR is_admin_compatible()))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "voos_baloes",
+      "policyname": "Usuários podem ver balões de seus voos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(EXISTS ( SELECT 1\n   FROM voos v\n  WHERE ((v.id = voos_baloes.voo_id) AND (is_member_owner_compatible(v.piloto_id) OR ((v.agencia_id IS NOT NULL) AND is_member_owner_compatible(v.agencia_id)) OR is_admin_compatible()))))",
+      "with_check": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "voos_baloes",
+      "policyname": "Ver voos_baloes através dos voos",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "((EXISTS ( SELECT 1\n   FROM (voos v\n     JOIN membros m ON ((v.piloto_id = m.id)))\n  WHERE ((v.id = voos_baloes.voo_id) AND ((m.user_id)::text = (auth.uid())::text)))) OR (EXISTS ( SELECT 1\n   FROM (voos v\n     JOIN membros m ON ((v.agencia_id = m.id)))\n  WHERE ((v.id = voos_baloes.voo_id) AND ((m.user_id)::text = (auth.uid())::text)))))",
+      "with_check": null
+    }
+  ],
+  "extensions": [
+    {
+      "extension_name": "pg_graphql",
+      "version": "1.5.11",
+      "relocatable": false
+    },
+    {
+      "extension_name": "pg_stat_statements",
+      "version": "1.11",
+      "relocatable": true
+    },
+    {
+      "extension_name": "pgcrypto",
+      "version": "1.3",
+      "relocatable": true
+    },
+    {
+      "extension_name": "plpgsql",
+      "version": "1.0",
+      "relocatable": false
+    },
+    {
+      "extension_name": "supabase_vault",
+      "version": "0.3.1",
+      "relocatable": false
+    },
+    {
+      "extension_name": "uuid-ossp",
+      "version": "1.1",
+      "relocatable": true
+    }
+  ],
+  "indexes": []
+}

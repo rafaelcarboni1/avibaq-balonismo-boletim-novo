@@ -1,12 +1,19 @@
--- MIGRAÇÃO SEGURA DE DADOS DE AUTENTICAÇÃO - VERSÃO FINAL
+-- MIGRAÇÃO SEGURA DE DADOS DE AUTENTICAÇÃO - CORRIGIDA
 -- Resolve user_id NULL sem quebrar novos cadastros
--- Data: 31 de julho de 2025 - VERSÃO SEGURA SEM DEPENDÊNCIA DE ENUM
+-- Data: 31 de julho de 2025 - VERSÃO CORRIGIDA
 
 -- =====================================================================
--- ETAPA 1: MIGRAÇÃO APENAS DOS DADOS EXISTENTES (SEM CRIAR USERS)
+-- ETAPA 1: VERIFICAR VALORES VÁLIDOS DO ENUM user_role
 -- =====================================================================
 
--- 1.1. PRIMEIRO: Atualizar membros que JÁ TÊM usuário correspondente na tabela users
+-- Primeiro vamos ver quais valores são válidos para o enum user_role
+-- SELECT unnest(enum_range(NULL::user_role)) as valid_roles;
+
+-- =====================================================================
+-- ETAPA 2: MIGRAÇÃO CUIDADOSA DOS DADOS EXISTENTES
+-- =====================================================================
+
+-- 2.1. PRIMEIRO: Atualizar membros que JÁ TÊM usuário correspondente na tabela users
 UPDATE membros 
 SET user_id = (
   SELECT u.id 
@@ -21,11 +28,45 @@ WHERE user_id IS NULL
     WHERE u.email = membros.email
   );
 
+-- 2.2. SEGUNDO: Criar usuários na tabela users com os tipos corretos do ENUM
+INSERT INTO users (id, email, nome, role, ativo, primeira_senha, username, created_at)
+SELECT 
+  gen_random_uuid() as id,
+  m.email,
+  m.nome_completo,
+  CASE 
+    WHEN m.tipo = 'piloto' THEN 'piloto'
+    WHEN m.tipo = 'agencia' THEN 'agencia'  
+    ELSE 'piloto'
+  END as role,
+  CASE WHEN m.status = 'ativo' THEN true ELSE false END as ativo,
+  true as primeira_senha, -- Precisará definir senha se quiser logar
+  COALESCE(SPLIT_PART(m.email, '@', 1), 'user_' || substr(m.id::text, 1, 8)) as username,
+  NOW() as created_at
+FROM membros m
+WHERE m.user_id IS NULL 
+  AND m.email IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM users u 
+    WHERE u.email = m.email
+  );
+
+-- 2.3. TERCEIRO: Atualizar user_id nos membros recém-vinculados
+UPDATE membros 
+SET user_id = (
+  SELECT u.id 
+  FROM users u 
+  WHERE u.email = membros.email 
+  LIMIT 1
+)
+WHERE user_id IS NULL 
+  AND email IS NOT NULL;
+
 -- =====================================================================
--- ETAPA 2: FUNÇÕES AUXILIARES COMPATÍVEIS
+-- ETAPA 3: FUNÇÕES AUXILIARES COMPATÍVEIS
 -- =====================================================================
 
--- 2.1. Função que funciona tanto para usuários existentes quanto novos
+-- 3.1. Função que funciona tanto para usuários existentes quanto novos
 CREATE OR REPLACE FUNCTION is_member_owner_compatible(membro_id UUID)
 RETURNS BOOLEAN AS $$
 DECLARE
@@ -57,7 +98,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- 2.2. Função de admin compatível
+-- 3.2. Função de admin compatível
 CREATE OR REPLACE FUNCTION is_admin_compatible()
 RETURNS BOOLEAN AS $$
 DECLARE
@@ -90,10 +131,10 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- =====================================================================
--- ETAPA 3: POLÍTICAS RLS COMPATÍVEIS
+-- ETAPA 4: POLÍTICAS RLS COMPATÍVEIS
 -- =====================================================================
 
--- 3.1. Política para balões
+-- 4.1. Política para balões
 DROP POLICY IF EXISTS "Proprietários podem ver seus balões" ON baloes;
 CREATE POLICY "Proprietários podem ver seus balões" ON baloes
   FOR SELECT USING (
@@ -112,7 +153,7 @@ CREATE POLICY "Proprietários podem atualizar seus balões" ON baloes
     is_member_owner_compatible(proprietario_id) OR is_admin_compatible()
   );
 
--- 3.2. Política para voos
+-- 4.2. Política para voos
 DROP POLICY IF EXISTS "Pilotos podem ver seus voos" ON voos;
 CREATE POLICY "Pilotos podem ver seus voos" ON voos
   FOR SELECT USING (
@@ -135,7 +176,7 @@ CREATE POLICY "Pilotos podem atualizar seus voos" ON voos
     is_admin_compatible()
   );
 
--- 3.3. Política para checklist
+-- 4.3. Política para checklist
 DROP POLICY IF EXISTS "Usuários podem gerenciar checklist de seus voos" ON checklist_itens;
 DROP POLICY IF EXISTS "Usuários autorizados podem gerenciar checklist" ON checklist_itens;
 DROP POLICY IF EXISTS "Usuários que editam voo podem editar checklist" ON checklist_itens;
@@ -153,7 +194,7 @@ CREATE POLICY "Usuários podem gerenciar checklist" ON checklist_itens
     )
   );
 
--- 3.4. Política para vínculos
+-- 4.4. Política para vínculos
 DROP POLICY IF EXISTS "Agências podem ver seus vínculos" ON vinculos_agencia_piloto;
 CREATE POLICY "Agências podem ver vínculos" ON vinculos_agencia_piloto
   FOR SELECT USING (
@@ -169,10 +210,10 @@ CREATE POLICY "Agências podem criar vínculos" ON vinculos_agencia_piloto
   );
 
 -- =====================================================================
--- ETAPA 4: CORREÇÃO DOS TRIGGERS
+-- ETAPA 5: CORREÇÃO DOS TRIGGERS
 -- =====================================================================
 
--- 4.1. Trigger de voos corrigido
+-- 5.1. Trigger de voos corrigido
 CREATE OR REPLACE FUNCTION trigger_voos_insert_validation()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -223,7 +264,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- 4.2. Trigger de checklist corrigido
+-- 5.2. Trigger de checklist corrigido
 CREATE OR REPLACE FUNCTION trigger_voos_criar_checklist()
 RETURNS TRIGGER AS $$
 DECLARE
@@ -273,17 +314,17 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- =====================================================================
--- ETAPA 5: PERMISSÕES E COMENTÁRIOS
+-- ETAPA 6: PERMISSÕES E COMENTÁRIOS
 -- =====================================================================
 
 GRANT EXECUTE ON FUNCTION is_member_owner_compatible(UUID) TO authenticated;
 GRANT EXECUTE ON FUNCTION is_admin_compatible() TO authenticated;
 
-COMMENT ON FUNCTION is_member_owner_compatible(UUID) IS 'Verificação de propriedade compatível - versão final segura';
-COMMENT ON FUNCTION is_admin_compatible() IS 'Verificação de admin compatível - versão final segura';
+COMMENT ON FUNCTION is_member_owner_compatible(UUID) IS 'Verificação de propriedade compatível - corrigida para enum user_role';
+COMMENT ON FUNCTION is_admin_compatible() IS 'Verificação de admin compatível - corrigida para enum user_role';
 
 -- =====================================================================
--- ETAPA 6: VALIDAÇÃO FINAL
+-- ETAPA 7: VALIDAÇÃO FINAL
 -- =====================================================================
 
 -- Verificar quantos membros ainda têm user_id NULL:
@@ -295,15 +336,4 @@ COMMENT ON FUNCTION is_admin_compatible() IS 'Verificação de admin compatível
 -- WHERE m.user_id IS NOT NULL 
 --   AND NOT EXISTS (SELECT 1 FROM users u WHERE u.id = m.user_id);
 
--- =====================================================================
--- RESUMO DESTA VERSÃO FINAL:
--- =====================================================================
-
--- ✅ Atualiza apenas user_id NULL que já têm users correspondentes
--- ✅ NÃO tenta criar novos registros users (evita problemas de enum)
--- ✅ Políticas RLS funcionam com fallback por email
--- ✅ Triggers corrigidos para não gerar foreign key errors
--- ✅ Sistema compatível para usuários existentes e novos
--- ✅ Preserva completamente o fluxo de associação
-
--- Esta versão é mais conservadora mas totalmente segura!
+-- Script corrigido - pronto para aplicar!

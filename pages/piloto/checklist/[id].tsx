@@ -363,59 +363,123 @@ export default function ChecklistVoo() {
   };
 
   const handleItemChange = async (itemId: string, marcado: boolean, motivo?: string) => {
+    console.log('[Checklist] Iniciando atualização:', { itemId, marcado, motivo, user: user?.users_table_id });
+    
+    // VALIDAÇÃO CRÍTICA: Verificar se usuário está autenticado
+    if (!user?.users_table_id) {
+      console.error('[Checklist] ❌ Usuário não identificado:', user);
+      toast({
+        title: "Erro de autenticação",
+        description: "Não foi possível identificar o usuário. Faça login novamente.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // PREPARAR DADOS PARA ATUALIZAÇÃO
     const updateData: any = {
       marcado,
       marcado_em: new Date().toISOString(),
-      marcado_por: user?.users_table_id  // CORREÇÃO: usar ID da tabela users ao invés de auth.uid()
+      marcado_por: user.users_table_id,
+      updated_at: new Date().toISOString()
     };
 
-    if (!marcado && motivo) {
-      updateData.motivo_nao_marcado = motivo;
+    // LÓGICA DO MOTIVO
+    if (!marcado && motivo?.trim()) {
+      updateData.motivo_nao_marcado = motivo.trim();
     } else if (marcado) {
       updateData.motivo_nao_marcado = null;
     }
 
-    // Atualizar estado local primeiro
+    console.log('[Checklist] Dados para atualização:', updateData);
+
+    // ATUALIZAR ESTADO LOCAL PRIMEIRO (OTIMISTIC UPDATE)
+    const itemAnterior = checklistItems.find(item => item.id === itemId);
+    
     setChecklistItems(items => 
       items.map(item => 
         item.id === itemId 
-          ? { 
-              ...item, 
-              marcado, 
-              motivo_nao_marcado: updateData.motivo_nao_marcado,
-              marcado_em: updateData.marcado_em,
-              marcado_por: updateData.marcado_por
-            }
+          ? { ...item, ...updateData }
           : item
       )
     );
 
-    // Tentar salvar no servidor se online
+    // SALVAR NO SERVIDOR SE ONLINE
     if (isOnline) {
       try {
         setAutoSaving(true);
+        console.log('[Checklist] Enviando para Supabase...');
 
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from('checklist_itens')
           .update(updateData)
-          .eq('id', itemId);
+          .eq('id', itemId)
+          .select('*');
 
         if (error) {
-          console.error('Erro ao atualizar item:', error);
+          console.error('[Checklist] ❌ Erro do Supabase:', error);
+          
+          // REVERTER ESTADO LOCAL EM CASO DE ERRO
+          if (itemAnterior) {
+            setChecklistItems(items => 
+              items.map(item => 
+                item.id === itemId ? itemAnterior : item
+              )
+            );
+          }
+          
+          // MOSTRAR ERRO ESPECÍFICO
+          let errorMessage = "Erro desconhecido";
+          if (error.message.includes('foreign key')) {
+            errorMessage = "Erro de autenticação. Faça login novamente.";
+          } else if (error.message.includes('violates')) {
+            errorMessage = "Dados inválidos. Verifique os campos preenchidos.";
+          } else {
+            errorMessage = error.message;
+          }
+          
           toast({
-            title: "Erro",
-            description: "Erro ao salvar item do checklist",
+            title: "Erro ao salvar item",
+            description: errorMessage,
             variant: "destructive"
           });
           return;
         }
 
+        console.log('[Checklist] ✅ Item atualizado com sucesso:', data);
+        
+        // CONFIRMAR SUCESSO
+        toast({
+          title: "Item atualizado",
+          description: marcado ? "Item marcado como concluído" : "Motivo registrado",
+          variant: "default"
+        });
+        
       } catch (error) {
-        console.error('Erro:', error);
+        console.error('[Checklist] ❌ Erro inesperado:', error);
+        
+        // REVERTER ESTADO LOCAL
+        if (itemAnterior) {
+          setChecklistItems(items => 
+            items.map(item => 
+              item.id === itemId ? itemAnterior : item
+            )
+          );
+        }
+        
+        toast({
+          title: "Erro inesperado",
+          description: "Tente novamente em alguns instantes",
+          variant: "destructive"
+        });
       } finally {
         setAutoSaving(false);
       }
     } else {
+      // MODO OFFLINE
+      console.log('[Checklist] Modo offline - salvando localmente');
+      saveDraftToStorage();
+      
       toast({
         title: "Modo offline",
         description: "Item salvo localmente. Será sincronizado quando voltar online.",
