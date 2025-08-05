@@ -4,6 +4,15 @@ dist
 .git
 .trae
 .log
+.next
+docs/
+scripts/
+table_structure.pdf
+*.pdf
+*.zip
+*.tar.gz
+*.rar
+*.7z
 
 # Arquivos SQL de debug e desenvolvimento
 *.sql
