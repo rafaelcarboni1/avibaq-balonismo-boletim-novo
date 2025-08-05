@@ -13,7 +13,7 @@ interface ChecklistItem {
   id: string;
   bloco: number;
   item_numero: number;
-  descricao: string;
+  item_descricao: string;  // Corrigido: usar item_descricao para compatibilidade com Supabase
   marcado: boolean;
   motivo_nao_marcado: string | null;  // VOLTANDO ao original
   marcado_em: string | null;          // VOLTANDO ao original  
@@ -339,7 +339,7 @@ export default function ChecklistVoo() {
             voo_id: id,
             bloco: blocoNum,
             item_numero: index + 1,
-            descricao: descricao,
+            item_descricao: descricao,  // Corrigido: usar item_descricao em vez de descricao
             marcado: false,
             motivo_nao_marcado: null
           });
@@ -365,16 +365,33 @@ export default function ChecklistVoo() {
   const handleItemChange = async (itemId: string, marcado: boolean, motivo?: string) => {
     console.log('[Checklist] Iniciando atualização:', { itemId, marcado, motivo, user: user?.users_table_id });
     
-    // VALIDAÇÃO CRÍTICA: Verificar se usuário está autenticado
-    if (!user?.users_table_id) {
-      console.error('[Checklist] ❌ Usuário não identificado:', user);
+    // VALIDAÇÃO CRÍTICA: Verificar se usuário está autenticado E tem users_table_id válido
+    if (!user) {
+      console.error('[Checklist] ❌ Usuário não logado');
       toast({
         title: "Erro de autenticação",
-        description: "Não foi possível identificar o usuário. Faça login novamente.",
+        description: "Você precisa estar logado para usar o checklist.",
+        variant: "destructive"
+      });
+      router.push('/login');
+      return;
+    }
+
+    if (!user.users_table_id) {
+      console.error('[Checklist] ❌ users_table_id é null - usuário não existe na tabela users:', {
+        authId: user.id,
+        email: user.email,
+        users_table_id: user.users_table_id
+      });
+      toast({
+        title: "Erro de dados do usuário",
+        description: "Seu perfil não foi encontrado no sistema. Entre em contato com o administrador.",
         variant: "destructive"
       });
       return;
     }
+
+    console.log('[Checklist] ✅ Validação passou - users_table_id:', user.users_table_id);
 
     // PREPARAR DADOS PARA ATUALIZAÇÃO
     const updateData: any = {
@@ -941,7 +958,7 @@ function ChecklistItemComponent({ item, onChange }: ChecklistItemComponentProps)
             disabled={showMotivoInput}
           />
           <span className={`${item.marcado ? 'line-through text-gray-600' : ''}`}>
-            {item.descricao}
+            {item.item_descricao}
           </span>
         </div>
         

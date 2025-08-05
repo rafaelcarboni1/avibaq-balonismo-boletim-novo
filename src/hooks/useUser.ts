@@ -2,14 +2,14 @@ import { useEffect, useState, useMemo, useCallback } from "react";
 import { supabase } from "../integrations/supabase/client";
 
 /**
- * Hook useUser VERSÃO SEGURA
+ * Hook useUser VERSÃO ROBUSTA
  * 
- * MUDANÇAS MÍNIMAS PARA NÃO QUEBRAR SISTEMA ATUAL:
- * 1. Mantém busca por email como principal (compatibilidade)
- * 2. Adiciona busca por auth_id como otimização
- * 3. NÃO muda estrutura do retorno
- * 4. NÃO afeta fluxo de cadastro
- * 5. Logs melhorados para debug
+ * IMPLEMENTAÇÃO SEGURA CONTRA FOREIGN KEY ERRORS:
+ * 1. Usa função RPC get_current_user_table_id como método principal
+ * 2. Validação rigorosa de IDs antes de definir users_table_id
+ * 3. Não retorna users_table_id nulo (evita foreign key errors)
+ * 4. Mantém compatibilidade com sistema existente
+ * 5. Logs detalhados para debug
  */
 
 export function useUser() {
@@ -21,7 +21,7 @@ export function useUser() {
 
   const fetchUser = useCallback(async () => {
     try {
-      console.log('[useUser] Iniciando busca de usuário...');
+      console.log('[useUser] Iniciando busca robusta de usuário...');
       
       const { data: { user } } = await supabase.auth.getUser();
       console.log('[useUser] Auth user:', user?.email);
@@ -32,75 +32,105 @@ export function useUser() {
         let data = null;
         let error = null;
         
-        // OTIMIZAÇÃO SEGURA: Tentar por auth_id primeiro (se função existir)
+        // MÉTODO PRINCIPAL: Usar função RPC robusta
         try {
-          console.log('[useUser] Tentando busca otimizada por auth_id:', user.id);
-          const result = await supabase.rpc('get_user_by_auth_id', { p_auth_id: user.id });
-          if (result.data && result.data.length > 0 && !result.error) {
-            data = result.data[0];
-            console.log('[useUser] ✅ Busca por auth_id funcionou');
+          console.log('[useUser] Usando get_current_user_table_id...');
+          const { data: userTableId, error: rpcError } = await supabase
+            .rpc('get_current_user_table_id');
+          
+          if (!rpcError && userTableId) {
+            console.log('[useUser] ✅ RPC retornou ID válido:', userTableId);
+            
+            // Buscar dados completos do usuário
+            const result = await supabase
+              .from("users")
+              .select("id, role, nome, whatsapp_group_joined, whatsapp_modal_shown")
+              .eq('id', userTableId)
+              .single();
+            
+            data = result.data;
+            error = result.error;
+            
+            if (data) {
+              console.log('[useUser] ✅ Dados completos obtidos via RPC');
+            }
           } else {
-            console.log('[useUser] Busca por auth_id não retornou dados, usando fallback');
+            console.warn('[useUser] RPC não retornou ID válido:', rpcError);
           }
         } catch (rpcError) {
-          console.log('[useUser] Função RPC não disponível, usando método tradicional');
+          console.warn('[useUser] Função RPC falhou, usando fallback:', rpcError);
         }
         
-        // MÉTODO TRADICIONAL: Buscar por email (mantém compatibilidade)
+        // FALLBACK: Métodos tradicionais com validação
         if (!data) {
-          console.log('[useUser] Usando busca tradicional por email:', user.email);
-          const result = await supabase
-            .from("users")
-            .select("id, role, nome, whatsapp_group_joined, whatsapp_modal_shown")
-            .match({ email: user.email })
+          console.log('[useUser] Usando métodos fallback...');
+          
+          // Tentar por auth_id primeiro
+          try {
+            const result = await supabase.rpc('get_user_by_auth_id', { p_auth_id: user.id });
+            if (result.data && result.data.length > 0 && !result.error) {
+              data = result.data[0];
+              console.log('[useUser] ✅ Busca por auth_id funcionou');
+            }
+          } catch (authIdError) {
+            console.log('[useUser] Busca por auth_id falhou:', authIdError);
+          }
+          
+          // Se ainda não encontrou, tentar por email
+          if (!data) {
+            console.log('[useUser] Tentando busca por email:', user.email);
+            const result = await supabase
+              .from("users")
+              .select("id, role, nome, whatsapp_group_joined, whatsapp_modal_shown")
+              .match({ email: user.email })
+              .single();
+            
+            data = result.data;
+            error = result.error;
+          }
+        }
+        
+        if (data && !error && data.id) {
+          // VALIDAÇÃO RIGOROSA: Verificar se o ID realmente existe
+          const { data: validationCheck } = await supabase
+            .from('users')
+            .select('id')
+            .eq('id', data.id)
             .single();
           
-          data = result.data;
-          error = result.error;
-        }
-        
-        if (data && !error) {
-          console.log('[useUser] ✅ Usuário encontrado:', { email: user.email, role: data.role });
-          
-          setRole(data.role);
-          setNome(data.nome || "");
-          
-          // MANTÉM ESTRUTURA ORIGINAL (não quebra código existente)
-          const userWithUsersData = { 
-            ...user, 
-            id: user.id, // ID original do auth.users para RLS
-            auth_id: user.id, // Para referência
-            users_table_id: data.id, // ID da tabela users
-            role: data.role,
-            whatsapp_group_joined: data.whatsapp_group_joined,
-            whatsapp_modal_shown: data.whatsapp_modal_shown
-          };
-          
-          console.log('[useUser] ✅ Dados integrados - auth ID:', user.id, 'users table ID:', data.id);
-          console.log('[useUser] 🔍 CRITICAL DEBUG - users_table_id:', userWithUsersData.users_table_id);
-          console.log('[useUser] 🔍 CRITICAL DEBUG - userWithUsersData completo:', JSON.stringify(userWithUsersData, null, 2));
-          setUser(userWithUsersData);
-          
+          if (validationCheck) {
+            console.log('[useUser] ✅ Usuário validado:', { email: user.email, role: data.role, id: data.id });
+            
+            setRole(data.role);
+            setNome(data.nome || "");
+            
+            // ESTRUTURA SEGURA com ID validado
+            const userWithUsersData = { 
+              ...user, 
+              id: user.id, // ID original do auth.users para RLS
+              auth_id: user.id, // Para referência
+              users_table_id: data.id, // ID VALIDADO da tabela users
+              role: data.role,
+              whatsapp_group_joined: data.whatsapp_group_joined,
+              whatsapp_modal_shown: data.whatsapp_modal_shown
+            };
+            
+            console.log('[useUser] ✅ Dados seguros integrados - users_table_id:', data.id);
+            setUser(userWithUsersData);
+          } else {
+            console.error('[useUser] 🚨 ERRO CRÍTICO: ID não passou na validação!');
+            // NÃO definir usuário com users_table_id inválido
+            setUser(null);
+            setRole(null);
+            setNome("");
+          }
         } else {
           console.warn('[useUser] ⚠️ Usuário não encontrado na tabela users:', user.email);
-          console.warn('[useUser] Error:', error);
-          console.warn('[useUser] 🚨 CRITICAL: Este usuário CAUSARÁ erro de foreign key!');
-          console.warn('[useUser] 🚨 Auth ID:', user.id, 'não existe em public.users');
+          console.warn('[useUser] 🛡️ SEGURANÇA: Não definindo users_table_id para evitar foreign key errors');
           
-          // COMPORTAMENTO CONSERVADOR: Manter usuário com dados mínimos
-          // (não quebra o sistema, apenas fica sem role)
-          const userWithoutRole = {
-            ...user,
-            id: user.id,
-            auth_id: user.id,
-            users_table_id: null,  // ❌ ESTE NULL CAUSA O ERRO!
-            role: null,
-            whatsapp_group_joined: false,
-            whatsapp_modal_shown: false
-          };
-          
-          console.warn('[useUser] 🚨 DEFININDO users_table_id como NULL - ISSO CAUSARÁ ERRO!');
-          setUser(userWithoutRole);
+          // SEGURANÇA: Não retornar usuário sem users_table_id válido
+          // Isso evita foreign key errors em operações subsequentes
+          setUser(null);
           setRole(null);
           setNome("");
         }
@@ -151,4 +181,4 @@ export function useUser() {
   }, [user, role]);
 
   return { user: userWithRole, role, nome, loading: loading || !initialized };
-} 
+}

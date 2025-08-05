@@ -1,59 +1,59 @@
--- CRIAR FUNÇÃO RPC PARA DEBUG (Execute no Dashboard)
--- Esta função vai permitir testar RLS com auth.uid() real
+-- Debug da função RPC get_current_user_table_id
+-- Verificar se existe conflito de tipos
 
-CREATE OR REPLACE FUNCTION debug_auth_uid()
-RETURNS json AS $$
-BEGIN
-  RETURN json_build_object(
-    'auth_uid', auth.uid(),
-    'is_authenticated', CASE WHEN auth.uid() IS NOT NULL THEN true ELSE false END,
-    'user_email', (SELECT email FROM auth.users WHERE id = auth.uid()),
-    'member_data', (
-      SELECT json_build_object(
-        'id', m.id,
-        'nome', m.nome_completo,
-        'email', m.email,
-        'user_id', m.user_id,
-        'tipo', m.tipo
-      )
-      FROM membros m 
-      WHERE m.user_id = auth.uid() 
-      AND m.status = 'ativo'
-    )
-  );
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+SELECT 'Verificando função get_current_user_table_id:' as status;
 
--- CRIAR FUNÇÃO PARA TESTAR POLÍTICA RLS
-CREATE OR REPLACE FUNCTION test_balao_policy()
-RETURNS json AS $$
+-- Verificar se a função existe e seus tipos
+SELECT 
+    proname as function_name,
+    proargnames as argument_names,
+    proargtypes::regtype[] as argument_types,
+    prorettype::regtype as return_type,
+    prosrc as source_code
+FROM pg_proc 
+WHERE proname = 'get_current_user_table_id';
+
+-- Verificar se há múltiplas versões da função
+SELECT 
+    COUNT(*) as function_count,
+    'Número de funções com este nome' as description
+FROM pg_proc 
+WHERE proname = 'get_current_user_table_id';
+
+-- Recriar a função corretamente
+DROP FUNCTION IF EXISTS get_current_user_table_id();
+
+CREATE OR REPLACE FUNCTION get_current_user_table_id()
+RETURNS UUID AS $$
 DECLARE
-  member_id uuid;
-  policy_result boolean;
+    user_email TEXT;
+    user_table_id UUID;
 BEGIN
-  -- Buscar ID do membro atual
-  SELECT m.id INTO member_id
-  FROM membros m 
-  WHERE m.user_id = auth.uid() 
-  AND m.status = 'ativo' 
-  AND m.tipo = 'piloto';
-  
-  -- Testar política
-  SELECT EXISTS (
-    SELECT 1 FROM membros m 
-    JOIN auth.users u ON (
-      (m.user_id = u.id AND u.id = auth.uid()) OR 
-      (m.user_id IS NULL AND m.email = u.email AND u.id = auth.uid())
-    )
-    WHERE m.id = member_id 
-    AND m.status = 'ativo'
-  ) INTO policy_result;
-  
-  RETURN json_build_object(
-    'member_id', member_id,
-    'auth_uid', auth.uid(),
-    'policy_allows', policy_result,
-    'member_found', CASE WHEN member_id IS NOT NULL THEN true ELSE false END
-  );
+    -- Obter email do usuário autenticado
+    SELECT email INTO user_email FROM auth.users WHERE id = auth.uid();
+    
+    IF user_email IS NULL THEN
+        RETURN NULL;
+    END IF;
+    
+    -- Buscar ID na tabela users
+    SELECT id INTO user_table_id FROM users WHERE email = user_email;
+    
+    RETURN user_table_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Conceder permissões
+GRANT EXECUTE ON FUNCTION get_current_user_table_id() TO authenticated;
+GRANT EXECUTE ON FUNCTION get_current_user_table_id() TO anon;
+
+SELECT 'Função RPC recriada com sucesso' as status;
+
+-- Verificar novamente após recriação
+SELECT 
+    proname as function_name,
+    proargnames as argument_names,
+    proargtypes::regtype[] as argument_types,
+    prorettype::regtype as return_type
+FROM pg_proc 
+WHERE proname = 'get_current_user_table_id';
