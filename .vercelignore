@@ -37,65 +37,14 @@ investigate_*.sql
 alternative_*.sql
 add_*.sql
 
-# Documentação de debug e desenvolvimento
-CLAUDE.md
-DEBUG_*.md
-DEPLOY_*.md
-EMERGENCY_*.md
-SOLUCAO_*.md
-SUPABASE_*.md
-VERCEL_*.md
-WEBHOOK_*.md
-INSTRUCOES_*.md
-SISTEMA_*.md
-GARANTIA_*.md
-
-# Arquivos de teste e debug JavaScript
-test-*.js
-debug-*.js
-generate-*.js
-criar-*.cjs
-
-# Arquivos temporários e de configuração de desenvolvimento
-.claude/
-.kiro/
-.mcp/
-.vscode/
+# Arquivos grandes que devem ser excluídos do deploy
 table_structure.pdf
+
+# Arquivos temporários de build
 tsconfig.tsbuildinfo
 bun.lockb
 
-# Scripts de desenvolvimento
-scripts/test-*
-scripts/debug-*
-scripts/create-*
-scripts/apply-*
-scripts/migrate-*
-scripts/fix-*
-scripts/check-*
-scripts/send-*
-scripts/recovery-*
-scripts/start-*
-scripts/verificar-*
-scripts/corrigir-*
-scripts/analyze-*
-scripts/disable-*
-scripts/README-*
-
-# Documentação de desenvolvimento
-docs/AUTH_*
-docs/ESPECIFICACAO_*
-docs/MAGIC_*
-docs/Novo_*
-docs/PERFORMANCE-*
-docs/PLANO_*
-docs/PUSH_*
-docs/SISTEMA_*
-docs/SOLUCAO_*
-docs/SUPABASE_*
-docs/configuracao-*
-docs/fix-*
-docs/funcionalidades-*
-docs/implementacao-*
-docs/modulo-*
-docs/solucao-*
+# Arquivos SQL de debug (mantendo apenas os grandes)
+*.sql.backup
+*_backup.sql
+*_debug_large.sql
