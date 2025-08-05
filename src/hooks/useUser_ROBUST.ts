@@ -185,3 +185,8 @@ export function useUser() {
     debugInfo: {
       hasUser: !!user,
       hasUsersTableId: !!(user?.users_table_id),
+      initialized,
+      loading
+    }
+  };
+}
