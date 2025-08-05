@@ -26,3 +26,15 @@ out/
 *.njsproj
 *.sln
 *.sw?
+
+# Arquivos grandes de documentação
+docs/supabase_schema/
+table_structure.pdf
+*.pdf
+*.svg
+tsconfig.tsbuildinfo
+bun.lockb
+
+# Arquivos de análise e debug
+.trae/documents/analise-*.json
+.trae/documents/supabase-*.json
