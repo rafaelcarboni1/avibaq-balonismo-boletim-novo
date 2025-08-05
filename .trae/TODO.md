@@ -1,15 +1,4 @@
 # TODO:
 
-- [x] 1: Analisar os 3 erros específicos mencionados nos logs do console (priority: High)
-- [x] 2: Verificar a página /associar-se e seu fluxo de cadastro (priority: High)
-- [x] 3: Validar sincronização entre tabelas MEMBROS, USERS e auth.users (priority: High)
-- [x] 4: Testar fluxo completo: cadastro → login → acesso ao checklist (priority: High)
-- [x] 7: Corrigir 2 usuários órfãos sem auth_id (jpbalonismors@gmail.com, admin-teste@avibaq.com) (priority: High)
-- [x] 8: Corrigir erro na RPC get_current_user_table_id (invalid input syntax for type integer) (priority: High)
-- [x] 9: Corrigir erro de relacionamento entre voos e baloes na consulta (priority: High)
-- [x] 10: Analisar logs de erro do Vercel para identificar problemas de TypeScript (priority: High)
-- [x] 11: Corrigir erros de tipo 'Type error: '!' expected.' no código (priority: High)
-- [x] 5: Verificar integridade referencial e foreign keys (priority: Medium)
-- [x] 6: Documentar problemas encontrados e soluções aplicadas (priority: Medium)
-- [x] 12: Executar npm run check para validar correções (priority: Medium)
-- [ ] 13: Fazer commit e push das correções para resolver o deploy (**IN PROGRESS**) (priority: High)
+- [x] 46: Criar documentação completa sobre resolução do problema do checklist (priority: High)
+- [ ] 47: Fazer commit e push das alterações (**IN PROGRESS**) (priority: Medium)

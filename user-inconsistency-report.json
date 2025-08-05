@@ -1,0 +1,635 @@
+{
+  "igorAuthId": "7e85dac4-7a9f-48d6-a073-e0aeb2a63b64",
+  "rpcReturnedId": "f36990a5-192f-41dc-aa95-8720d9122071",
+  "igorUserInTable": {
+    "id": "f36990a5-192f-41dc-aa95-8720d9122071",
+    "email": "igor_pk_@hotmail.com",
+    "role": "piloto",
+    "created_at": "2025-07-05T17:46:58.06+00:00",
+    "nome": "Igor Niehues Belettini",
+    "username": "Igor Niehues Belettini",
+    "senha_hash": "$2b$10$AYE1tsEZouStA4LUvJ8vF.nJ/ndsmeO6n72DrLsdZxMpEBm.pcAAS",
+    "ativo": true,
+    "updated_at": "2025-08-05T01:02:05.733633+00:00",
+    "primeira_senha": false,
+    "auth_id": "7e85dac4-7a9f-48d6-a073-e0aeb2a63b64",
+    "migrated_at": null,
+    "cnpj": null,
+    "razao_social": null,
+    "nome_fantasia": null,
+    "telefone": null,
+    "celular": null,
+    "endereco": null,
+    "cidade": null,
+    "cep": null,
+    "whatsapp_group_joined": true,
+    "whatsapp_modal_shown": true
+  },
+  "allUsers": [
+    {
+      "id": "53ae4b68-a350-47dc-81ff-f4f3ec28f348",
+      "auth_id": "53ae4b68-a350-47dc-81ff-f4f3ec28f348",
+      "email": "info@victoriaballoonsbrazil.com",
+      "nome": "Mauro Leandro Chemin",
+      "created_at": "2025-07-30T20:18:05.422+00:00"
+    },
+    {
+      "id": "ad69fb5c-bc85-48d2-824c-375ebcb54058",
+      "auth_id": "db9ebdfd-6de3-4d4c-a4af-48c7de846412",
+      "email": "jpbalonismors@gmail.com",
+      "nome": "JOAO PAULO ROCHO",
+      "created_at": "2025-07-29T19:45:07.26+00:00"
+    },
+    {
+      "id": "782e0286-cb15-4a8e-b1ed-481a782f00e0",
+      "auth_id": "782e0286-cb15-4a8e-b1ed-481a782f00e0",
+      "email": "pamelaselau309@gmail.com",
+      "nome": "Pamela selau Monteiro ",
+      "created_at": "2025-07-29T19:39:14.697+00:00"
+    },
+    {
+      "id": "1a2bc60f-bfce-4414-ae5c-5489fdd64f4b",
+      "auth_id": "1a2bc60f-bfce-4414-ae5c-5489fdd64f4b",
+      "email": "garden.nature@gmail.com",
+      "nome": "Daniel Zeferino Carlos ",
+      "created_at": "2025-07-29T18:28:49.762+00:00"
+    },
+    {
+      "id": "07d9ca08-648f-43c6-933b-68e28e70e702",
+      "auth_id": "07d9ca08-648f-43c6-933b-68e28e70e702",
+      "email": "giuliadaluz@gmail.com",
+      "nome": "Giulia da Luz Jorge",
+      "created_at": "2025-07-29T16:25:13.259+00:00"
+    },
+    {
+      "id": "7fc52305-d532-4c43-ae0e-d045dcb002c2",
+      "auth_id": "7fc52305-d532-4c43-ae0e-d045dcb002c2",
+      "email": "voenoscanyonsagencia@gmail.com",
+      "nome": "Murilo Gonçalves",
+      "created_at": "2025-07-25T14:22:44.488+00:00"
+    },
+    {
+      "id": "3c9f0f95-c430-429b-a474-aa8ae8d2cf50",
+      "auth_id": "3c9f0f95-c430-429b-a474-aa8ae8d2cf50",
+      "email": "eduardo@canyonsbalonismo.com.br",
+      "nome": "Eduardo de Melo ",
+      "created_at": "2025-07-22T22:49:42.647+00:00"
+    },
+    {
+      "id": "9eef6e2f-1162-4495-8ec5-650869f44260",
+      "auth_id": "9eef6e2f-1162-4495-8ec5-650869f44260",
+      "email": "giovanipompermaier@gmail.com",
+      "nome": "Giovani Pompermaier",
+      "created_at": "2025-07-22T21:41:02.445+00:00"
+    },
+    {
+      "id": "911e853d-1abd-4a3f-97ab-6485b713067c",
+      "auth_id": "911e853d-1abd-4a3f-97ab-6485b713067c",
+      "email": "jvrocho@gmail.com",
+      "nome": "JOAO VITOR DOS SANTOS ROCHO",
+      "created_at": "2025-07-22T21:31:48.777+00:00"
+    },
+    {
+      "id": "00000000-1111-2222-3333-444444444444",
+      "auth_id": "28f654f8-91e8-456a-8bb2-0567497ae000",
+      "email": "admin-teste@avibaq.com",
+      "nome": "Admin Teste Push",
+      "created_at": "2025-07-22T12:32:45.99385+00:00"
+    },
+    {
+      "id": "2b848575-5a52-4085-904f-b845671c9b0a",
+      "auth_id": "2b848575-5a52-4085-904f-b845671c9b0a",
+      "email": "arquentebalonismo@gmail.com",
+      "nome": "Arthur Carneiro Lima (Zanella)",
+      "created_at": "2025-07-20T16:10:51.706+00:00"
+    },
+    {
+      "id": "8fc8ca98-d5a6-4b33-ab30-a488342fbdbd",
+      "auth_id": "5f522741-bef7-451e-b256-f2fb87499f89",
+      "email": "piloto.teste@avibaq.com",
+      "nome": null,
+      "created_at": "2025-07-17T23:27:56.654774+00:00"
+    },
+    {
+      "id": "495b98ca-c234-43e3-8b4f-506b4c8484c7",
+      "auth_id": "495b98ca-c234-43e3-8b4f-506b4c8484c7",
+      "email": "canyonturismo@gmail.com",
+      "nome": "Franciselio De Carvalho",
+      "created_at": "2025-07-16T20:37:51.148+00:00"
+    },
+    {
+      "id": "75946bbb-2308-4832-93e1-53765d620a65",
+      "auth_id": "75946bbb-2308-4832-93e1-53765d620a65",
+      "email": "skyzan2@hotmail.com",
+      "nome": "Arthur Carneiro Lima (Zanella)",
+      "created_at": "2025-07-16T18:37:04.847+00:00"
+    },
+    {
+      "id": "06eceb86-5e9f-4f15-aced-05c138325d4c",
+      "auth_id": "06eceb86-5e9f-4f15-aced-05c138325d4c",
+      "email": "gracomagnusfr@gmail.com",
+      "nome": "GRACO MAGNUS MENGUE",
+      "created_at": "2025-07-16T15:32:32.99+00:00"
+    },
+    {
+      "id": "d06883ff-cb86-4324-aaf9-3061f98fa908",
+      "auth_id": "d06883ff-cb86-4324-aaf9-3061f98fa908",
+      "email": "adrianbalonismo@gmail.com",
+      "nome": "Adrian dos Santos Scheffer ",
+      "created_at": "2025-07-16T15:13:16.695+00:00"
+    },
+    {
+      "id": "c446704d-d03b-4852-8d17-a74bcecf9628",
+      "auth_id": "c446704d-d03b-4852-8d17-a74bcecf9628",
+      "email": "flavio@canyonsbalonismo.com.br",
+      "nome": "Flavio Antonio dos Santos Júnior ",
+      "created_at": "2025-07-16T14:20:48.923+00:00"
+    },
+    {
+      "id": "e6be67e3-b138-4b8c-a6ac-f64ba3f6f2b7",
+      "auth_id": "e6be67e3-b138-4b8c-a6ac-f64ba3f6f2b7",
+      "email": "contato@voeomega.com",
+      "nome": "Omega ",
+      "created_at": "2025-07-16T14:04:53.727+00:00"
+    },
+    {
+      "id": "7520fbed-2947-4425-85b2-79fe6c36d20e",
+      "auth_id": "7520fbed-2947-4425-85b2-79fe6c36d20e",
+      "email": "murilo@voeomega.com",
+      "nome": "Murilo Hoffmann de Souza",
+      "created_at": "2025-07-16T13:37:58.459+00:00"
+    },
+    {
+      "id": "c0ec3215-54aa-49cd-8f80-bc327beae84a",
+      "auth_id": "c0ec3215-54aa-49cd-8f80-bc327beae84a",
+      "email": "aguiadoscanyons@gmail.com",
+      "nome": "Jaison Schardosim da silva",
+      "created_at": "2025-07-16T13:36:43.262+00:00"
+    },
+    {
+      "id": "3dd68e6a-4c5d-47a4-921c-da3b497efb36",
+      "auth_id": "3dd68e6a-4c5d-47a4-921c-da3b497efb36",
+      "email": "rafaeldacunhacarboni@gmail.com",
+      "nome": "Rafael da Cunha Carboni ",
+      "created_at": "2025-07-15T18:57:50.937+00:00"
+    },
+    {
+      "id": "aac61e17-d174-4193-a270-afc1fb69fa1d",
+      "auth_id": "8425877c-15d0-407f-b75c-b0dbbd32df88",
+      "email": "admin@balaoaventura.test",
+      "nome": null,
+      "created_at": "2025-07-11T14:27:54.128882+00:00"
+    },
+    {
+      "id": "862e89c3-07d1-4a15-a9dc-c1ff7c897b0a",
+      "auth_id": "fd9943de-4dcd-449d-812b-5180e8855643",
+      "email": "contato@voosmagicos.test",
+      "nome": null,
+      "created_at": "2025-07-11T14:27:53.872957+00:00"
+    },
+    {
+      "id": "0e1c9361-b353-4dea-b886-5289d2226287",
+      "auth_id": "7c20fe89-0f6d-4f07-b18b-66271acda366",
+      "email": "pedro.piloto@avibaq.test",
+      "nome": null,
+      "created_at": "2025-07-11T14:27:53.618958+00:00"
+    },
+    {
+      "id": "c593ff9f-aea4-47ea-8d23-5db23266b601",
+      "auth_id": "04180fda-881d-4a62-b406-c73591d41cc3",
+      "email": "maria.piloto@avibaq.test",
+      "nome": null,
+      "created_at": "2025-07-11T14:27:53.317663+00:00"
+    },
+    {
+      "id": "9c03e546-c85d-469e-87ad-7349055d4bfc",
+      "auth_id": "e216b643-2158-4d6e-9194-e2f96c8c02dd",
+      "email": "joao.piloto@avibaq.test",
+      "nome": null,
+      "created_at": "2025-07-11T14:27:52.961374+00:00"
+    },
+    {
+      "id": "f8186afc-f494-488d-82d4-86140f0af486",
+      "auth_id": "06979c30-536b-4316-b59a-2ac74cd9fcc7",
+      "email": "litoralvendasbr@gmail.com",
+      "nome": "Teste Meteo",
+      "created_at": "2025-07-10T19:17:54.631247+00:00"
+    },
+    {
+      "id": "b75bfa6b-a1be-4f2a-aad5-a37901c65062",
+      "auth_id": "1b165324-92f9-406f-8054-ca475688c41c",
+      "email": "xtz159@gmail.com",
+      "nome": "TESTE TESOURARIA",
+      "created_at": "2025-07-10T19:15:29.46771+00:00"
+    },
+    {
+      "id": "2a8a7b9c-b2f8-41c3-8c14-824a3d587891",
+      "auth_id": "df2f8d5f-eea4-4588-b622-264fa2ed99da",
+      "email": "teste@abc.com",
+      "nome": "teste",
+      "created_at": "2025-07-10T14:54:25.583913+00:00"
+    },
+    {
+      "id": "c6ed0d53-0255-4d83-9a29-4a4c0e4b3660",
+      "auth_id": "52626ee5-b887-431d-bbf5-21e0f24525ea",
+      "email": "rafaaelcarbonii2019@gmail.com",
+      "nome": "rafaaelcarbonii2019",
+      "created_at": "2025-07-10T14:14:55.381908+00:00"
+    },
+    {
+      "id": "9c47fb87-add0-4067-8c7f-7caec0e7f271",
+      "auth_id": "52295fa7-7071-4164-be09-230751efcc66",
+      "email": "teste.fluxo.1752111397710@avibaq.org",
+      "nome": "teste.fluxo.1752111397710",
+      "created_at": "2025-07-10T01:36:38.362849+00:00"
+    },
+    {
+      "id": "71d5ba28-c9a4-45c0-8255-c12f93502851",
+      "auth_id": "665db39b-35d0-4035-a991-092a95b1dcb6",
+      "email": "admin@avibaq.org",
+      "nome": "Administrador AVIBAQ",
+      "created_at": "2025-07-10T00:21:37.638651+00:00"
+    },
+    {
+      "id": "45e595fb-91a3-424b-acb4-9d62c9378bd9",
+      "auth_id": "4c9d894b-513d-47a3-9cfd-8b4b912596f9",
+      "email": "avibaq.admin@gmail.com",
+      "nome": "avibaq.admin",
+      "created_at": "2025-07-09T22:46:52.60704+00:00"
+    },
+    {
+      "id": "bc27afd0-fe38-4c9b-b391-0a9c12d316b8",
+      "auth_id": "39f7e41d-b785-4b7d-8521-530e85baf2ac",
+      "email": "aeroview36@gmail.com",
+      "nome": "aeroview36",
+      "created_at": "2025-07-09T22:44:56.441328+00:00"
+    },
+    {
+      "id": "7f97e659-0623-45c4-87a6-ad112bc525b7",
+      "auth_id": "8a9c226a-c0fc-42d8-8deb-d10e2b43cb2d",
+      "email": "lucianorocha2310@gmail.com",
+      "nome": "Luciano Dos Santos Rocha ",
+      "created_at": "2025-07-09T10:01:59.675+00:00"
+    },
+    {
+      "id": "b243f362-1b38-4209-9534-a059ceacceff",
+      "auth_id": "6a0fed12-76dd-48bf-af31-1018e239863a",
+      "email": "guilhermepadilha1@hotmail.comg",
+      "nome": "Guilherme luis Padilha ",
+      "created_at": "2025-07-08T15:07:10.002+00:00"
+    },
+    {
+      "id": "73f7c702-bc78-4b16-9293-b9f9951aeaf6",
+      "auth_id": "d7e551a0-cff1-4fa0-b9f8-f6df941c8dea",
+      "email": "lucasagrinfo07@gmail.com",
+      "nome": "Lucas Goulart Agrinfo ",
+      "created_at": "2025-07-06T13:39:43.412+00:00"
+    },
+    {
+      "id": "15c33eec-c5e7-4807-ab24-2f36f7c4729b",
+      "auth_id": "ab7249c7-7325-47ab-ae61-fdd9c6abe171",
+      "email": "murilo_1_martins@hotmail.com",
+      "nome": "Murilo Dias Martins ",
+      "created_at": "2025-07-06T04:33:13.179+00:00"
+    },
+    {
+      "id": "260546e0-cb68-4cc3-8b84-961c136ab9f7",
+      "auth_id": "dbdd91c1-cc62-4a70-97d4-ad1c8cd17e3f",
+      "email": "reni@pinhoveiculos.com.br",
+      "nome": "Reni Roxo Pinho",
+      "created_at": "2025-07-05T17:55:43.432+00:00"
+    },
+    {
+      "id": "f36990a5-192f-41dc-aa95-8720d9122071",
+      "auth_id": "7e85dac4-7a9f-48d6-a073-e0aeb2a63b64",
+      "email": "igor_pk_@hotmail.com",
+      "nome": "Igor Niehues Belettini",
+      "created_at": "2025-07-05T17:46:58.06+00:00"
+    },
+    {
+      "id": "0f01bd27-a685-4567-b703-9b16febb9feb",
+      "auth_id": "3dbe6d18-800d-40e5-a48b-a0fbc6181e12",
+      "email": "jaime@centenarte.com.br",
+      "nome": "Jaime Peres Pinho",
+      "created_at": "2025-07-05T14:31:17.881+00:00"
+    },
+    {
+      "id": "8b0c7a3f-578b-4ee7-b278-eb1853a63dc6",
+      "auth_id": "89e5fae4-10fa-4dcf-9a1a-ea43c03a515c",
+      "email": "atendimentoskyroad@gmail.com",
+      "nome": "Ramon Schardosim Selau",
+      "created_at": "2025-07-05T13:32:01.664+00:00"
+    },
+    {
+      "id": "8117d768-b7ad-4d4d-b4b8-6df4e8087c12",
+      "auth_id": "3f1f9fee-1b4c-4690-86a4-9f4e06f4c880",
+      "email": "brunolopesroldao@gmail.com",
+      "nome": "Bruno Lopes Roldão",
+      "created_at": "2025-07-05T00:08:50.511+00:00"
+    },
+    {
+      "id": "326b0a33-c4e9-4c69-8922-34b419f26f6a",
+      "auth_id": "c4b86f57-61ee-481d-94be-6fff6a5f0e95",
+      "email": "fernando89.personal@gmail.com",
+      "nome": "FERNANDO DA SILVA",
+      "created_at": "2025-07-04T23:45:33.987+00:00"
+    },
+    {
+      "id": "fbf0901f-6cfe-47c3-a0eb-107a00f5f37a",
+      "auth_id": "c56d581c-5692-4df0-939d-3a4f19af04df",
+      "email": "cassiapionerscandolara@gmail.com",
+      "nome": "Fabio da Silva Rocha",
+      "created_at": "2025-07-04T23:03:26.159+00:00"
+    },
+    {
+      "id": "9080537d-4e95-4699-87d4-128f82af1ad8",
+      "auth_id": "935ff806-2534-4ba4-b7f0-801bee908f28",
+      "email": "fabiorochapk@gmail.com",
+      "nome": "Fábio da Silva Rocha ",
+      "created_at": "2025-07-04T22:57:43.926+00:00"
+    },
+    {
+      "id": "d2633be4-dbfd-46c3-aa33-7855bf0604a4",
+      "auth_id": "e19f59cc-be37-4932-bbb6-7363d0c85893",
+      "email": "comprasmtzstore@gmail.com",
+      "nome": "Erick de Mattos ",
+      "created_at": "2025-07-04T22:54:49.949+00:00"
+    },
+    {
+      "id": "b98b67ab-ad65-4b9c-bb57-1107e6df6286",
+      "auth_id": "333bcb7d-1095-4f1c-bbd9-19efa0a4f0f1",
+      "email": "marinezfr@gmail.com",
+      "nome": "Gabriel Ramos ",
+      "created_at": "2025-07-04T22:49:41.338+00:00"
+    },
+    {
+      "id": "5364f3cb-a718-429d-8224-bbc215637b8f",
+      "auth_id": "edbcf0e8-92fb-49e0-9f05-7de768750e6a",
+      "email": "o.m.r_mecanica@hotmail.com",
+      "nome": "Yuri Sávio Ril",
+      "created_at": "2025-07-04T22:46:24.063+00:00"
+    },
+    {
+      "id": "72a2f90d-78bc-4db8-9e69-5455042c89d1",
+      "auth_id": "da393834-7bfd-4fad-9de8-e07fd178238a",
+      "email": "luanadelavechia57@gmail.com",
+      "nome": "Igor Bendo Daros ",
+      "created_at": "2025-07-04T22:44:31.597+00:00"
+    },
+    {
+      "id": "5a612f79-9580-4939-b958-199de109463f",
+      "auth_id": "077e4793-2e4e-4bba-8a2d-a3d33034063e",
+      "email": "guilhermemotta75@gmail.com",
+      "nome": "Guilherme da Rosa Motta",
+      "created_at": "2025-07-04T22:42:12.784+00:00"
+    },
+    {
+      "id": "f2686664-7962-4631-973e-480adb9adf82",
+      "auth_id": "0ffe7d39-9f60-425e-b395-3a024fe7ab74",
+      "email": "upcanyonsbalonismo@gmail.com",
+      "nome": "Leandro Trein Gonçalves ",
+      "created_at": "2025-07-04T22:20:13.492+00:00"
+    },
+    {
+      "id": "63139e23-8884-4acf-a556-888e92788877",
+      "auth_id": "e1e6bc1f-5d7a-4b33-938f-7bc6229a33b4",
+      "email": "vinivoandobalonismo@gmail.com",
+      "nome": "Vinícius De Latorre",
+      "created_at": "2025-07-04T22:01:12.772+00:00"
+    },
+    {
+      "id": "fab5bde4-4db6-4c81-80d1-b3a5d943e229",
+      "auth_id": "dbc7e3b9-e75c-48d7-9e24-98dd3efd6a79",
+      "email": "diovanemiranda1307@gmail.com",
+      "nome": "Diovane Magnus bonin de Miranda ",
+      "created_at": "2025-07-04T21:59:01.81+00:00"
+    },
+    {
+      "id": "218ccd1e-25ee-4cbb-bece-cdfff0e95311",
+      "auth_id": "4878e4b5-81a9-4929-bfeb-06f7ef70028a",
+      "email": "rosisalapaganini81@gmail.com",
+      "nome": "Rosilene Santos Sala Paganini",
+      "created_at": "2025-07-04T21:52:56.866+00:00"
+    },
+    {
+      "id": "7ba1e642-75c3-4d3e-89c0-4b4a04d51567",
+      "auth_id": "8dc5f548-8397-4070-85ac-2b77cf939f0b",
+      "email": "boni.trier@gmail.com",
+      "nome": "Irídio Boni ",
+      "created_at": "2025-07-04T21:41:43.429+00:00"
+    },
+    {
+      "id": "5e0a5c71-f7a7-4b4e-b277-431dc6cd07f0",
+      "auth_id": "e655b137-ec43-4d69-ab3b-6bfddba46a22",
+      "email": "marquionivs@gmail.com",
+      "nome": "Marquioni Vitorino dos Santos",
+      "created_at": "2025-07-04T21:36:09.718+00:00"
+    },
+    {
+      "id": "7c90b6b2-90df-4c2d-bfcf-87262d4c06ca",
+      "auth_id": "7358e640-298b-4dd5-8472-efc06a613f1b",
+      "email": "thiago@amazeballoons.com.br",
+      "nome": "Thiago Dias Marques",
+      "created_at": "2025-07-04T21:32:00.32+00:00"
+    },
+    {
+      "id": "24ea59e4-2b47-4876-9f03-7ff1100af1c2",
+      "auth_id": "0b54ef6c-d419-4787-a25d-556316c6707c",
+      "email": "murilo_1_martins@hormail.com",
+      "nome": "Murilo Dias Martins ",
+      "created_at": "2025-07-04T21:02:12.083+00:00"
+    },
+    {
+      "id": "40d6b55b-d51a-4037-befb-8a2f5fb8d825",
+      "auth_id": "db9ebdfd-6de3-4d4c-a4af-48c7de846412",
+      "email": "jpadesivostc@gmail.com",
+      "nome": "JOAO PAULO ROCHO",
+      "created_at": "2025-07-04T20:35:59.317+00:00"
+    },
+    {
+      "id": "f49b0cad-c79c-4a42-a4cd-01805e16f018",
+      "auth_id": "e87fc2fa-0067-4ecd-bf2e-434a82ebb447",
+      "email": "dionatansilva2002@gmail.com",
+      "nome": "Dionatan da Silva Ramos",
+      "created_at": "2025-07-04T20:08:54.513+00:00"
+    },
+    {
+      "id": "a81b0fe6-ec2c-4716-a1ed-e28413069a4d",
+      "auth_id": "1724d3c2-8b00-4342-95fd-14930ce43433",
+      "email": "rodrigoperettodemoraes113@hotmail.com",
+      "nome": "Rodrigo Peretto de Moraes ",
+      "created_at": "2025-07-04T19:43:24.788+00:00"
+    },
+    {
+      "id": "633d8e46-19f2-427e-b8e7-52850dc7a98b",
+      "auth_id": "a17751e0-2b14-4ada-b62d-d9358570e626",
+      "email": "atendimento@paulistabaloes.com.br",
+      "nome": "André Ibanhes Lopes ",
+      "created_at": "2025-07-04T19:42:50.829+00:00"
+    },
+    {
+      "id": "1d9b6f8b-bdef-4a2d-b963-f992471bc272",
+      "auth_id": "34cfce37-5f61-4f47-a75e-6efff0f0bdf0",
+      "email": "alexlummertz355@gmail.com",
+      "nome": "Alex Magnus Lummertz ",
+      "created_at": "2025-07-04T19:29:45.442+00:00"
+    },
+    {
+      "id": "505cbae1-e8cc-4ae8-850c-21156bdcbd3a",
+      "auth_id": "5c768426-8525-4c4d-9384-3416266d821f",
+      "email": "mariaeduardasc123@gmail.com",
+      "nome": "Eraldo martins pereira",
+      "created_at": "2025-07-04T19:25:35.067+00:00"
+    },
+    {
+      "id": "70baa2f0-fe5d-4d4f-b76e-a9e47101aecb",
+      "auth_id": "16a975ea-65a7-470a-b374-f2c149d40e9d",
+      "email": "dieversonsbardeloto0@hotmail.com",
+      "nome": "Dieverson sbardeloto",
+      "created_at": "2025-07-04T19:20:53.175+00:00"
+    },
+    {
+      "id": "24407ecf-3de7-42e6-8925-84ec9bf8ed39",
+      "auth_id": "0b31f064-f617-411f-9800-9bf067c187e7",
+      "email": "capitaocanyon@gmail.com",
+      "nome": "Gabriel rocha ",
+      "created_at": "2025-07-04T19:18:48.505+00:00"
+    },
+    {
+      "id": "672c28bb-fa61-431a-bb7a-60c0b9daac17",
+      "auth_id": "dbdd34f1-1c5c-452c-bb2a-6e114cbb9c20",
+      "email": "gabiroxa@hotmail.com",
+      "nome": "Gabriel rocha ",
+      "created_at": "2025-07-04T19:13:54.618+00:00"
+    },
+    {
+      "id": "89ee332a-1ed6-4842-ae45-2d841de2e512",
+      "auth_id": "e20c2a0e-a0e3-4d91-9e4f-436c849c7bfa",
+      "email": "canyonseperaus@gmail.com",
+      "nome": "Flavio Getulio Lima",
+      "created_at": "2025-07-04T19:11:40.311+00:00"
+    },
+    {
+      "id": "ce156a59-2a3d-4b6f-904e-5d3024c8e3cc",
+      "auth_id": "19deb2ee-526e-4caf-b352-3ffbe3c6dafa",
+      "email": "jucinei.rock@gmail.com",
+      "nome": "JUCINEI DA ROSA JUSTO",
+      "created_at": "2025-07-04T19:05:00.595+00:00"
+    },
+    {
+      "id": "7c3efaa0-46d9-4b4a-97c2-530a03bf3b7f",
+      "auth_id": "f89feb93-0f44-462c-8504-889bd9c1435b",
+      "email": "toipmaciel@gmail.com",
+      "nome": "Heitor Pereira Maciel",
+      "created_at": "2025-07-04T18:59:59.736+00:00"
+    },
+    {
+      "id": "51ae44fd-2dbb-41b3-af72-e077b68c0487",
+      "auth_id": "c6760ad3-d3bb-425b-a837-2657758a8340",
+      "email": "andersoncduartte@gmail.com",
+      "nome": "Anderson Duarte",
+      "created_at": "2025-07-04T18:57:17.852+00:00"
+    },
+    {
+      "id": "bbe18275-0248-4e58-9a46-cc886afd762f",
+      "auth_id": "95dcaddc-cb2a-4200-a946-20061f300ef8",
+      "email": "jf_pk@hotmail.com",
+      "nome": "José Fernando Machado",
+      "created_at": "2025-07-04T18:53:47.092+00:00"
+    },
+    {
+      "id": "f462034f-02ec-415f-87ae-d2116274d715",
+      "auth_id": "c0e429db-4a6c-4984-9262-4788df80c936",
+      "email": "destinodosventosbalonismo@gmail.com",
+      "nome": "Guilherme da Rosa Motta",
+      "created_at": "2025-07-04T18:49:54.438+00:00"
+    },
+    {
+      "id": "4f2d8c24-b969-414d-b721-35e491183d85",
+      "auth_id": "4bf81a68-5021-4376-b859-a522efcafa33",
+      "email": "adrianeril@yahoo.com.br",
+      "nome": "Adriane de Lurdes Ril ",
+      "created_at": "2025-07-04T18:48:55.736+00:00"
+    },
+    {
+      "id": "d4305bbc-c7c3-452b-ae7e-b11a87adfa98",
+      "auth_id": "5a250821-7144-4a49-9fe2-5311a90682c1",
+      "email": "azulveiculoss@gmail.com",
+      "nome": "Daniel Zeferino Carlos",
+      "created_at": "2025-07-04T18:46:45.852+00:00"
+    },
+    {
+      "id": "6a022c2e-6d7c-4093-93b7-971f1a054920",
+      "auth_id": "b7109735-f917-4715-b440-aaed968c6794",
+      "email": "taionaracarvalho@gmail.com",
+      "nome": "Taionara da Silva Carvalho ",
+      "created_at": "2025-07-04T18:46:09.222+00:00"
+    },
+    {
+      "id": "3b90f403-9507-4b09-af1f-5043271f61aa",
+      "auth_id": "7001d457-2b65-44cd-9688-ad7ef0eb50f5",
+      "email": "marcel@redefurnas.com.br",
+      "nome": "Marcel Gonçalves ",
+      "created_at": "2025-07-04T18:44:05.036+00:00"
+    },
+    {
+      "id": "ba7bb9eb-fb0d-47fd-8c1c-5e708c70f610",
+      "auth_id": "a6fbd437-fe2d-44c2-9762-4c1a33475953",
+      "email": "contato@canyonsebaloes.com.br",
+      "nome": "Geovani Moro Reus",
+      "created_at": "2025-07-04T18:42:17.514+00:00"
+    },
+    {
+      "id": "29551d4a-dc3c-4b10-a40f-f380d0924858",
+      "auth_id": "62824809-5517-4fd7-81ae-a97fc05987cc",
+      "email": "miguel_redefurnas@hotmail.com",
+      "nome": "Miguel Antonio Gonçalves",
+      "created_at": "2025-07-04T18:34:31.437+00:00"
+    },
+    {
+      "id": "6067c7c7-1b9b-44d1-9b3c-4ee268cd227a",
+      "auth_id": "80ee3f5b-e52b-47d8-9879-1815849af260",
+      "email": "voenoscanyons.adm@gmail.com",
+      "nome": "Murilo Pereira Gonçalves ",
+      "created_at": "2025-07-04T18:15:45.205+00:00"
+    },
+    {
+      "id": "106d4b3f-1ca9-4f42-a7f1-5133b0713bb3",
+      "auth_id": "e944399c-cebf-4294-81ab-db0a4b3c727f",
+      "email": "iFlyBalloon@gmail.com",
+      "nome": "Rafael Cirimbelli da Luz ",
+      "created_at": "2025-07-03T23:34:57.946+00:00"
+    },
+    {
+      "id": "875da1d4-4d3a-4b9d-b2f9-e51f4b141214",
+      "auth_id": "b7abe060-ed9a-4d8c-ac9d-ad04de0a1d0f",
+      "email": "gab1998ramos@gmail.com",
+      "nome": "Gabriel Ramos de Aguiar ",
+      "created_at": "2025-07-03T22:46:32.605+00:00"
+    },
+    {
+      "id": "918173c4-2cd9-4e0c-bccf-1e9b143ca453",
+      "auth_id": "63c42fac-a17c-494c-bdf5-60c88daafac3",
+      "email": "balaodevoo@gmail.com",
+      "nome": "Rafael Cirimbelli da Luz ",
+      "created_at": "2025-07-03T21:29:10.362+00:00"
+    },
+    {
+      "id": "e6a4a3be-aa74-463e-9e5e-450eb141918f",
+      "auth_id": "0285937f-0997-427d-8c9e-d09957863f59",
+      "email": "admin@teste.com",
+      "nome": "admin",
+      "created_at": "2025-07-01T20:13:57.733064+00:00"
+    }
+  ],
+  "authUsers": [],
+  "duplicates": [],
+  "inconsistencies": [],
+  "analysis": {
+    "totalUsers": 85,
+    "emailDuplicates": 0,
+    "authIdDuplicates": 1,
+    "usersWithoutAuthId": 0,
+    "usersWithoutEmail": 0
+  }
+}
