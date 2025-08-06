@@ -13,6 +13,7 @@ const nextConfig = {
       },
     ],
   },
+
   // Configurações removidas - causavam conflito com bodyParser: false nas API routes
 };
 

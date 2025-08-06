@@ -1,7 +1,8 @@
 # TODO:
 
-- [x] 1: Investigar erros PGRST116 no histórico de voos do piloto (priority: High)
-- [x] 2: Verificar inconsistências entre auth.uid() e users_table_id no histórico (priority: High)
-- [x] 3: Analisar consultas de membros que retornam 0 rows (priority: High)
-- [x] 4: Corrigir problemas de ID no histórico de voos similar ao checklist (priority: High)
-- [x] 5: Testar correções no histórico de voos do piloto (priority: Medium)
+- [x] 1: Verificar status atual do git e arquivos modificados (priority: High)
+- [x] 2: Fazer commit das correções do Fast Refresh infinito (priority: High)
+- [ ] 3: Adicionar todas as alterações ao staging area (**IN PROGRESS**) (priority: High)
+- [ ] 4: Fazer commit com mensagem descritiva (priority: High)
+- [ ] 5: Configurar remote do GitHub se necessário (priority: High)
+- [ ] 6: Fazer push forçado das alterações para o repositório GitHub (priority: High)
