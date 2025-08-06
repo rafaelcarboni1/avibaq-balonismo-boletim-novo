@@ -91,10 +91,26 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Verificar se o usuário é piloto e tem acesso ao voo
     console.log('👤 [UPLOAD] Verificando se usuário é piloto...');
+    
+    // Primeiro, buscar o ID do usuário na tabela users usando o auth_id
+    const { data: userData, error: userError } = await supabaseAdmin
+      .from('users')
+      .select('id')
+      .eq('auth_id', user.id)
+      .single();
+    
+    if (userError || !userData) {
+      console.log('[UPLOAD] Usuário não encontrado na tabela users:', userError?.message);
+      return res.status(403).json({ error: 'Acesso negado: usuário não encontrado' });
+    }
+    
+    console.log('[UPLOAD] ID do usuário na tabela users:', userData.id);
+    
+    // Agora buscar o membro usando o user_id correto
     const { data: membro, error: membroError } = await supabaseAdmin
       .from('membros')
       .select('id')
-      .eq('user_id', user.id)
+      .eq('user_id', userData.id)
       .eq('tipo', 'piloto')
       .single();
 
