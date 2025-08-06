@@ -1,0 +1,50 @@
+node_modules
+build
+dist
+.git
+.trae
+.log
+.next
+docs/
+scripts/
+table_structure.pdf
+*.pdf
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Arquivos SQL de debug e desenvolvimento
+*.sql
+DEBUG_*.sql
+EMERGENCY_*.sql
+FINAL_*.sql
+fix_*.sql
+fix-*.sql
+test_*.sql
+test-*.sql
+debug_*.sql
+debug-*.sql
+check_*.sql
+check-*.sql
+create-*.sql
+aplicar_*.sql
+bypass_*.sql
+nova-*.sql
+update_*.sql
+script_*.sql
+investigate_*.sql
+alternative_*.sql
+add_*.sql
+
+# Arquivos grandes que devem ser excluídos do deploy
+table_structure.pdf
+
+# Arquivos temporários de build
+tsconfig.tsbuildinfo
+bun.lockb
+
+# Arquivos SQL de debug (mantendo apenas os grandes)
+*.sql.backup
+*_backup.sql
+*_debug_large.sql

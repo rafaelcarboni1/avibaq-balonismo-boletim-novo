@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "magicui-mcp": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@magicuidesign/mcp",
+        "--key",
+        "2598b4e8-ba08-4ef6-b430-5814dae9c524",
+        "--profile",
+        "remote-toad-s6nEiF"
+      ]
+    }
+  }
+}

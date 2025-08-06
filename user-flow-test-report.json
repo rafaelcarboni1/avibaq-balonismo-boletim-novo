@@ -1,0 +1,61 @@
+{
+  "timestamp": "2025-08-05T20:25:34.298Z",
+  "summary": {
+    "totalTests": 5,
+    "passed": 5,
+    "failed": 0,
+    "successRate": "100.0%"
+  },
+  "details": [
+    {
+      "test": "Integridade do Sistema",
+      "success": true,
+      "error": null,
+      "data": {
+        "totalAuthUsers": 50,
+        "totalPublicUsers": 85,
+        "orphanUsers": 0
+      }
+    },
+    {
+      "test": "Cadastro Completo de Usuário",
+      "success": true,
+      "error": null,
+      "data": {
+        "authUserId": "4405dd38-4b05-41cc-b29a-d41ea68e8eda",
+        "publicUserId": "b7a86334-239f-47dd-91d7-e1d6cebd311f",
+        "email": "teste-1754425532978@avibaq.com.br"
+      }
+    },
+    {
+      "test": "Foreign Key Constraints",
+      "success": true,
+      "error": null,
+      "data": {
+        "testUserId": "862e89c3-07d1-4a15-a9dc-c1ff7c897b0a",
+        "testVooId": "12400c8b-43ab-43ea-876b-d2fc364bfe74",
+        "checklistItemId": "75f0546d-a86b-4683-ab7c-07b6aa5f7ebd"
+      }
+    },
+    {
+      "test": "Login de Usuário",
+      "success": true,
+      "error": null,
+      "data": {
+        "userId": "b7a86334-239f-47dd-91d7-e1d6cebd311f",
+        "email": "teste-1754425532978@avibaq.com.br",
+        "nome": "Usuário Teste"
+      }
+    },
+    {
+      "test": "Row Level Security",
+      "success": true,
+      "error": null,
+      "data": {
+        "accessWithoutAuth": true,
+        "recordsReturned": 1
+      }
+    }
+  ],
+  "errors": []
+}
