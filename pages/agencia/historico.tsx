@@ -255,9 +255,9 @@ export default function AgenciaHistorico() {
       const voosProcessados = voosData?.map(voo => ({
         ...voo,
         piloto: {
-          id: voo.membros.id,
-          nome: voo.membros.nome,
-          user_id: voo.membros.user_id
+          id: (voo.membros as any)?.id,
+          nome: (voo.membros as any)?.nome,
+          user_id: (voo.membros as any)?.user_id
         },
         baloes: [], // Temporariamente vazio
         anexos: [] // Temporariamente vazio

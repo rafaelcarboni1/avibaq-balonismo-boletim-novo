@@ -1,8 +1,7 @@
 # TODO:
 
-- [x] 1: Verificar status atual do git e arquivos modificados (priority: High)
-- [x] 2: Fazer commit das correções do Fast Refresh infinito (priority: High)
-- [x] 3: Adicionar todas as alterações ao staging area (priority: High)
-- [x] 4: Fazer commit com mensagem descritiva (priority: High)
-- [x] 5: Configurar remote do GitHub se necessário (priority: High)
-- [x] 6: Fazer push forçado das alterações para o repositório GitHub (priority: High)
+- [x] 1: Analisar logs de erro do deploy para identificar problemas de TypeScript (priority: High)
+- [x] 2: Corrigir erros de tipo no arquivo /pages/agencia/historico.tsx linha 258 (priority: High)
+- [x] 3: Verificar se há outros arquivos com erros de TypeScript (priority: Medium)
+- [x] 4: Executar build local para validar correções (priority: Medium)
+- [ ] 5: Fazer commit e push das correções (**IN PROGRESS**) (priority: High)
