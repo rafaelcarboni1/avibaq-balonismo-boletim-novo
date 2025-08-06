@@ -257,8 +257,7 @@ export default function PlanejamentoVoo() {
         membro = membroPorId;
         console.log('[DEBUG-PILOTO] Membro encontrado por user_id:', {
           id: membro.id,
-          nome: membroPorId.nome || 'N/A',
-          tipo: membroPorId.tipo || 'N/A'
+          user_id: membroPorId.user_id
         });
       } else {
         console.log('[DEBUG-PILOTO] Membro não encontrado por user_id, erro:', errorPorId);
@@ -276,7 +275,6 @@ export default function PlanejamentoVoo() {
           membro = membroPorEmail;
           console.log('[DEBUG-PILOTO] Membro encontrado por email:', {
             id: membroPorEmail.id,
-            nome: membroPorEmail.nome || 'N/A',
             user_id_atual: membroPorEmail.user_id
           });
           
