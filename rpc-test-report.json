@@ -1,0 +1,70 @@
+{
+  "timestamp": "2025-08-05T21:46:05.826Z",
+  "testResults": {
+    "loginSuccess": true,
+    "userAuthId": "7e85dac4-7a9f-48d6-a073-e0aeb2a63b64",
+    "rpcResult": "f36990a5-192f-41dc-aa95-8720d9122071",
+    "userTableData": {
+      "byAuthId": {
+        "id": "f36990a5-192f-41dc-aa95-8720d9122071",
+        "email": "igor_pk_@hotmail.com",
+        "role": "piloto",
+        "created_at": "2025-07-05T17:46:58.06+00:00",
+        "nome": "Igor Niehues Belettini",
+        "username": "Igor Niehues Belettini",
+        "senha_hash": "$2b$10$AYE1tsEZouStA4LUvJ8vF.nJ/ndsmeO6n72DrLsdZxMpEBm.pcAAS",
+        "ativo": true,
+        "updated_at": "2025-08-05T01:02:05.733633+00:00",
+        "primeira_senha": false,
+        "auth_id": "7e85dac4-7a9f-48d6-a073-e0aeb2a63b64",
+        "migrated_at": null,
+        "cnpj": null,
+        "razao_social": null,
+        "nome_fantasia": null,
+        "telefone": null,
+        "celular": null,
+        "endereco": null,
+        "cidade": null,
+        "cep": null,
+        "whatsapp_group_joined": true,
+        "whatsapp_modal_shown": true
+      },
+      "byEmail": {
+        "id": "f36990a5-192f-41dc-aa95-8720d9122071",
+        "email": "igor_pk_@hotmail.com",
+        "role": "piloto",
+        "created_at": "2025-07-05T17:46:58.06+00:00",
+        "nome": "Igor Niehues Belettini",
+        "username": "Igor Niehues Belettini",
+        "senha_hash": "$2b$10$AYE1tsEZouStA4LUvJ8vF.nJ/ndsmeO6n72DrLsdZxMpEBm.pcAAS",
+        "ativo": true,
+        "updated_at": "2025-08-05T01:02:05.733633+00:00",
+        "primeira_senha": false,
+        "auth_id": "7e85dac4-7a9f-48d6-a073-e0aeb2a63b64",
+        "migrated_at": null,
+        "cnpj": null,
+        "razao_social": null,
+        "nome_fantasia": null,
+        "telefone": null,
+        "celular": null,
+        "endereco": null,
+        "cidade": null,
+        "cep": null,
+        "whatsapp_group_joined": true,
+        "whatsapp_modal_shown": true
+      }
+    },
+    "debugResult": {
+      "auth_uid": "7e85dac4-7a9f-48d6-a073-e0aeb2a63b64",
+      "auth_email": "igor_pk_@hotmail.com",
+      "found_by_auth_id": "f36990a5-192f-41dc-aa95-8720d9122071",
+      "users_with_auth_id_count": 85,
+      "users_total_count": 85
+    }
+  },
+  "summary": {
+    "loginSuccess": true,
+    "rpcWorking": true,
+    "authIdSynced": true
+  }
+}

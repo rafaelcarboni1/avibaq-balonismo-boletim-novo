@@ -1,0 +1,605 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/router';
+import dynamic from 'next/dynamic';
+
+import { PlusIcon, UsersIcon, CalendarIcon, DocumentTextIcon, BriefcaseIcon, ChartBarIcon, CurrencyDollarIcon, BuildingOfficeIcon, ClockIcon } from '@heroicons/react/24/solid';
+import { EnhancedDashboardLayout } from '../../src/components/magicui/enhanced-dashboard-layout';
+import { MagicCard } from '../../src/components/magicui/magic-card';
+import { BentoGrid, BentoGridItem } from '../../src/components/magicui/bento-grid';
+import SimpleKpiCard from '../../src/components/SimpleKpiCard';
+import LoadingSkeleton from '../../src/components/magicui/loading-skeleton';
+
+import { Button } from '../../src/components/ui/button';
+import { supabase } from '../../src/integrations/supabase/client';
+import { useUser } from '../../src/hooks/useUser';
+import { useToast } from '../../src/hooks/use-toast';
+import VooEmAndamento from '../../src/components/VooEmAndamento';
+import VoosStatistics from '../../src/components/VoosStatistics';
+import VoosCharts from '../../src/components/VoosCharts';
+import PushNotificationManager from '../../src/components/PushNotificationManager';
+import { WhatsAppWelcomeModal } from '../../src/components/WhatsAppWelcomeModal';
+
+// Lazy load dos componentes pesados
+const AdvancedKPICard = dynamic(() => import('../../src/components/magicui/advanced-kpi-analytics').then(mod => ({ default: mod.AdvancedKPICard })), {
+  loading: () => <div className="animate-pulse bg-gray-200 rounded-lg h-32" />
+});
+
+const AdvancedLineChart = dynamic(() => import('../../src/components/magicui/advanced-charts').then(mod => ({ default: mod.AdvancedLineChart })), {
+  loading: () => <div className="animate-pulse bg-gray-200 rounded-lg h-64" />
+});
+
+const HeatmapChart = dynamic(() => import('../../src/components/magicui/advanced-charts').then(mod => ({ default: mod.HeatmapChart })), {
+  loading: () => <div className="animate-pulse bg-gray-200 rounded-lg h-64" />
+});
+
+interface DashboardStats {
+  totalPilotos: number;
+  pilotosAtivos: number;
+  voosEsteAno: number;
+  voosEsteMes: number;
+  proximoVoo: any;
+  voosRecentes: any[];
+  voosEmAndamento: any[];
+}
+
+export default function AgenciaDashboard() {
+  const router = useRouter();
+  const { user, loading: userLoading } = useUser();
+  const { toast } = useToast();
+  
+  const [stats, setStats] = useState<DashboardStats>({
+    totalPilotos: 0,
+    pilotosAtivos: 0,
+    voosEsteAno: 0,
+    voosEsteMes: 0,
+    proximoVoo: null,
+    voosRecentes: [],
+    voosEmAndamento: []
+  });
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<'overview' | 'business' | 'team'>('overview');
+  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
+
+  // Verificar autenticação e carregar dados
+  useEffect(() => {
+    if (userLoading) return;
+
+    if (!user) {
+      router.push('/agencia/login');
+      return;
+    }
+
+    if (user.role && user.role !== 'agencia') {
+      console.log('[AgenciaDashboard] Redirecionando - role:', user.role);
+      router.push('/');
+      return;
+    }
+
+    // Se chegou até aqui, usuário está autenticado e é agência
+    if (user.role === 'agencia') {
+      carregarDashboard();
+    }
+  }, [user, userLoading, router]);
+
+  // Verificar se deve mostrar modal do WhatsApp
+  useEffect(() => {
+    if (!user || userLoading || user.role !== 'agencia') return;
+    
+    // Verificar se é o primeiro acesso ou se ainda não entrou no grupo
+    if (!user.whatsapp_modal_shown || !user.whatsapp_group_joined) {
+      setShowWhatsAppModal(true);
+    }
+  }, [user, userLoading]);
+
+  // Funções do modal WhatsApp
+  const handleJoinWhatsApp = () => {
+    // Abrir link do WhatsApp (URL deve ser configurada no ambiente)
+    const whatsappUrl = process.env.NEXT_PUBLIC_WHATSAPP_GROUP_URL || '#';
+    window.open(whatsappUrl, '_blank');
+  };
+
+  const handleMarkAsJoined = async () => {
+    try {
+      await supabase
+        .from('users')
+        .update({ 
+          whatsapp_group_joined: true,
+          whatsapp_modal_shown: true 
+        })
+        .eq('id', user?.id);
+      
+      setShowWhatsAppModal(false);
+      toast({
+        title: "Obrigado!",
+        description: "Esperamos você no grupo do WhatsApp!",
+      });
+    } catch (error) {
+      console.error('Erro ao atualizar status WhatsApp:', error);
+    }
+  };
+
+  const handleSkipWhatsApp = async () => {
+    try {
+      await supabase
+        .from('users')
+        .update({ whatsapp_modal_shown: true })
+        .eq('id', user?.id);
+      
+      setShowWhatsAppModal(false);
+    } catch (error) {
+      console.error('Erro ao atualizar status WhatsApp:', error);
+    }
+  };
+
+  const carregarDashboard = async () => {
+    try {
+      setLoading(true);
+      
+      // Buscar membro associado ao usuário (primeiro por user_id, depois por email como fallback)
+      let membro = null;
+      let membroError = null;
+
+      // Tentar primeiro por user_id
+      const { data: membroPorId, error: errorPorId } = await supabase
+        .from('membros')
+        .select('id, user_id')
+        .eq('user_id', user?.id)
+        .eq('tipo', 'agencia')
+        .single();
+
+      if (membroPorId && !errorPorId) {
+        membro = membroPorId;
+      } else {
+        console.log('[Dashboard Agência] Membro não encontrado por user_id, tentando por email:', user?.email);
+        
+        // Fallback: buscar por email se user_id não funcionou
+        const { data: membroPorEmail, error: errorPorEmail } = await supabase
+          .from('membros')
+          .select('id, user_id')
+          .eq('email', user?.email)
+          .eq('tipo', 'agencia')
+          .single();
+
+        if (membroPorEmail && !errorPorEmail) {
+          membro = membroPorEmail;
+          console.log('[Dashboard Agência] Membro encontrado por email. User_id atual:', membroPorEmail.user_id);
+          
+          // Se encontrou por email mas user_id está null, tentar atualizar
+          if (!membroPorEmail.user_id && user?.id) {
+            console.log('[Dashboard Agência] Tentando vincular user_id ao membro...');
+            await supabase
+              .from('membros')
+              .update({ user_id: user.id })
+              .eq('id', membroPorEmail.id);
+            console.log('[Dashboard Agência] Vinculação user_id tentada');
+          }
+        } else {
+          membroError = errorPorEmail || errorPorId;
+        }
+      }
+
+      if (membroError || !membro) {
+        console.error('[Dashboard Agência] Erro ao buscar membro:', { 
+          errorPorId, 
+          errorPorEmail: membroError, 
+          userEmail: user?.email, 
+          userId: user?.id 
+        });
+        
+        toast({
+          title: "Erro ao carregar dados",
+          description: "Agência não encontrada no sistema. Entre em contato com o administrador.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Carregar estatísticas em paralelo
+      const [
+        pilotosResult,
+        pilotosAtivosResult,
+        voosAnoResult,
+        voosMesResult,
+        proximoVooResult,
+        voosRecentesResult,
+        voosEmAndamentoResult
+      ] = await Promise.all([
+        // Total de pilotos vinculados
+        supabase
+          .from('vinculos_agencia_piloto')
+          .select('id')
+          .eq('agencia_id', membro.id),
+        
+        // Pilotos ativos (status aceito)
+        supabase
+          .from('vinculos_agencia_piloto')
+          .select('id')
+          .eq('agencia_id', membro.id)
+          .eq('status', 'aceito'),
+        
+        // Voos este ano
+        supabase
+          .from('voos')
+          .select('id')
+          .eq('agencia_id', membro.id)
+          .gte('data_voo', new Date().getFullYear() + '-01-01'),
+        
+        // Voos este mês
+        supabase
+          .from('voos')
+          .select('id')
+          .eq('agencia_id', membro.id)
+          .gte('data_voo', new Date().getFullYear() + '-' + String(new Date().getMonth() + 1).padStart(2, '0') + '-01'),
+        
+        // Próximo voo
+        supabase
+          .from('voos')
+          .select('*, piloto:membros!voos_piloto_id_fkey(nome)')
+          .eq('agencia_id', membro.id)
+          .gte('data_voo', new Date().toISOString().split('T')[0])
+          .order('data_voo', { ascending: true })
+          .limit(1)
+          .single(),
+        
+        // Voos recentes (últimos 5) - apenas finalizados e cancelados
+        supabase
+          .from('voos')
+          .select('*, piloto:membros!voos_piloto_id_fkey(nome)')
+          .eq('agencia_id', membro.id)
+          .in('status', ['finalizado', 'cancelado'])
+          .order('data_voo', { ascending: false })
+          .limit(5),
+        
+        // Voos em andamento da agência (rascunho até checklist_concluido)
+        supabase
+          .from('voos')
+          .select('*, piloto:membros!voos_piloto_id_fkey(nome)')
+          .eq('agencia_id', membro.id)
+          .in('status', ['rascunho', 'planejado', 'checklist_bloco1', 'checklist_bloco2', 'checklist_concluido'])
+          .order('data_voo', { ascending: true })
+      ]);
+
+      setStats({
+        totalPilotos: pilotosResult.data?.length || 0,
+        pilotosAtivos: pilotosAtivosResult.data?.length || 0,
+        voosEsteAno: voosAnoResult.data?.length || 0,
+        voosEsteMes: voosMesResult.data?.length || 0,
+        proximoVoo: proximoVooResult.data || null,
+        voosRecentes: voosRecentesResult.data || [],
+        voosEmAndamento: voosEmAndamentoResult.data || []
+      });
+
+    } catch (error) {
+      console.error('Erro ao carregar dashboard:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao carregar dados do dashboard",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Memoizar o mapeamento de status para evitar recriação
+  const statusDisplayMap = useMemo(() => ({
+    'rascunho': { label: 'Rascunho', color: 'bg-gray-100 text-gray-800' },
+    'planejado': { label: 'Planejado', color: 'bg-blue-100 text-blue-800' },
+    'checklist_bloco1': { label: 'Checklist 1/3', color: 'bg-yellow-100 text-yellow-800' },
+    'checklist_bloco2': { label: 'Checklist 2/3', color: 'bg-yellow-100 text-yellow-800' },
+    'checklist_concluido': { label: 'Checklist OK', color: 'bg-green-100 text-green-800' },
+    'finalizado': { label: 'Finalizado', color: 'bg-emerald-100 text-emerald-800' },
+    'cancelado': { label: 'Cancelado', color: 'bg-red-100 text-red-800' }
+  }), []);
+
+  const getStatusDisplay = (status: string) => {
+    return statusDisplayMap[status] || { label: status, color: 'bg-gray-100 text-gray-800' };
+  };
+
+  if (userLoading || loading) {
+    return (
+      <EnhancedDashboardLayout 
+        title="Dashboard da Agência" 
+        breadcrumbs={[
+          { label: "Dashboard", icon: DocumentTextIcon }
+        ]}
+        loading={true}
+      >
+        <div className="space-y-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-white rounded-2xl p-6 border border-gray-200/50">
+                <LoadingSkeleton variant="card" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </EnhancedDashboardLayout>
+    );
+  }
+
+  return (
+    <EnhancedDashboardLayout 
+      title="Dashboard da Agência"
+      breadcrumbs={[
+        { label: "Dashboard", icon: DocumentTextIcon }
+      ]}
+    >
+      <div className="space-y-8">
+        
+        {/* Navegação por abas */}
+        <div className="flex gap-4 border-b border-gray-200">
+          {[
+            { key: 'overview', label: 'Visão Geral', icon: ChartBarIcon },
+            { key: 'team', label: 'Equipe', icon: UsersIcon },
+            { key: 'business', label: 'Business', icon: CurrencyDollarIcon }
+          ].map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key as any)}
+              className={`
+                flex items-center gap-2 px-4 py-2 border-b-2 transition-colors
+                ${activeTab === tab.key 
+                  ? 'border-blue-500 text-blue-600 bg-blue-50' 
+                  : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                }
+              `}
+            >
+              <tab.icon className="h-5 w-5" />
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Conteúdo das abas */}
+        {activeTab === 'overview' && (
+          <div className="space-y-8">
+            {/* KPI Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <SimpleKpiCard 
+                title="Total Pilotos"
+                value={stats.totalPilotos} 
+                icon={UsersIcon}
+                color="blue"
+                description="Pilotos vinculados"
+              />
+
+              <SimpleKpiCard 
+                title="Pilotos Ativos"
+                value={stats.pilotosAtivos}
+                icon={BriefcaseIcon}
+                color="green"
+                description="Pilotos trabalhando"
+              />
+
+              <SimpleKpiCard 
+                title="Voos Este Ano"
+                value={stats.voosEsteAno}
+                icon={CalendarIcon}
+                color="purple"
+                description="Operações anuais"
+              />
+
+              <SimpleKpiCard 
+                title="Voos Este Mês"
+                value={stats.voosEsteMes}
+                icon={DocumentTextIcon}
+                color="yellow"
+                description="Operações mensais"
+              />
+            </div>
+
+            {/* Estatísticas Simples */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <MagicCard className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Resumo de Operações</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Voos Este Ano:</span>
+                    <span className="font-semibold">{stats.voosEsteAno} voos</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Voos Este Mês:</span>
+                    <span className="font-semibold">{stats.voosEsteMes} voos</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Total de Pilotos:</span>
+                    <span className="font-semibold">{stats.totalPilotos}</span>
+                  </div>
+                </div>
+              </MagicCard>
+              
+              <MagicCard className="p-6">
+                <h3 className="text-lg font-semibold mb-4">Status da Equipe</h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Pilotos Ativos:</span>
+                    <span className="font-semibold text-green-600">{stats.pilotosAtivos}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Taxa de Atividade:</span>
+                    <span className="font-semibold">
+                      {stats.totalPilotos > 0 ? Math.round((stats.pilotosAtivos / stats.totalPilotos) * 100) : 0}%
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Convites Pendentes:</span>
+                    <span className={`font-semibold ${(stats.totalPilotos - stats.pilotosAtivos) > 0 ? 'text-yellow-600' : 'text-green-600'}`}>
+                      {stats.totalPilotos - stats.pilotosAtivos}
+                    </span>
+                  </div>
+                </div>
+              </MagicCard>
+            </div>
+            
+            {/* Seção Voos em Andamento da Equipe */}
+            {stats.voosEmAndamento.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+                  <ClockIcon className="h-6 w-6 text-blue-500" />
+                  Voos em Andamento da Equipe ({stats.voosEmAndamento.length})
+                </h3>
+                <div className="grid gap-4">
+                  {stats.voosEmAndamento.map((voo) => (
+                    <VooEmAndamento 
+                      key={voo.id} 
+                      voo={voo} 
+                      showPilotInfo={true}
+                      compact={true}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Aba de Equipe */}
+        {activeTab === 'team' && (
+          <div className="space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <SimpleKpiCard 
+                title="Pilotos Ativos"
+                value={stats.pilotosAtivos} 
+                icon={UsersIcon}
+                color="green"
+                description="Trabalhando ativamente"
+              />
+              
+              <SimpleKpiCard 
+                title="Convites Pendentes"
+                value={stats.totalPilotos - stats.pilotosAtivos}
+                icon={PlusIcon}
+                color="yellow"
+                description="Respostas pendentes"
+              />
+              
+              <SimpleKpiCard 
+                title="Voos Este Mês"
+                value={stats.voosEsteMes}
+                icon={CalendarIcon}
+                color="blue"
+                description="Produtividade da equipe"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Aba de Business Analytics */}
+        {activeTab === 'business' && (
+          <div className="space-y-8">
+            {/* Estatísticas de Voos */}
+            <VoosStatistics periodo="trimestre" />
+            
+            {/* Gráficos de Voos */}
+            <VoosCharts />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <AdvancedKPICard
+                title="Receita Mensal"
+                metric={{
+                  value: 45750,
+                  target: 50000,
+                  previousValue: 38200,
+                  format: 'currency'
+                }}
+                icon={CurrencyDollarIcon}
+                color="green"
+                description="Receita este mês"
+              />
+              
+              <AdvancedKPICard
+                title="Taxa de Ocupação"
+                metric={{
+                  value: 78.5,
+                  target: 80,
+                  previousValue: 73.2,
+                  format: 'percentage'
+                }}
+                icon={CalendarIcon}
+                color="blue"
+                description="Voos vs. Capacidade"
+              />
+              
+              <AdvancedKPICard
+                title="Satisfação Cliente"
+                metric={{
+                  value: 4.8,
+                  target: 4.5,
+                  previousValue: 4.6,
+                  unit: '/5'
+                }}
+                icon={UsersIcon}
+                color="yellow"
+                description="Avaliação média"
+              />
+              
+              <AdvancedKPICard
+                title="ROI Operacional"
+                metric={{
+                  value: 28.3,
+                  target: 25,
+                  previousValue: 24.1,
+                  format: 'percentage'
+                }}
+                icon={ChartBarIcon}
+                color="purple"
+                description="Retorno sobre investimento"
+              />
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <AdvancedLineChart
+                title="Receita por Mês - Últimos 12 Meses"
+                data={[
+                  { name: 'Jan', value: 32000 },
+                  { name: 'Fev', value: 28000 },
+                  { name: 'Mar', value: 35000 },
+                  { name: 'Abr', value: 42000 },
+                  { name: 'Mai', value: 48000 },
+                  { name: 'Jun', value: 45750 }
+                ]}
+                type="line"
+                colors={['#8b5cf6']}
+                height={300}
+              />
+              
+              <HeatmapChart
+                title="Demanda por Horário da Semana"
+                data={[
+                  { day: 'Seg', hour: 9, value: 2 },
+                  { day: 'Seg', hour: 15, value: 3 },
+                  { day: 'Ter', hour: 10, value: 1 },
+                  { day: 'Qua', hour: 14, value: 2 },
+                  { day: 'Qui', hour: 16, value: 4 },
+                  { day: 'Sex', hour: 9, value: 3 },
+                  { day: 'Sex', hour: 17, value: 5 },
+                  { day: 'Sáb', hour: 8, value: 8 },
+                  { day: 'Sáb', hour: 10, value: 12 },
+                  { day: 'Sáb', hour: 14, value: 15 },
+                  { day: 'Sáb', hour: 16, value: 18 },
+                  { day: 'Dom', hour: 9, value: 10 },
+                  { day: 'Dom', hour: 11, value: 14 },
+                  { day: 'Dom', hour: 15, value: 16 }
+                ]}
+              />
+            </div>
+          </div>
+        )}
+        
+        {/* Push Notification Manager */}
+        <PushNotificationManager userId={user?.id} />
+      </div>
+
+      {/* Modal de boas-vindas do WhatsApp */}
+      <WhatsAppWelcomeModal
+        isOpen={showWhatsAppModal}
+        onClose={() => setShowWhatsAppModal(false)}
+        onJoinWhatsApp={handleJoinWhatsApp}
+        onMarkAsJoined={handleMarkAsJoined}
+        onSkip={handleSkipWhatsApp}
+        hasShownBefore={user?.whatsapp_modal_shown || false}
+      />
+    </EnhancedDashboardLayout>
+  );
+}

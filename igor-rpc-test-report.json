@@ -1,0 +1,25 @@
+{
+  "timestamp": "2025-08-05T22:00:12.371Z",
+  "test": "Igor RPC Fix Test",
+  "auth_data": {
+    "user_id": "7e85dac4-7a9f-48d6-a073-e0aeb2a63b64",
+    "email": "igor_pk_@hotmail.com"
+  },
+  "rpc_result": {
+    "user_table_id": "f36990a5-192f-41dc-aa95-8720d9122071",
+    "error": null
+  },
+  "debug_info": {
+    "auth_uid": "7e85dac4-7a9f-48d6-a073-e0aeb2a63b64",
+    "auth_email": "igor_pk_@hotmail.com",
+    "found_by_auth_id": "f36990a5-192f-41dc-aa95-8720d9122071",
+    "users_with_auth_id_count": 85,
+    "users_total_count": 85
+  },
+  "user_data": {
+    "id": "f36990a5-192f-41dc-aa95-8720d9122071",
+    "email": "igor_pk_@hotmail.com",
+    "auth_id": "7e85dac4-7a9f-48d6-a073-e0aeb2a63b64"
+  },
+  "problem_resolved": true
+}

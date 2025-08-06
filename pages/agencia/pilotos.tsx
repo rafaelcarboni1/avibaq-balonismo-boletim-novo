@@ -1,0 +1,779 @@
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { PlusIcon, UserPlusIcon, CheckIcon, XMarkIcon, ClockIcon, UsersIcon, PaperAirplaneIcon } from '@heroicons/react/24/outline';
+import { EnhancedDashboardLayout } from '../../src/components/magicui/enhanced-dashboard-layout';
+import { MagicCard } from '../../src/components/magicui/magic-card';
+import { NumberTicker } from '../../src/components/magicui/number-ticker';
+import { BentoGrid, BentoGridItem } from '../../src/components/magicui/bento-grid';
+import { supabase } from '../../src/integrations/supabase/client';
+import { useUser } from '../../src/hooks/useUser';
+import { useToast } from '../../src/hooks/use-toast';
+
+interface Piloto {
+  id: string;
+  nome_completo: string;
+  email: string;
+  telefone: string;
+  status: string;
+}
+
+interface Vinculo {
+  id: string;
+  agencia_id: string;
+  piloto_id: string;
+  status: 'pendente' | 'aceito' | 'recusado';
+  observacoes: string | null;
+  convite_enviado_em: string;
+  respondido_em: string | null;
+  piloto: Piloto;
+}
+
+interface ConviteFormData {
+  piloto_email: string;
+  observacoes: string;
+}
+
+export default function GestãoPilotos() {
+  const router = useRouter();
+  const { user, loading: userLoading } = useUser();
+  const { toast } = useToast();
+  
+  const [vinculos, setVinculos] = useState<Vinculo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [formData, setFormData] = useState<ConviteFormData>({
+    piloto_email: '',
+    observacoes: ''
+  });
+  const [submitting, setSubmitting] = useState(false);
+
+  // Verificar se usuário está autenticado e é agência
+  useEffect(() => {
+    if (!userLoading) {
+      if (!user) {
+        router.push('/agencia/login');
+        return;
+      }
+      if (user.role && user.role !== 'agencia') {
+        console.log('[AgenciaPilotos] Redirecionando - role:', user.role);
+        router.push('/');
+        return;
+      }
+    }
+  }, [user, userLoading, router]);
+
+  // Carregar vínculos da agência
+  useEffect(() => {
+    if (user) {
+      carregarVinculos();
+    }
+  }, [user]);
+
+  const carregarVinculos = async () => {
+    try {
+      setLoading(true);
+      
+      // Buscar membro associado ao usuário (agência) (primeiro por user_id, depois por email como fallback)
+      let membro = null;
+      let membroError = null;
+
+      console.log('[AgenciaPilotos] Carregando vínculos para usuário:', { userId: user?.id, email: user?.email });
+
+      // Tentar primeiro por user_id
+      const { data: membroPorId, error: errorPorId } = await supabase
+        .from('membros')
+        .select('id, user_id')
+        .eq('user_id', user?.id)
+        .eq('tipo', 'agencia')
+        .single();
+
+      if (membroPorId && !errorPorId) {
+        membro = membroPorId;
+        console.log('[AgenciaPilotos] Membro encontrado por user_id:', membro.id);
+      } else {
+        console.log('[AgenciaPilotos] Membro não encontrado por user_id, tentando por email:', user?.email);
+        
+        // Fallback: buscar por email se user_id não funcionou
+        const { data: membroPorEmail, error: errorPorEmail } = await supabase
+          .from('membros')
+          .select('id, user_id')
+          .eq('email', user?.email)
+          .eq('tipo', 'agencia')
+          .single();
+
+        if (membroPorEmail && !errorPorEmail) {
+          membro = membroPorEmail;
+          console.log('[AgenciaPilotos] Membro encontrado por email. User_id atual:', membroPorEmail.user_id);
+          
+          // Se encontrou por email mas user_id está null, tentar atualizar
+          if (!membroPorEmail.user_id && user?.id) {
+            console.log('[AgenciaPilotos] Tentando vincular user_id ao membro...');
+            await supabase
+              .from('membros')
+              .update({ user_id: user.id })
+              .eq('id', membroPorEmail.id);
+            console.log('[AgenciaPilotos] Vinculação user_id tentada');
+          }
+        } else {
+          membroError = errorPorEmail || errorPorId;
+        }
+      }
+
+      if (membroError || !membro) {
+        console.error('[AgenciaPilotos] Erro ao buscar membro:', { 
+          errorPorId, 
+          errorPorEmail: membroError, 
+          userEmail: user?.email, 
+          userId: user?.id 
+        });
+        
+        toast({
+          title: "Erro ao carregar dados",
+          description: "Agência não encontrada no sistema. Entre em contato com o administrador.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      console.log('[AgenciaPilotos] Membro encontrado, carregando vínculos:', membro.id);
+
+      // Buscar vínculos da agência com dados dos pilotos
+      const { data, error } = await supabase
+        .from('vinculos_agencia_piloto')
+        .select(`
+          *,
+          piloto:membros!vinculos_agencia_piloto_piloto_id_fkey (
+            id,
+            nome_completo,
+            email,
+            telefone,
+            status
+          )
+        `)
+        .eq('agencia_id', membro.id)
+        .order('convite_enviado_em', { ascending: false });
+
+      if (error) {
+        console.error('Erro ao carregar vínculos:', error);
+        toast({
+          title: "Erro",
+          description: "Erro ao carregar vínculos com pilotos",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      setVinculos(data || []);
+    } catch (error) {
+      console.error('Erro:', error);
+      toast({
+        title: "Erro",
+        description: "Erro inesperado ao carregar vínculos",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEnviarConvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    try {
+      setSubmitting(true);
+
+      // Buscar membro associado ao usuário (agência) (primeiro por user_id, depois por email como fallback)
+      let agencia = null;
+      let agenciaError = null;
+
+      console.log('[AgenciaPilotos] Submit - Buscando agência para usuário:', { userId: user?.id, email: user?.email });
+
+      // Tentar primeiro por user_id
+      const { data: agenciaPorId, error: errorPorId } = await supabase
+        .from('membros')
+        .select('id, user_id')
+        .eq('user_id', user?.id)
+        .eq('tipo', 'agencia')
+        .single();
+
+      if (agenciaPorId && !errorPorId) {
+        agencia = agenciaPorId;
+        console.log('[AgenciaPilotos] Submit - Agência encontrada por user_id:', agencia.id);
+      } else {
+        console.log('[AgenciaPilotos] Submit - Agência não encontrada por user_id, tentando por email:', user?.email);
+        
+        // Fallback: buscar por email se user_id não funcionou
+        const { data: agenciaPorEmail, error: errorPorEmail } = await supabase
+          .from('membros')
+          .select('id, user_id')
+          .eq('email', user?.email)
+          .eq('tipo', 'agencia')
+          .single();
+
+        if (agenciaPorEmail && !errorPorEmail) {
+          agencia = agenciaPorEmail;
+          console.log('[AgenciaPilotos] Submit - Agência encontrada por email. User_id atual:', agenciaPorEmail.user_id);
+          
+          // Se encontrou por email mas user_id está null, tentar atualizar
+          if (!agenciaPorEmail.user_id && user?.id) {
+            console.log('[AgenciaPilotos] Submit - Tentando vincular user_id ao membro...');
+            await supabase
+              .from('membros')
+              .update({ user_id: user.id })
+              .eq('id', agenciaPorEmail.id);
+            console.log('[AgenciaPilotos] Submit - Vinculação user_id tentada');
+          }
+        } else {
+          agenciaError = errorPorEmail || errorPorId;
+        }
+      }
+
+      if (agenciaError || !agencia) {
+        console.error('[AgenciaPilotos] Submit - Erro ao buscar agência:', { 
+          errorPorId, 
+          errorPorEmail: agenciaError, 
+          userEmail: user?.email, 
+          userId: user?.id 
+        });
+        
+        toast({
+          title: "Erro ao carregar dados",
+          description: "Agência não encontrada no sistema. Entre em contato com o administrador.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      console.log('[AgenciaPilotos] Submit - Agência encontrada, preparando convite:', agencia.id);
+
+      // Buscar piloto pelo e-mail
+      const { data: piloto, error: pilotoError } = await supabase
+        .from('membros')
+        .select('id, nome_completo, status')
+        .eq('email', formData.piloto_email.toLowerCase().trim())
+        .eq('tipo', 'piloto')
+        .single();
+
+      if (pilotoError || !piloto) {
+        toast({
+          title: "Erro",
+          description: "Piloto não encontrado ou e-mail incorreto",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (piloto.status !== 'ativo') {
+        toast({
+          title: "Erro",
+          description: "Piloto deve estar ativo para receber convites",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Verificar se já existe vínculo
+      const { data: vinculoExistente } = await supabase
+        .from('vinculos_agencia_piloto')
+        .select('id, status')
+        .eq('agencia_id', agencia.id)
+        .eq('piloto_id', piloto.id)
+        .single();
+
+      if (vinculoExistente) {
+        const statusMsg = vinculoExistente.status === 'pendente' ? 'pendente' :
+                         vinculoExistente.status === 'aceito' ? 'já aceito' : 'recusado';
+        toast({
+          title: "Erro",
+          description: `Já existe um convite ${statusMsg} para este piloto`,
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Criar novo vínculo
+      const { error: vinculoError } = await supabase
+        .from('vinculos_agencia_piloto')
+        .insert([{
+          agencia_id: agencia.id,
+          piloto_id: piloto.id,
+          status: 'pendente',
+          observacoes: formData.observacoes.trim() || null
+        }]);
+
+      if (vinculoError) {
+        console.error('Erro ao criar vínculo:', vinculoError);
+        toast({
+          title: "Erro",
+          description: "Erro ao enviar convite",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "Sucesso",
+        description: `Convite enviado para ${piloto.nome_completo}`,
+        variant: "default"
+      });
+
+      // Recarregar lista e fechar modal
+      await carregarVinculos();
+      handleCloseModal();
+
+    } catch (error) {
+      console.error('Erro:', error);
+      toast({
+        title: "Erro",
+        description: "Erro inesperado",
+        variant: "destructive"
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleCancelarConvite = async (vinculo: Vinculo) => {
+    if (!confirm(`Tem certeza que deseja cancelar o convite para ${vinculo.piloto.nome_completo}?`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('vinculos_agencia_piloto')
+        .delete()
+        .eq('id', vinculo.id);
+
+      if (error) {
+        console.error('Erro ao cancelar convite:', error);
+        toast({
+          title: "Erro",
+          description: "Erro ao cancelar convite",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "Sucesso",
+        description: "Convite cancelado com sucesso",
+        variant: "default"
+      });
+
+      await carregarVinculos();
+    } catch (error) {
+      console.error('Erro:', error);
+      toast({
+        title: "Erro",
+        description: "Erro inesperado",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleRemoverVinculo = async (vinculo: Vinculo) => {
+    if (!confirm(`Tem certeza que deseja remover ${vinculo.piloto.nome_completo} da sua equipe?`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('vinculos_agencia_piloto')
+        .delete()
+        .eq('id', vinculo.id);
+
+      if (error) {
+        console.error('Erro ao remover vínculo:', error);
+        toast({
+          title: "Erro",
+          description: "Erro ao remover piloto",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      toast({
+        title: "Sucesso",
+        description: "Piloto removido da equipe",
+        variant: "default"
+      });
+
+      await carregarVinculos();
+    } catch (error) {
+      console.error('Erro:', error);
+      toast({
+        title: "Erro",
+        description: "Erro inesperado",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setFormData({
+      piloto_email: '',
+      observacoes: ''
+    });
+  };
+
+  const vinculosPendentes = vinculos.filter(v => v.status === 'pendente');
+  const vinculosAceitos = vinculos.filter(v => v.status === 'aceito');
+  const vinculosRecusados = vinculos.filter(v => v.status === 'recusado');
+
+  if (userLoading || loading) {
+    return (
+      <EnhancedDashboardLayout title="Gestão de Pilotos" loading={true}>
+        <div>Carregando...</div>
+      </EnhancedDashboardLayout>
+    );
+  }
+
+  return (
+    <EnhancedDashboardLayout title="Gestão de Pilotos">
+      <div className="space-y-6">
+        {/* Estatísticas */}
+        <BentoGrid className="grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <BentoGridItem className="bg-white border border-blue-200 shadow-sm hover:shadow-md transition-shadow">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-blue-600">Total de Vínculos</p>
+                  <NumberTicker value={vinculos.length} className="text-2xl font-semibold text-gray-800" />
+                </div>
+                <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center">
+                  <UsersIcon className="h-6 w-6 text-blue-500" />
+                </div>
+              </div>
+            </div>
+          </BentoGridItem>
+
+          <BentoGridItem className="bg-white border border-green-200 shadow-sm hover:shadow-md transition-shadow">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-green-600">Pilotos Ativos</p>
+                  <NumberTicker value={vinculosAceitos.length} className="text-2xl font-semibold text-gray-800" />
+                </div>
+                <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center">
+                  <CheckIcon className="h-6 w-6 text-green-500" />
+                </div>
+              </div>
+            </div>
+          </BentoGridItem>
+
+          <BentoGridItem className="bg-white border border-yellow-200 shadow-sm hover:shadow-md transition-shadow">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-yellow-600">Pendentes</p>
+                  <NumberTicker value={vinculosPendentes.length} className="text-2xl font-semibold text-gray-800" />
+                </div>
+                <div className="w-12 h-12 bg-yellow-50 rounded-full flex items-center justify-center">
+                  <ClockIcon className="h-6 w-6 text-yellow-500" />
+                </div>
+              </div>
+            </div>
+          </BentoGridItem>
+
+          <BentoGridItem className="bg-white border border-red-200 shadow-sm hover:shadow-md transition-shadow">
+            <div className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-red-600">Recusados</p>
+                  <NumberTicker value={vinculosRecusados.length} className="text-2xl font-semibold text-gray-800" />
+                </div>
+                <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center">
+                  <XMarkIcon className="h-6 w-6 text-red-500" />
+                </div>
+              </div>
+            </div>
+          </BentoGridItem>
+        </BentoGrid>
+
+        {/* Botão Convidar */}
+        <div className="flex justify-between items-center">
+          <h2 className="text-xl font-semibold">Equipe de Pilotos</h2>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-primary/90 transition-colors"
+          >
+            <UserPlusIcon className="h-5 w-5" />
+            Convidar Piloto
+          </button>
+        </div>
+
+        {/* Lista de Vínculos */}
+        {vinculos.length === 0 ? (
+          <div className="bg-white rounded-xl p-12 text-center">
+            <div className="flex flex-col items-center justify-center space-y-4">
+              <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center">
+                <UsersIcon className="h-10 w-10 text-blue-400" />
+              </div>
+              <h3 className="text-xl font-medium text-gray-800">Nenhum piloto vinculado</h3>
+              <p className="text-gray-600 max-w-md">
+                Convide pilotos para formar sua equipe e expandir suas operações.
+              </p>
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className="mt-4 bg-primary text-white px-6 py-2 rounded-lg hover:bg-primary/90 transition-colors flex items-center gap-2"
+              >
+                <UserPlusIcon className="h-5 w-5" />
+                Convidar Primeiro Piloto
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {/* Pilotos Ativos */}
+            {vinculosAceitos.length > 0 && (
+              <div>
+                <h3 className="text-lg font-medium mb-3 text-green-700 flex items-center gap-2">
+                  <CheckIcon className="h-5 w-5" />
+                  Pilotos da Equipe ({vinculosAceitos.length})
+                </h3>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {vinculosAceitos.map((vinculo) => (
+                    <PilotoCard
+                      key={vinculo.id}
+                      vinculo={vinculo}
+                      onRemover={handleRemoverVinculo}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Convites Pendentes */}
+            {vinculosPendentes.length > 0 && (
+              <div>
+                <h3 className="text-lg font-medium mb-3 text-yellow-700 flex items-center gap-2">
+                  <ClockIcon className="h-5 w-5" />
+                  Convites Pendentes ({vinculosPendentes.length})
+                </h3>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {vinculosPendentes.map((vinculo) => (
+                    <ConvitePendenteCard
+                      key={vinculo.id}
+                      vinculo={vinculo}
+                      onCancelar={handleCancelarConvite}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Convites Recusados */}
+            {vinculosRecusados.length > 0 && (
+              <div>
+                <h3 className="text-lg font-medium mb-3 text-red-700 flex items-center gap-2">
+                  <XMarkIcon className="h-5 w-5" />
+                  Convites Recusados ({vinculosRecusados.length})
+                </h3>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                  {vinculosRecusados.map((vinculo) => (
+                    <ConviteRecusadoCard
+                      key={vinculo.id}
+                      vinculo={vinculo}
+                      onRemover={handleRemoverVinculo}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Modal de Convite */}
+        {isModalOpen && (
+          <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl max-w-md w-full p-6 space-y-4">
+              <h3 className="text-xl font-semibold flex items-center gap-2">
+                <PaperAirplaneIcon className="h-6 w-6 text-primary" />
+                Convidar Piloto
+              </h3>
+              
+              <form onSubmit={handleEnviarConvite} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    E-mail do Piloto *
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.piloto_email}
+                    onChange={(e) => setFormData({ ...formData, piloto_email: e.target.value })}
+                    placeholder="piloto@email.com"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    required
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    O piloto deve estar cadastrado e ativo na AVIBAQ
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Mensagem do Convite (opcional)
+                  </label>
+                  <textarea
+                    value={formData.observacoes}
+                    onChange={(e) => setFormData({ ...formData, observacoes: e.target.value })}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    placeholder="Descreva sua proposta de parceria..."
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={handleCloseModal}
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className="flex-1 bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {submitting ? (
+                      'Enviando...'
+                    ) : (
+                      <>
+                        <PaperAirplaneIcon className="h-4 w-4" />
+                        Enviar Convite
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+      </div>
+    </EnhancedDashboardLayout>
+  );
+}
+
+// Componente para Piloto Ativo
+function PilotoCard({ 
+  vinculo, 
+  onRemover 
+}: { 
+  vinculo: Vinculo;
+  onRemover: (vinculo: Vinculo) => void;
+}) {
+  return (
+    <MagicCard className="p-4 border-green-200">
+      <div className="space-y-3">
+        <div className="flex items-start justify-between">
+          <div>
+            <h4 className="font-semibold text-lg">{vinculo.piloto.nome_completo}</h4>
+            <p className="text-sm text-gray-600">{vinculo.piloto.email}</p>
+            <p className="text-sm text-gray-600">{vinculo.piloto.telefone}</p>
+          </div>
+          <div className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+            Ativo
+          </div>
+        </div>
+
+        {vinculo.observacoes && (
+          <p className="text-sm text-gray-600">
+            <span className="font-medium">Observações:</span> {vinculo.observacoes}
+          </p>
+        )}
+
+        <div className="text-xs text-gray-500">
+          Vinculado em: {new Date(vinculo.respondido_em || vinculo.convite_enviado_em).toLocaleDateString('pt-BR')}
+        </div>
+
+        <button
+          onClick={() => onRemover(vinculo)}
+          className="w-full bg-red-50 text-red-700 px-3 py-2 rounded-lg text-sm hover:bg-red-100 transition-colors"
+        >
+          Remover da Equipe
+        </button>
+      </div>
+    </MagicCard>
+  );
+}
+
+// Componente para Convite Pendente
+function ConvitePendenteCard({ 
+  vinculo, 
+  onCancelar 
+}: { 
+  vinculo: Vinculo;
+  onCancelar: (vinculo: Vinculo) => void;
+}) {
+  return (
+    <MagicCard className="p-4 border-yellow-200">
+      <div className="space-y-3">
+        <div className="flex items-start justify-between">
+          <div>
+            <h4 className="font-semibold text-lg">{vinculo.piloto.nome_completo}</h4>
+            <p className="text-sm text-gray-600">{vinculo.piloto.email}</p>
+            <p className="text-sm text-gray-600">{vinculo.piloto.telefone}</p>
+          </div>
+          <div className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+            Pendente
+          </div>
+        </div>
+
+        {vinculo.observacoes && (
+          <p className="text-sm text-gray-600">
+            <span className="font-medium">Mensagem:</span> {vinculo.observacoes}
+          </p>
+        )}
+
+        <div className="text-xs text-gray-500">
+          Enviado em: {new Date(vinculo.convite_enviado_em).toLocaleDateString('pt-BR')}
+        </div>
+
+        <button
+          onClick={() => onCancelar(vinculo)}
+          className="w-full bg-orange-50 text-orange-700 px-3 py-2 rounded-lg text-sm hover:bg-orange-100 transition-colors"
+        >
+          Cancelar Convite
+        </button>
+      </div>
+    </MagicCard>
+  );
+}
+
+// Componente para Convite Recusado
+function ConviteRecusadoCard({ 
+  vinculo, 
+  onRemover 
+}: { 
+  vinculo: Vinculo;
+  onRemover: (vinculo: Vinculo) => void;
+}) {
+  return (
+    <MagicCard className="p-4 border-red-200 opacity-80">
+      <div className="space-y-3">
+        <div className="flex items-start justify-between">
+          <div>
+            <h4 className="font-semibold text-lg">{vinculo.piloto.nome_completo}</h4>
+            <p className="text-sm text-gray-600">{vinculo.piloto.email}</p>
+          </div>
+          <div className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
+            Recusado
+          </div>
+        </div>
+
+        <div className="text-xs text-gray-500">
+          Recusado em: {vinculo.respondido_em ? new Date(vinculo.respondido_em).toLocaleDateString('pt-BR') : 'N/A'}
+        </div>
+
+        <button
+          onClick={() => onRemover(vinculo)}
+          className="w-full bg-red-50 text-red-700 px-3 py-2 rounded-lg text-sm hover:bg-red-100 transition-colors"
+        >
+          Remover Registro
+        </button>
+      </div>
+    </MagicCard>
+  );
+}
